@@ -54,3 +54,4 @@ jobs:
         with:
           tf-plan-lookup-dir: ./testdata
           tf-plan-lookup-name: custom_plan.json
+          github-token: ${{ secrets.CI_TOKEN }}
