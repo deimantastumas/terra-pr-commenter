@@ -168,6 +168,17 @@ export async function run(): Promise<void> {
             Action: overallAction
           })
 
+          // Create change content for comment body
+          let changeContent = ''
+          for (const resourceChangeBody of planChanges.ResouceChangeBody) {
+            changeContent += `
+\`\`\`diff
+${resourceChangeBody.ChangeDif}
+\`\`\`
+
+`
+          }
+
           // Create comment
           const commentBody = `
 <b>${resolvedCommentHeader}<b>
@@ -177,14 +188,7 @@ export async function run(): Promise<void> {
 <b>Terraform Diff:</b>
 </summary>
 
-\`\`\`diff
-${planChanges.ResouceChangeBody[0].ChangeDif}
-\`\`\`
-
-\`\`\`diff
-${planChanges.ResouceChangeBody[0].ChangeDif}
-\`\`\`
-
+${changeContent}
 </details>
 `
           octokit.rest.issues.createComment({

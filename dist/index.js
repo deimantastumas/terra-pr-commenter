@@ -33679,6 +33679,16 @@ async function run() {
                         ChangeDif: changeDiff,
                         Action: overallAction
                     });
+                    // Create change content for comment body
+                    let changeContent = '';
+                    for (const resourceChangeBody of planChanges.ResouceChangeBody) {
+                        changeContent += `
+\`\`\`diff
+${resourceChangeBody.ChangeDif}
+\`\`\`
+
+`;
+                    }
                     // Create comment
                     const commentBody = `
 <b>${resolvedCommentHeader}<b>
@@ -33688,14 +33698,7 @@ async function run() {
 <b>Terraform Diff:</b>
 </summary>
 
-\`\`\`diff
-${planChanges.ResouceChangeBody[0].ChangeDif}
-\`\`\`
-
-\`\`\`diff
-${planChanges.ResouceChangeBody[0].ChangeDif}
-\`\`\`
-
+${changeContent}
 </details>
 `;
                     octokit.rest.issues.createComment({
