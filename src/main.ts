@@ -176,7 +176,8 @@ export async function run(): Promise<void> {
 <summary>
 <b>Terraform Diff:</b>
 </summary>
-${planChanges.ResouceChangeBody[0].ChangeDif}
+\`\`\`diff\n
+${planChanges.ResouceChangeBody[0].ChangeDif}\`\`\`\n
 </details>
 `
 
