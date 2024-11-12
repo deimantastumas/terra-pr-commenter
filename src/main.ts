@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import { findTFPlans } from './utils'
 
 /**
  * The main function for the action.
@@ -7,15 +7,31 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    // Define action inputs
+    const tfPlanLookupDir: string = core.getInput('tf-plan-lookup-dir')
+    const tfPlanLookupName: string = core.getInput('tf-plan-lookup-name')
+    const githubtoken: string = core.getInput('github-token')
+    const expandComment: boolean = core.getBooleanInput('expand-comment')
+    const headingPlanVariableName: string = core.getInput(
+      'heading-plan-variable-name'
+    )
+    const commentHeader: string = core.getInput('comment-header')
+    const quiet: boolean = core.getBooleanInput('quiet')
+    const hidePreviousComments: boolean = core.getBooleanInput(
+      'hide-previous-comments'
+    )
+    const removePreviousComments: boolean = core.getBooleanInput(
+      'remove-previous-comments'
+    )
+    const createMultipleComments: boolean = core.getBooleanInput(
+      'create-multiple-comments'
+    )
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    // todo(): input validation
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    // Find TF plan JSON files
+    const tfPlanFiles = findTFPlans(tfPlanLookupDir, tfPlanLookupName)
+    console.log(JSON.stringify(tfPlanFiles))
 
     // Set outputs for other workflow steps to use
     core.setOutput('time', new Date().toTimeString())

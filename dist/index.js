@@ -2446,7 +2446,7 @@ class HttpClient {
         if (this._keepAlive && useProxy) {
             agent = this._proxyAgent;
         }
-        if (this._keepAlive && !useProxy) {
+        if (!useProxy) {
             agent = this._agent;
         }
         // if agent is already assigned use that agent.
@@ -2478,15 +2478,11 @@ class HttpClient {
             agent = tunnelAgent(agentOptions);
             this._proxyAgent = agent;
         }
-        // if reusing agent across request and tunneling agent isn't assigned create a new agent
-        if (this._keepAlive && !agent) {
+        // if tunneling agent isn't assigned create a new agent
+        if (!agent) {
             const options = { keepAlive: this._keepAlive, maxSockets };
             agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
             this._agent = agent;
-        }
-        // if not using private agent and tunnel agent isn't setup then use global agent
-        if (!agent) {
-            agent = usingSsl ? https.globalAgent : http.globalAgent;
         }
         if (usingSsl && this._ignoreSslError) {
             // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
@@ -2509,7 +2505,7 @@ class HttpClient {
         }
         const usingSsl = parsedUrl.protocol === 'https:';
         proxyAgent = new undici_1.ProxyAgent(Object.assign({ uri: proxyUrl.href, pipelining: !this._keepAlive ? 0 : 1 }, ((proxyUrl.username || proxyUrl.password) && {
-            token: `${proxyUrl.username}:${proxyUrl.password}`
+            token: `Basic ${Buffer.from(`${proxyUrl.username}:${proxyUrl.password}`).toString('base64')}`
         })));
         this._proxyAgentDispatcher = proxyAgent;
         if (usingSsl && this._ignoreSslError) {
@@ -2623,11 +2619,11 @@ function getProxyUrl(reqUrl) {
     })();
     if (proxyVar) {
         try {
-            return new URL(proxyVar);
+            return new DecodedURL(proxyVar);
         }
         catch (_a) {
             if (!proxyVar.startsWith('http://') && !proxyVar.startsWith('https://'))
-                return new URL(`http://${proxyVar}`);
+                return new DecodedURL(`http://${proxyVar}`);
         }
     }
     else {
@@ -2685,6 +2681,19 @@ function isLoopbackAddress(host) {
         hostLower.startsWith('127.') ||
         hostLower.startsWith('[::1]') ||
         hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
+class DecodedURL extends URL {
+    constructor(url, base) {
+        super(url, base);
+        this._decodedUsername = decodeURIComponent(super.username);
+        this._decodedPassword = decodeURIComponent(super.password);
+    }
+    get username() {
+        return this._decodedUsername;
+    }
+    get password() {
+        return this._decodedPassword;
+    }
 }
 //# sourceMappingURL=proxy.js.map
 
@@ -25657,20 +25666,28 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
-const wait_1 = __nccwpck_require__(910);
+const utils_1 = __nccwpck_require__(1798);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
     try {
-        const ms = core.getInput('milliseconds');
-        // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-        core.debug(`Waiting ${ms} milliseconds ...`);
-        // Log the current timestamp, wait, then log the new timestamp
-        core.debug(new Date().toTimeString());
-        await (0, wait_1.wait)(parseInt(ms, 10));
-        core.debug(new Date().toTimeString());
+        // Define action inputs
+        const tfPlanLookupDir = core.getInput('tf-plan-lookup-dir');
+        const tfPlanLookupName = core.getInput('tf-plan-lookup-name');
+        const githubtoken = core.getInput('github-token');
+        const expandComment = core.getBooleanInput('expand-comment');
+        const headingPlanVariableName = core.getInput('heading-plan-variable-name');
+        const commentHeader = core.getInput('comment-header');
+        const quiet = core.getBooleanInput('quiet');
+        const hidePreviousComments = core.getBooleanInput('hide-previous-comments');
+        const removePreviousComments = core.getBooleanInput('remove-previous-comments');
+        const createMultipleComments = core.getBooleanInput('create-multiple-comments');
+        // todo(): input validation
+        // Find TF plan JSON files
+        const tfPlanFiles = (0, utils_1.findTFPlans)(tfPlanLookupDir, tfPlanLookupName);
+        console.log(JSON.stringify(tfPlanFiles));
         // Set outputs for other workflow steps to use
         core.setOutput('time', new Date().toTimeString());
     }
@@ -25684,26 +25701,69 @@ async function run() {
 
 /***/ }),
 
-/***/ 910:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 1798:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = wait;
+exports.findTFPlans = void 0;
+const fs = __importStar(__nccwpck_require__(9896));
+const path = __importStar(__nccwpck_require__(6928));
 /**
- * Wait for a number of milliseconds.
- * @param milliseconds The number of milliseconds to wait.
- * @returns {Promise<string>} Resolves with 'done!' after the wait is over.
+ * Iteratively searches for all files with the specified name, starting from a lookup directory.
+ * @param lookupDir The directory to start the search from.
+ * @param fileName The name of the file to look for.
+ * @returns An array of paths to the found files, or an empty array if no files were found.
  */
-async function wait(milliseconds) {
-    return new Promise(resolve => {
-        if (isNaN(milliseconds)) {
-            throw new Error('milliseconds not a number');
+const findTFPlans = (lookupDir, planName) => {
+    const dirsToCheck = [lookupDir];
+    const foundPaths = [];
+    while (dirsToCheck.length > 0) {
+        const currentDir = dirsToCheck.shift();
+        if (!currentDir)
+            continue;
+        const entries = fs.readdirSync(currentDir);
+        for (const entry of entries) {
+            const fullPath = path.join(currentDir, entry);
+            const stat = fs.statSync(fullPath);
+            if (stat.isDirectory()) {
+                // Add subdirectory to the queue to check later
+                dirsToCheck.push(fullPath);
+            }
+            else if (entry === planName) {
+                // Add the path to the found paths array
+                foundPaths.push(fullPath);
+            }
         }
-        setTimeout(() => resolve('done!'), milliseconds);
-    });
-}
+    }
+    // Return the array of found paths
+    return foundPaths;
+};
+exports.findTFPlans = findTFPlans;
 
 
 /***/ }),

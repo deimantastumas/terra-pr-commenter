@@ -1,23 +1,60 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'terra-pr-commenter'
+description:
+  'Utility action used for creating pull-request comments from the plan created
+  via Terraform/Terragrunt'
+author: 'deimantastumas'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
+# todo(): add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
   icon: 'heart'
   color: 'red'
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
-    required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  # todo(): support passing a single/static terraform plan(s)
+  tf-plan-lookup-dir:
+    description: Directory where the lookup for TF plan JSON files will be done
+    required: false
+    default: '.'
+  tf-plan-lookup-name:
+    description:
+      Goes along with 'tf-plan-lookup-dir' to specify which files should be
+      looked
+    required: false
+    default: 'tfplan.json'
+  github-token:
+    description: GitHub Token
+    required: false
+    default: '${{ github.token }}'
+  expand-comment:
+    description: If true, expand the details comment by default
+    required: false
+    default: 'false'
+  heading-plan-variable-name:
+    description: Variable name from the plan that will be used for a heading.
+    required: false
+    default: ''
+  comment-header:
+    description:
+      Header to use for the comment. Ignored if 'heading-plan-variable-name' is
+      passed
+    required: false
+    default: 'Terraform Plan Changes'
+  quiet:
+    description: Skips the comment if there are no changes in plan
+    required: false
+    default: 'false'
+  hide-previous-comments:
+    description: Hides privious comments on the PR
+    required: false
+    default: 'false'
+  remove-previous-comments:
+    description: Removes privious comments on the PR
+    required: false
+    default: 'false'
+  create-multiple-comments:
+    description: Creates separate comments for each specified plan
+    required: false
+    default: 'false'
 
 runs:
   using: node20
