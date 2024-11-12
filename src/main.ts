@@ -44,8 +44,8 @@ export async function run(): Promise<void> {
     const createMultipleComments: boolean = core.getBooleanInput(
       'create-multiple-comments'
     )
-    const octokit = github.getOctokit(githubtoken);
-    const context = github.context;
+    const octokit = github.getOctokit(githubtoken)
+    const context = github.context
 
     // todo(): input validation
 
@@ -55,9 +55,9 @@ export async function run(): Promise<void> {
     // Go through TF plans and create comment bodies
     for (const tfPlan of tfPlanFiles) {
       core.info(`Parsing TF plan: ${tfPlan}`)
-      const planContent = fs.readFileSync(tfPlan);
-      const parsedContent = JSON.parse(planContent.toString());
-      let resolvedCommentHeader = commentHeader;
+      const planContent = fs.readFileSync(tfPlan)
+      const parsedContent = JSON.parse(planContent.toString())
+      let resolvedCommentHeader = commentHeader
 
       const planChanges: PlanChanges = {
         CreateResourcesCount: 0,
@@ -68,16 +68,22 @@ export async function run(): Promise<void> {
       }
 
       // If 'heading-plan-variable-name' is passed - use this variable for resolving heading value
-      if (headingPlanVariableName !== "") {
+      if (headingPlanVariableName !== '') {
         // Check if passed variable actually exists in the plan
-        if (('variables' in parsedContent) && headingPlanVariableName in parsedContent['variables']) {
-          resolvedCommentHeader = parsedContent['variables'][headingPlanVariableName]['value'];
+        if (
+          'variables' in parsedContent &&
+          headingPlanVariableName in parsedContent['variables']
+        ) {
+          resolvedCommentHeader =
+            parsedContent['variables'][headingPlanVariableName]['value']
         } else {
-          core.warning(`Passed variable ${headingPlanVariableName} doesn't exist in the plan. Defaulting to ${resolvedCommentHeader}`)
+          core.warning(
+            `Passed variable ${headingPlanVariableName} doesn't exist in the plan. Defaulting to ${resolvedCommentHeader}`
+          )
         }
       }
 
-      let resourceChanges = [];
+      let resourceChanges = []
       try {
         resourceChanges = parsedContent['resource_changes']
         // Parse resource changes
@@ -86,28 +92,38 @@ export async function run(): Promise<void> {
           const resourceChangeDetails = resourceChange['change']
 
           // Skip change if it's 'no-op'
-          const resourceChangeActions: string[] = resourceChangeDetails['actions']
+          const resourceChangeActions: string[] =
+            resourceChangeDetails['actions']
           if (resourceChangeActions.includes('no-op')) {
             continue
           }
 
-          const beforeChanges = resourceChangeDetails['before'] ? resourceChangeDetails['before'] : {}
-          const afterChanges = resourceChangeDetails['after'] ? resourceChangeDetails['after'] : {}
-          const sensitiveParams = resourceChangeDetails['after_sensitive'] ? resourceChangeDetails['after_sensitive'] : {}
+          const beforeChanges = resourceChangeDetails['before']
+            ? resourceChangeDetails['before']
+            : {}
+          const afterChanges = resourceChangeDetails['after']
+            ? resourceChangeDetails['after']
+            : {}
+          const sensitiveParams = resourceChangeDetails['after_sensitive']
+            ? resourceChangeDetails['after_sensitive']
+            : {}
 
           // To prevent exposing sensitive data:
           // 1. Remove sensitive field if there was no change for it
           // 2. Mask sensitive field if there was a change
           for (const sensitiveParamKey in sensitiveParams) {
-            if (beforeChanges[sensitiveParamKey] === afterChanges[sensitiveParamKey]) {
+            if (
+              beforeChanges[sensitiveParamKey] ===
+              afterChanges[sensitiveParamKey]
+            ) {
               delete beforeChanges[sensitiveParamKey]
               delete afterChanges[sensitiveParamKey]
             } else {
               if (sensitiveParamKey in beforeChanges) {
-                beforeChanges[sensitiveParamKey] = "OLD_SENSITIVE_VALUE"
+                beforeChanges[sensitiveParamKey] = 'OLD_SENSITIVE_VALUE'
               }
               if (sensitiveParamKey in afterChanges) {
-                afterChanges[sensitiveParamKey] = "NEW_SENSITIVE_VALUE"
+                afterChanges[sensitiveParamKey] = 'NEW_SENSITIVE_VALUE'
               }
             }
           }
@@ -115,28 +131,35 @@ export async function run(): Promise<void> {
           // Create a diff from before and after changes
           const beforeYaml = yaml.stringify(beforeChanges)
           const afterYaml = yaml.stringify(afterChanges)
-          const changeDiff = diff.createPatch(resourceAddress, beforeYaml, afterYaml)
+          const changeDiff = diff.createPatch(
+            resourceAddress,
+            beforeYaml,
+            afterYaml
+          )
 
           // Resolve resource change action
-          let overallAction = ""
+          let overallAction = ''
           switch (resourceChangeActions[0]) {
-            case "create":
-              overallAction = "Create"
+            case 'create':
+              overallAction = 'Create'
               planChanges.CreateResourcesCount += 1
               break
-            case "delete":
-              if (resourceChangeActions.includes('delete') && resourceChangeActions.includes('create')) {
+            case 'delete':
+              if (
+                resourceChangeActions.includes('delete') &&
+                resourceChangeActions.includes('create')
+              ) {
                 planChanges.CreateResourcesCount += 1
                 planChanges.DestroyResourcesCount += 1
-                overallAction = "Replace"
+                overallAction = 'Replace'
               } else {
                 planChanges.DestroyResourcesCount += 1
-                overallAction = "Destroy"
+                overallAction = 'Destroy'
               }
               break
-            case "update":
+            case 'update':
               planChanges.UpdateResourcesCount += 1
-              overallAction = "Update"
+              overallAction = 'Update'
           }
 
           planChanges.ResouceChangeBody.push({
@@ -149,24 +172,24 @@ export async function run(): Promise<void> {
           const commentBody = `
 <b>${resolvedCommentHeader}<b>
 ![add](https://img.shields.io/badge/add-${planChanges.CreateResourcesCount}-brightgreen) ![change](https://img.shields.io/badge/change-${planChanges.UpdateResourcesCount}-yellow) ![replace](https://img.shields.io/badge/change-${planChanges.ReplaceResourcesCount}-orange) ![destroy](https://img.shields.io/badge/destroy-${planChanges.DestroyResourcesCount}-red)
-<details ${expandComment ? "open" : ""}>
+<details ${expandComment ? 'open' : ''}>
 <summary>
 <b>Terraform Diff:</b>
 </summary>
 ${planChanges.ResouceChangeBody[0].ChangeDif}
 </details>
 `
-          
+
           octokit.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: commentBody
-          });
-
+          })
         }
       } catch (error) {
-        if (error instanceof Error) core.setFailed(`TF plan ${tfPlan} is invalid: ${error}`)
+        if (error instanceof Error)
+          core.setFailed(`TF plan ${tfPlan} is invalid: ${error}`)
         return
       }
     }
