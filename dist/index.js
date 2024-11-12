@@ -33687,7 +33687,8 @@ async function run() {
 <summary>
 <b>Terraform Diff:</b>
 </summary>
-${planChanges.ResouceChangeBody[0].ChangeDif}
+\`\`\`diff\n
+${planChanges.ResouceChangeBody[0].ChangeDif}\`\`\`\n
 </details>
 `;
                     octokit.rest.issues.createComment({
