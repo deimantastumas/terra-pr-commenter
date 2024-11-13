@@ -1,7 +1,7 @@
 {
   "format_version": "1.2",
   "terraform_version": "1.8.2",
-  "variables": { "name": { "value": "Name" } },
+  "variables": { "name": { "value": "Test module #1" } },
   "planned_values": {
     "root_module": {
       "resources": [
