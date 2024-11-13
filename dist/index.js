@@ -33625,6 +33625,7 @@ async function run() {
         // Find TF plan JSON files
         // todo(): simplify this function and allow customizing max-depth
         const tfPlanFiles = (0, utils_1.findTFPlans)(tfPlanLookupDir, tfPlanLookupName, 2);
+        const planComments = [];
         // Go through TF plans and create comment bodies
         for (const tfPlan of tfPlanFiles) {
             core.info(`Parsing TF plan: ${tfPlan}`);
@@ -33864,11 +33865,16 @@ ${constants_1.COMMENT_FOOTER}
                 core.setFailed(`Comment body size is too large for GitHub comment: ${commentBody.length} > ${constants_1.MAX_GITHUB_COMMENT_BODY_SIZE}`);
                 return;
             }
-            console.log(commentBody);
-            // Remove previous comments that were created by this action
-            await (0, pull_request_1.RemoveCommentsByLookupText)(octokit, context, constants_1.COMMENT_FOOTER);
-            // Create a comment
-            await (0, pull_request_1.CreatePRComment)(octokit, context, commentBody);
+            planComments.push(commentBody);
+        }
+        if (planComments.length === 0) {
+            return;
+        }
+        // Remove previous comments that were created by this action
+        await (0, pull_request_1.RemoveCommentsByLookupText)(octokit, context, constants_1.COMMENT_FOOTER);
+        // Create a comment for each plan
+        for (const planComment of planComments) {
+            await (0, pull_request_1.CreatePRComment)(octokit, context, planComment);
         }
     }
     catch (error) {

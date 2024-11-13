@@ -49,6 +49,8 @@ export async function run(): Promise<void> {
     // todo(): simplify this function and allow customizing max-depth
     const tfPlanFiles = findTFPlans(tfPlanLookupDir, tfPlanLookupName, 2)
 
+    const planComments = []
+
     // Go through TF plans and create comment bodies
     for (const tfPlan of tfPlanFiles) {
       core.info(`Parsing TF plan: ${tfPlan}`)
@@ -329,13 +331,20 @@ ${COMMENT_FOOTER}
         )
         return
       }
-      console.log(commentBody)
 
-      // Remove previous comments that were created by this action
-      await RemoveCommentsByLookupText(octokit, context, COMMENT_FOOTER)
+      planComments.push(commentBody)
+    }
 
-      // Create a comment
-      await CreatePRComment(octokit, context, commentBody)
+    if (planComments.length === 0) {
+      return
+    }
+
+    // Remove previous comments that were created by this action
+    await RemoveCommentsByLookupText(octokit, context, COMMENT_FOOTER)
+
+    // Create a comment for each plan
+    for (const planComment of planComments) {
+      await CreatePRComment(octokit, context, planComment)
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
