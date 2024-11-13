@@ -1,14 +1,39 @@
 {
   "format_version": "1.2",
   "terraform_version": "1.8.2",
+  "variables": { "name": { "value": "Name" } },
   "planned_values": {
     "root_module": {
       "resources": [
         {
-          "address": "local_sensitive_file.foo",
+          "address": "local_sensitive_file.another-one",
           "mode": "managed",
           "type": "local_sensitive_file",
-          "name": "foo",
+          "name": "another-one",
+          "provider_name": "registry.terraform.io/hashicorp/local",
+          "schema_version": 0,
+          "values": {
+            "content": "foo!",
+            "content_base64": null,
+            "content_base64sha256": "wOCqrqBQvPO+JsDCPVj6iQwN+3nIojAWtKhs0oym6nE=",
+            "content_base64sha512": "TSCmPxazw2YStHurNILfRykjK/J4evgArH/2KnQuzQZodz4cq1f/ig2GeQO7mBI+Qx5jkTQEZxLCGs3mPtsB3Q==",
+            "content_md5": "35af8b7a9490467f75f19c1e5459f7e7",
+            "content_sha1": "4bf3e335199107182c6f7638efaad377acc7f452",
+            "content_sha256": "c0e0aaaea050bcf3be26c0c23d58fa890c0dfb79c8a23016b4a86cd28ca6ea71",
+            "content_sha512": "4d20a63f16b3c36612b47bab3482df4729232bf2787af800ac7ff62a742ecd0668773e1cab57ff8a0d867903bb98123e431e639134046712c21acde63edb01dd",
+            "directory_permission": "0700",
+            "file_permission": "0700",
+            "filename": "foo.barr",
+            "id": "4bf3e335199107182c6f7638efaad377acc7f452",
+            "source": null
+          },
+          "sensitive_values": { "content": true, "content_base64": true }
+        },
+        {
+          "address": "local_sensitive_file.another-one-one",
+          "mode": "managed",
+          "type": "local_sensitive_file",
+          "name": "another-one-one",
           "provider_name": "registry.terraform.io/hashicorp/local",
           "schema_version": 0,
           "values": {
@@ -16,7 +41,24 @@
             "content_base64": null,
             "directory_permission": "0700",
             "file_permission": "0700",
-            "filename": "foo.bar",
+            "filename": "foo.barrr",
+            "source": null
+          },
+          "sensitive_values": { "content": true, "content_base64": true }
+        },
+        {
+          "address": "local_sensitive_file.foo-bar",
+          "mode": "managed",
+          "type": "local_sensitive_file",
+          "name": "foo-bar",
+          "provider_name": "registry.terraform.io/hashicorp/local",
+          "schema_version": 0,
+          "values": {
+            "content": "foo!",
+            "content_base64": null,
+            "directory_permission": "0700",
+            "file_permission": "0700",
+            "filename": "foo.barrr",
             "source": null
           },
           "sensitive_values": { "content": true, "content_base64": true }
@@ -26,10 +68,54 @@
   },
   "resource_changes": [
     {
-      "address": "local_sensitive_file.foo",
+      "address": "local_sensitive_file.another-one",
       "mode": "managed",
       "type": "local_sensitive_file",
-      "name": "foo",
+      "name": "another-one",
+      "provider_name": "registry.terraform.io/hashicorp/local",
+      "change": {
+        "actions": ["no-op"],
+        "before": {
+          "content": "foo!",
+          "content_base64": null,
+          "content_base64sha256": "wOCqrqBQvPO+JsDCPVj6iQwN+3nIojAWtKhs0oym6nE=",
+          "content_base64sha512": "TSCmPxazw2YStHurNILfRykjK/J4evgArH/2KnQuzQZodz4cq1f/ig2GeQO7mBI+Qx5jkTQEZxLCGs3mPtsB3Q==",
+          "content_md5": "35af8b7a9490467f75f19c1e5459f7e7",
+          "content_sha1": "4bf3e335199107182c6f7638efaad377acc7f452",
+          "content_sha256": "c0e0aaaea050bcf3be26c0c23d58fa890c0dfb79c8a23016b4a86cd28ca6ea71",
+          "content_sha512": "4d20a63f16b3c36612b47bab3482df4729232bf2787af800ac7ff62a742ecd0668773e1cab57ff8a0d867903bb98123e431e639134046712c21acde63edb01dd",
+          "directory_permission": "0700",
+          "file_permission": "0700",
+          "filename": "foo.barr",
+          "id": "4bf3e335199107182c6f7638efaad377acc7f452",
+          "source": null
+        },
+        "after": {
+          "content": "foo!",
+          "content_base64": null,
+          "content_base64sha256": "wOCqrqBQvPO+JsDCPVj6iQwN+3nIojAWtKhs0oym6nE=",
+          "content_base64sha512": "TSCmPxazw2YStHurNILfRykjK/J4evgArH/2KnQuzQZodz4cq1f/ig2GeQO7mBI+Qx5jkTQEZxLCGs3mPtsB3Q==",
+          "content_md5": "35af8b7a9490467f75f19c1e5459f7e7",
+          "content_sha1": "4bf3e335199107182c6f7638efaad377acc7f452",
+          "content_sha256": "c0e0aaaea050bcf3be26c0c23d58fa890c0dfb79c8a23016b4a86cd28ca6ea71",
+          "content_sha512": "4d20a63f16b3c36612b47bab3482df4729232bf2787af800ac7ff62a742ecd0668773e1cab57ff8a0d867903bb98123e431e639134046712c21acde63edb01dd",
+          "directory_permission": "0700",
+          "file_permission": "0700",
+          "filename": "foo.barr",
+          "id": "4bf3e335199107182c6f7638efaad377acc7f452",
+          "source": null
+        },
+        "after_unknown": {},
+        "before_sensitive": { "content": true, "content_base64": true },
+        "after_sensitive": { "content": true, "content_base64": true },
+        "imported": { "id": "hello" }
+      }
+    },
+    {
+      "address": "local_sensitive_file.another-one-one",
+      "mode": "managed",
+      "type": "local_sensitive_file",
+      "name": "another-one-one",
       "provider_name": "registry.terraform.io/hashicorp/local",
       "change": {
         "actions": ["create"],
@@ -39,7 +125,67 @@
           "content_base64": null,
           "directory_permission": "0700",
           "file_permission": "0700",
+          "filename": "foo.barrr",
+          "source": null
+        },
+        "after_unknown": {
+          "content_base64sha256": true,
+          "content_base64sha512": true,
+          "content_md5": true,
+          "content_sha1": true,
+          "content_sha256": true,
+          "content_sha512": true,
+          "id": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": { "content": true, "content_base64": true }
+      }
+    },
+    {
+      "address": "local_sensitive_file.foo",
+      "mode": "managed",
+      "type": "local_sensitive_file",
+      "name": "foo",
+      "provider_name": "registry.terraform.io/hashicorp/local",
+      "change": {
+        "actions": ["delete"],
+        "before": {
+          "content": "foo!",
+          "content_base64": null,
+          "content_base64sha256": "wOCqrqBQvPO+JsDCPVj6iQwN+3nIojAWtKhs0oym6nE=",
+          "content_base64sha512": "TSCmPxazw2YStHurNILfRykjK/J4evgArH/2KnQuzQZodz4cq1f/ig2GeQO7mBI+Qx5jkTQEZxLCGs3mPtsB3Q==",
+          "content_md5": "35af8b7a9490467f75f19c1e5459f7e7",
+          "content_sha1": "4bf3e335199107182c6f7638efaad377acc7f452",
+          "content_sha256": "c0e0aaaea050bcf3be26c0c23d58fa890c0dfb79c8a23016b4a86cd28ca6ea71",
+          "content_sha512": "4d20a63f16b3c36612b47bab3482df4729232bf2787af800ac7ff62a742ecd0668773e1cab57ff8a0d867903bb98123e431e639134046712c21acde63edb01dd",
+          "directory_permission": "0700",
+          "file_permission": "0700",
           "filename": "foo.bar",
+          "id": "4bf3e335199107182c6f7638efaad377acc7f452",
+          "source": null
+        },
+        "after": null,
+        "after_unknown": {},
+        "before_sensitive": { "content": true, "content_base64": true },
+        "after_sensitive": false
+      },
+      "action_reason": "delete_because_no_resource_config"
+    },
+    {
+      "address": "local_sensitive_file.foo-bar",
+      "mode": "managed",
+      "type": "local_sensitive_file",
+      "name": "foo-bar",
+      "provider_name": "registry.terraform.io/hashicorp/local",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "content": "foo!",
+          "content_base64": null,
+          "directory_permission": "0700",
+          "file_permission": "0700",
+          "filename": "foo.barrr",
           "source": null
         },
         "after_unknown": {
@@ -56,6 +202,64 @@
       }
     }
   ],
+  "prior_state": {
+    "format_version": "1.0",
+    "terraform_version": "1.8.2",
+    "values": {
+      "root_module": {
+        "resources": [
+          {
+            "address": "local_sensitive_file.another-one",
+            "mode": "managed",
+            "type": "local_sensitive_file",
+            "name": "another-one",
+            "provider_name": "registry.terraform.io/hashicorp/local",
+            "schema_version": 0,
+            "values": {
+              "content": "foo!",
+              "content_base64": null,
+              "content_base64sha256": "wOCqrqBQvPO+JsDCPVj6iQwN+3nIojAWtKhs0oym6nE=",
+              "content_base64sha512": "TSCmPxazw2YStHurNILfRykjK/J4evgArH/2KnQuzQZodz4cq1f/ig2GeQO7mBI+Qx5jkTQEZxLCGs3mPtsB3Q==",
+              "content_md5": "35af8b7a9490467f75f19c1e5459f7e7",
+              "content_sha1": "4bf3e335199107182c6f7638efaad377acc7f452",
+              "content_sha256": "c0e0aaaea050bcf3be26c0c23d58fa890c0dfb79c8a23016b4a86cd28ca6ea71",
+              "content_sha512": "4d20a63f16b3c36612b47bab3482df4729232bf2787af800ac7ff62a742ecd0668773e1cab57ff8a0d867903bb98123e431e639134046712c21acde63edb01dd",
+              "directory_permission": "0700",
+              "file_permission": "0700",
+              "filename": "foo.barr",
+              "id": "4bf3e335199107182c6f7638efaad377acc7f452",
+              "source": null
+            },
+            "sensitive_values": { "content": true, "content_base64": true }
+          },
+          {
+            "address": "local_sensitive_file.foo",
+            "mode": "managed",
+            "type": "local_sensitive_file",
+            "name": "foo",
+            "provider_name": "registry.terraform.io/hashicorp/local",
+            "schema_version": 0,
+            "values": {
+              "content": "foo!",
+              "content_base64": null,
+              "content_base64sha256": "wOCqrqBQvPO+JsDCPVj6iQwN+3nIojAWtKhs0oym6nE=",
+              "content_base64sha512": "TSCmPxazw2YStHurNILfRykjK/J4evgArH/2KnQuzQZodz4cq1f/ig2GeQO7mBI+Qx5jkTQEZxLCGs3mPtsB3Q==",
+              "content_md5": "35af8b7a9490467f75f19c1e5459f7e7",
+              "content_sha1": "4bf3e335199107182c6f7638efaad377acc7f452",
+              "content_sha256": "c0e0aaaea050bcf3be26c0c23d58fa890c0dfb79c8a23016b4a86cd28ca6ea71",
+              "content_sha512": "4d20a63f16b3c36612b47bab3482df4729232bf2787af800ac7ff62a742ecd0668773e1cab57ff8a0d867903bb98123e431e639134046712c21acde63edb01dd",
+              "directory_permission": "0700",
+              "file_permission": "0700",
+              "filename": "foo.bar",
+              "id": "4bf3e335199107182c6f7638efaad377acc7f452",
+              "source": null
+            },
+            "sensitive_values": { "content": true, "content_base64": true }
+          }
+        ]
+      }
+    }
+  },
   "configuration": {
     "provider_config": {
       "local": {
@@ -66,21 +270,46 @@
     "root_module": {
       "resources": [
         {
-          "address": "local_sensitive_file.foo",
+          "address": "local_sensitive_file.another-one",
           "mode": "managed",
           "type": "local_sensitive_file",
-          "name": "foo",
+          "name": "another-one",
           "provider_config_key": "local",
           "expressions": {
             "content": { "constant_value": "foo!" },
-            "filename": { "constant_value": "foo.bar" }
+            "filename": { "constant_value": "foo.barr" }
+          },
+          "schema_version": 0
+        },
+        {
+          "address": "local_sensitive_file.another-one-one",
+          "mode": "managed",
+          "type": "local_sensitive_file",
+          "name": "another-one-one",
+          "provider_config_key": "local",
+          "expressions": {
+            "content": { "constant_value": "foo!" },
+            "filename": { "constant_value": "foo.barrr" }
+          },
+          "schema_version": 0
+        },
+        {
+          "address": "local_sensitive_file.foo-bar",
+          "mode": "managed",
+          "type": "local_sensitive_file",
+          "name": "foo-bar",
+          "provider_config_key": "local",
+          "expressions": {
+            "content": { "constant_value": "foo!" },
+            "filename": { "constant_value": "foo.barrr" }
           },
           "schema_version": 0
         }
-      ]
+      ],
+      "variables": { "name": { "default": "Name" } }
     }
   },
-  "timestamp": "2024-11-12T18:05:19Z",
+  "timestamp": "2024-11-13T04:34:13Z",
   "applyable": true,
   "complete": true,
   "errored": false

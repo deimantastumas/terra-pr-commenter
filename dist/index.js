@@ -33706,21 +33706,25 @@ async function run() {
                     }
                     // Resolve resource change action
                     let overallAction = '';
+                    let noChanges = true;
                     switch (resourceChangeActions[0]) {
                         case 'no-op':
                             if ('importing' in resourceChangeDetails) {
                                 planChanges.ImportResourcesCount += 1;
                                 overallAction = 'Import';
+                                noChanges = false;
                             }
                             else {
                                 continue;
                             }
                             break;
                         case 'create':
+                            noChanges = false;
                             overallAction = 'Create';
                             planChanges.CreateResourcesCount += 1;
                             break;
                         case 'delete':
+                            noChanges = false;
                             if (resourceChangeActions.includes('delete') &&
                                 resourceChangeActions.includes('create')) {
                                 planChanges.CreateResourcesCount += 1;
@@ -33734,9 +33738,13 @@ async function run() {
                             }
                             break;
                         case 'update':
+                            noChanges = false;
                             planChanges.UpdateResourcesCount += 1;
                             overallAction = 'Update';
                             break;
+                    }
+                    if (noChanges) {
+                        continue;
                     }
                     // Create a diff from before and after changes
                     const beforeYaml = yaml.stringify(beforeChanges);
@@ -33773,6 +33781,9 @@ ${changeDiff}
                 if (error instanceof Error)
                     core.setFailed(`TF plan ${tfPlan} is invalid: ${error}`);
                 return;
+            }
+            if (planChanges.ResouceChangeBody.length === 0) {
+                continue;
             }
             // Create change content for comment body
             let resourcesToCreateContent = `
@@ -33831,7 +33842,7 @@ ${changeDiff}
             const commentBody = `
 <b>${resolvedCommentHeader}<b>
 
-![Create](https://img.shields.io/badge/Create-${planChanges.CreateResourcesCount}-brightgreen) ![Update](https://img.shields.io/badge/Update-${planChanges.UpdateResourcesCount}-yellow) ![Replace](https://img.shields.io/badge/Replace-${planChanges.ReplaceResourcesCount}-orange) ![Destroy](https://img.shields.io/badge/Destroy-${planChanges.DestroyResourcesCount}-red ![Import](https://img.shields.io/badge/Import-${planChanges.ImportResourcesCount}-blue)
+![Create](https://img.shields.io/badge/Create-${planChanges.CreateResourcesCount}-brightgreen) ![Update](https://img.shields.io/badge/Update-${planChanges.UpdateResourcesCount}-yellow) ![Replace](https://img.shields.io/badge/Replace-${planChanges.ReplaceResourcesCount}-orange) ![Destroy](https://img.shields.io/badge/Destroy-${planChanges.DestroyResourcesCount}-red) ![Import](https://img.shields.io/badge/Import-${planChanges.ImportResourcesCount}-blue)
 <details${expandComment ? ' open' : ''}>
 <summary>
 <b>Resource changes:</b>
