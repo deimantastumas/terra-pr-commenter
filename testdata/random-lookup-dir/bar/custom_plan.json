@@ -108,7 +108,7 @@
         "after_unknown": {},
         "before_sensitive": { "content": true, "content_base64": true },
         "after_sensitive": { "content": true, "content_base64": true },
-        "imported": { "id": "hello" }
+        "importing": { "id": "hello" }
       }
     },
     {
