@@ -338,7 +338,12 @@ ${COMMENT_FOOTER}
     }
 
     if (planComments.length === 0) {
-      return
+      // todo(): allow disabling this comment
+      planComments.push(`
+\`\`\`No changes. Your infrastructure matches the configuration.\`\`\`
+
+###### Generated via \`terra-pr-commenter\` GHA
+`)
     }
 
     // Remove previous comments that were created by this action

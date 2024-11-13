@@ -33870,7 +33870,12 @@ ${constants_1.COMMENT_FOOTER}
             planComments.push(commentBody);
         }
         if (planComments.length === 0) {
-            return;
+            // todo(): allow disabling this comment
+            planComments.push(`
+\`\`\`No changes. Your infrastructure matches the configuration.\`\`\`
+
+###### Generated via \`terra-pr-commenter\` GHA
+`);
         }
         // Remove previous comments that were created by this action
         await (0, pull_request_1.RemoveCommentsByLookupText)(octokit, context, constants_1.COMMENT_FOOTER);
