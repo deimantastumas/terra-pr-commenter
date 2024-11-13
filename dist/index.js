@@ -1850,6 +1850,259 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 
+/***/ 1648:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Context = void 0;
+const fs_1 = __nccwpck_require__(9896);
+const os_1 = __nccwpck_require__(857);
+class Context {
+    /**
+     * Hydrate the context from the environment
+     */
+    constructor() {
+        var _a, _b, _c;
+        this.payload = {};
+        if (process.env.GITHUB_EVENT_PATH) {
+            if ((0, fs_1.existsSync)(process.env.GITHUB_EVENT_PATH)) {
+                this.payload = JSON.parse((0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' }));
+            }
+            else {
+                const path = process.env.GITHUB_EVENT_PATH;
+                process.stdout.write(`GITHUB_EVENT_PATH ${path} does not exist${os_1.EOL}`);
+            }
+        }
+        this.eventName = process.env.GITHUB_EVENT_NAME;
+        this.sha = process.env.GITHUB_SHA;
+        this.ref = process.env.GITHUB_REF;
+        this.workflow = process.env.GITHUB_WORKFLOW;
+        this.action = process.env.GITHUB_ACTION;
+        this.actor = process.env.GITHUB_ACTOR;
+        this.job = process.env.GITHUB_JOB;
+        this.runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
+        this.runId = parseInt(process.env.GITHUB_RUN_ID, 10);
+        this.apiUrl = (_a = process.env.GITHUB_API_URL) !== null && _a !== void 0 ? _a : `https://api.github.com`;
+        this.serverUrl = (_b = process.env.GITHUB_SERVER_URL) !== null && _b !== void 0 ? _b : `https://github.com`;
+        this.graphqlUrl =
+            (_c = process.env.GITHUB_GRAPHQL_URL) !== null && _c !== void 0 ? _c : `https://api.github.com/graphql`;
+    }
+    get issue() {
+        const payload = this.payload;
+        return Object.assign(Object.assign({}, this.repo), { number: (payload.issue || payload.pull_request || payload).number });
+    }
+    get repo() {
+        if (process.env.GITHUB_REPOSITORY) {
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            return { owner, repo };
+        }
+        if (this.payload.repository) {
+            return {
+                owner: this.payload.repository.owner.login,
+                repo: this.payload.repository.name
+            };
+        }
+        throw new Error("context.repo requires a GITHUB_REPOSITORY environment variable like 'owner/repo'");
+    }
+}
+exports.Context = Context;
+//# sourceMappingURL=context.js.map
+
+/***/ }),
+
+/***/ 3228:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOctokit = exports.context = void 0;
+const Context = __importStar(__nccwpck_require__(1648));
+const utils_1 = __nccwpck_require__(8006);
+exports.context = new Context.Context();
+/**
+ * Returns a hydrated octokit ready to use for GitHub Actions
+ *
+ * @param     token    the repo PAT or GITHUB_TOKEN
+ * @param     options  other options to set
+ */
+function getOctokit(token, options, ...additionalPlugins) {
+    const GitHubWithPlugins = utils_1.GitHub.plugin(...additionalPlugins);
+    return new GitHubWithPlugins((0, utils_1.getOctokitOptions)(token, options));
+}
+exports.getOctokit = getOctokit;
+//# sourceMappingURL=github.js.map
+
+/***/ }),
+
+/***/ 5156:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getApiBaseUrl = exports.getProxyFetch = exports.getProxyAgentDispatcher = exports.getProxyAgent = exports.getAuthString = void 0;
+const httpClient = __importStar(__nccwpck_require__(4844));
+const undici_1 = __nccwpck_require__(6752);
+function getAuthString(token, options) {
+    if (!token && !options.auth) {
+        throw new Error('Parameter token or opts.auth is required');
+    }
+    else if (token && options.auth) {
+        throw new Error('Parameters token and opts.auth may not both be specified');
+    }
+    return typeof options.auth === 'string' ? options.auth : `token ${token}`;
+}
+exports.getAuthString = getAuthString;
+function getProxyAgent(destinationUrl) {
+    const hc = new httpClient.HttpClient();
+    return hc.getAgent(destinationUrl);
+}
+exports.getProxyAgent = getProxyAgent;
+function getProxyAgentDispatcher(destinationUrl) {
+    const hc = new httpClient.HttpClient();
+    return hc.getAgentDispatcher(destinationUrl);
+}
+exports.getProxyAgentDispatcher = getProxyAgentDispatcher;
+function getProxyFetch(destinationUrl) {
+    const httpDispatcher = getProxyAgentDispatcher(destinationUrl);
+    const proxyFetch = (url, opts) => __awaiter(this, void 0, void 0, function* () {
+        return (0, undici_1.fetch)(url, Object.assign(Object.assign({}, opts), { dispatcher: httpDispatcher }));
+    });
+    return proxyFetch;
+}
+exports.getProxyFetch = getProxyFetch;
+function getApiBaseUrl() {
+    return process.env['GITHUB_API_URL'] || 'https://api.github.com';
+}
+exports.getApiBaseUrl = getApiBaseUrl;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 8006:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOctokitOptions = exports.GitHub = exports.defaults = exports.context = void 0;
+const Context = __importStar(__nccwpck_require__(1648));
+const Utils = __importStar(__nccwpck_require__(5156));
+// octokit + plugins
+const core_1 = __nccwpck_require__(1897);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(4935);
+const plugin_paginate_rest_1 = __nccwpck_require__(8082);
+exports.context = new Context.Context();
+const baseUrl = Utils.getApiBaseUrl();
+exports.defaults = {
+    baseUrl,
+    request: {
+        agent: Utils.getProxyAgent(baseUrl),
+        fetch: Utils.getProxyFetch(baseUrl)
+    }
+};
+exports.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(exports.defaults);
+/**
+ * Convience function to correctly format Octokit Options to pass into the constructor.
+ *
+ * @param     token    the repo PAT or GITHUB_TOKEN
+ * @param     options  other options to set
+ */
+function getOctokitOptions(token, options) {
+    const opts = Object.assign({}, options || {}); // Shallow clone - don't mutate the object provided by the caller
+    // Auth
+    const auth = Utils.getAuthString(token, opts);
+    if (auth) {
+        opts.auth = auth;
+    }
+    return opts;
+}
+exports.getOctokitOptions = getOctokitOptions;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
 /***/ 4552:
 /***/ (function(__unused_webpack_module, exports) {
 
@@ -2446,7 +2699,7 @@ class HttpClient {
         if (this._keepAlive && useProxy) {
             agent = this._proxyAgent;
         }
-        if (this._keepAlive && !useProxy) {
+        if (!useProxy) {
             agent = this._agent;
         }
         // if agent is already assigned use that agent.
@@ -2478,15 +2731,11 @@ class HttpClient {
             agent = tunnelAgent(agentOptions);
             this._proxyAgent = agent;
         }
-        // if reusing agent across request and tunneling agent isn't assigned create a new agent
-        if (this._keepAlive && !agent) {
+        // if tunneling agent isn't assigned create a new agent
+        if (!agent) {
             const options = { keepAlive: this._keepAlive, maxSockets };
             agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
             this._agent = agent;
-        }
-        // if not using private agent and tunnel agent isn't setup then use global agent
-        if (!agent) {
-            agent = usingSsl ? https.globalAgent : http.globalAgent;
         }
         if (usingSsl && this._ignoreSslError) {
             // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
@@ -2509,7 +2758,7 @@ class HttpClient {
         }
         const usingSsl = parsedUrl.protocol === 'https:';
         proxyAgent = new undici_1.ProxyAgent(Object.assign({ uri: proxyUrl.href, pipelining: !this._keepAlive ? 0 : 1 }, ((proxyUrl.username || proxyUrl.password) && {
-            token: `${proxyUrl.username}:${proxyUrl.password}`
+            token: `Basic ${Buffer.from(`${proxyUrl.username}:${proxyUrl.password}`).toString('base64')}`
         })));
         this._proxyAgentDispatcher = proxyAgent;
         if (usingSsl && this._ignoreSslError) {
@@ -2623,11 +2872,11 @@ function getProxyUrl(reqUrl) {
     })();
     if (proxyVar) {
         try {
-            return new URL(proxyVar);
+            return new DecodedURL(proxyVar);
         }
         catch (_a) {
             if (!proxyVar.startsWith('http://') && !proxyVar.startsWith('https://'))
-                return new URL(`http://${proxyVar}`);
+                return new DecodedURL(`http://${proxyVar}`);
         }
     }
     else {
@@ -2685,6 +2934,19 @@ function isLoopbackAddress(host) {
         hostLower.startsWith('127.') ||
         hostLower.startsWith('[::1]') ||
         hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
+class DecodedURL extends URL {
+    constructor(url, base) {
+        super(url, base);
+        this._decodedUsername = decodeURIComponent(super.username);
+        this._decodedPassword = decodeURIComponent(super.password);
+    }
+    get username() {
+        return this._decodedUsername;
+    }
+    get password() {
+        return this._decodedPassword;
+    }
 }
 //# sourceMappingURL=proxy.js.map
 
@@ -3183,6 +3445,7577 @@ function copyFile(srcFile, destFile, force) {
     });
 }
 //# sourceMappingURL=io.js.map
+
+/***/ }),
+
+/***/ 7864:
+/***/ ((module) => {
+
+"use strict";
+
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// pkg/dist-src/index.js
+var dist_src_exports = {};
+__export(dist_src_exports, {
+  createTokenAuth: () => createTokenAuth
+});
+module.exports = __toCommonJS(dist_src_exports);
+
+// pkg/dist-src/auth.js
+var REGEX_IS_INSTALLATION_LEGACY = /^v1\./;
+var REGEX_IS_INSTALLATION = /^ghs_/;
+var REGEX_IS_USER_TO_SERVER = /^ghu_/;
+async function auth(token) {
+  const isApp = token.split(/\./).length === 3;
+  const isInstallation = REGEX_IS_INSTALLATION_LEGACY.test(token) || REGEX_IS_INSTALLATION.test(token);
+  const isUserToServer = REGEX_IS_USER_TO_SERVER.test(token);
+  const tokenType = isApp ? "app" : isInstallation ? "installation" : isUserToServer ? "user-to-server" : "oauth";
+  return {
+    type: "token",
+    token,
+    tokenType
+  };
+}
+
+// pkg/dist-src/with-authorization-prefix.js
+function withAuthorizationPrefix(token) {
+  if (token.split(/\./).length === 3) {
+    return `bearer ${token}`;
+  }
+  return `token ${token}`;
+}
+
+// pkg/dist-src/hook.js
+async function hook(token, request, route, parameters) {
+  const endpoint = request.endpoint.merge(
+    route,
+    parameters
+  );
+  endpoint.headers.authorization = withAuthorizationPrefix(token);
+  return request(endpoint);
+}
+
+// pkg/dist-src/index.js
+var createTokenAuth = function createTokenAuth2(token) {
+  if (!token) {
+    throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
+  }
+  if (typeof token !== "string") {
+    throw new Error(
+      "[@octokit/auth-token] Token passed to createTokenAuth is not a string"
+    );
+  }
+  token = token.replace(/^(token|bearer) +/i, "");
+  return Object.assign(auth.bind(null, token), {
+    hook: hook.bind(null, token)
+  });
+};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (0);
+
+
+/***/ }),
+
+/***/ 1897:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// pkg/dist-src/index.js
+var dist_src_exports = {};
+__export(dist_src_exports, {
+  Octokit: () => Octokit
+});
+module.exports = __toCommonJS(dist_src_exports);
+var import_universal_user_agent = __nccwpck_require__(3843);
+var import_before_after_hook = __nccwpck_require__(2732);
+var import_request = __nccwpck_require__(8636);
+var import_graphql = __nccwpck_require__(7);
+var import_auth_token = __nccwpck_require__(7864);
+
+// pkg/dist-src/version.js
+var VERSION = "5.2.0";
+
+// pkg/dist-src/index.js
+var noop = () => {
+};
+var consoleWarn = console.warn.bind(console);
+var consoleError = console.error.bind(console);
+var userAgentTrail = `octokit-core.js/${VERSION} ${(0, import_universal_user_agent.getUserAgent)()}`;
+var Octokit = class {
+  static {
+    this.VERSION = VERSION;
+  }
+  static defaults(defaults) {
+    const OctokitWithDefaults = class extends this {
+      constructor(...args) {
+        const options = args[0] || {};
+        if (typeof defaults === "function") {
+          super(defaults(options));
+          return;
+        }
+        super(
+          Object.assign(
+            {},
+            defaults,
+            options,
+            options.userAgent && defaults.userAgent ? {
+              userAgent: `${options.userAgent} ${defaults.userAgent}`
+            } : null
+          )
+        );
+      }
+    };
+    return OctokitWithDefaults;
+  }
+  static {
+    this.plugins = [];
+  }
+  /**
+   * Attach a plugin (or many) to your Octokit instance.
+   *
+   * @example
+   * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
+   */
+  static plugin(...newPlugins) {
+    const currentPlugins = this.plugins;
+    const NewOctokit = class extends this {
+      static {
+        this.plugins = currentPlugins.concat(
+          newPlugins.filter((plugin) => !currentPlugins.includes(plugin))
+        );
+      }
+    };
+    return NewOctokit;
+  }
+  constructor(options = {}) {
+    const hook = new import_before_after_hook.Collection();
+    const requestDefaults = {
+      baseUrl: import_request.request.endpoint.DEFAULTS.baseUrl,
+      headers: {},
+      request: Object.assign({}, options.request, {
+        // @ts-ignore internal usage only, no need to type
+        hook: hook.bind(null, "request")
+      }),
+      mediaType: {
+        previews: [],
+        format: ""
+      }
+    };
+    requestDefaults.headers["user-agent"] = options.userAgent ? `${options.userAgent} ${userAgentTrail}` : userAgentTrail;
+    if (options.baseUrl) {
+      requestDefaults.baseUrl = options.baseUrl;
+    }
+    if (options.previews) {
+      requestDefaults.mediaType.previews = options.previews;
+    }
+    if (options.timeZone) {
+      requestDefaults.headers["time-zone"] = options.timeZone;
+    }
+    this.request = import_request.request.defaults(requestDefaults);
+    this.graphql = (0, import_graphql.withCustomRequest)(this.request).defaults(requestDefaults);
+    this.log = Object.assign(
+      {
+        debug: noop,
+        info: noop,
+        warn: consoleWarn,
+        error: consoleError
+      },
+      options.log
+    );
+    this.hook = hook;
+    if (!options.authStrategy) {
+      if (!options.auth) {
+        this.auth = async () => ({
+          type: "unauthenticated"
+        });
+      } else {
+        const auth = (0, import_auth_token.createTokenAuth)(options.auth);
+        hook.wrap("request", auth.hook);
+        this.auth = auth;
+      }
+    } else {
+      const { authStrategy, ...otherOptions } = options;
+      const auth = authStrategy(
+        Object.assign(
+          {
+            request: this.request,
+            log: this.log,
+            // we pass the current octokit instance as well as its constructor options
+            // to allow for authentication strategies that return a new octokit instance
+            // that shares the same internal state as the current one. The original
+            // requirement for this was the "event-octokit" authentication strategy
+            // of https://github.com/probot/octokit-auth-probot.
+            octokit: this,
+            octokitOptions: otherOptions
+          },
+          options.auth
+        )
+      );
+      hook.wrap("request", auth.hook);
+      this.auth = auth;
+    }
+    const classConstructor = this.constructor;
+    for (let i = 0; i < classConstructor.plugins.length; ++i) {
+      Object.assign(this, classConstructor.plugins[i](this, options));
+    }
+  }
+};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (0);
+
+
+/***/ }),
+
+/***/ 4471:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// pkg/dist-src/index.js
+var dist_src_exports = {};
+__export(dist_src_exports, {
+  endpoint: () => endpoint
+});
+module.exports = __toCommonJS(dist_src_exports);
+
+// pkg/dist-src/defaults.js
+var import_universal_user_agent = __nccwpck_require__(3843);
+
+// pkg/dist-src/version.js
+var VERSION = "9.0.5";
+
+// pkg/dist-src/defaults.js
+var userAgent = `octokit-endpoint.js/${VERSION} ${(0, import_universal_user_agent.getUserAgent)()}`;
+var DEFAULTS = {
+  method: "GET",
+  baseUrl: "https://api.github.com",
+  headers: {
+    accept: "application/vnd.github.v3+json",
+    "user-agent": userAgent
+  },
+  mediaType: {
+    format: ""
+  }
+};
+
+// pkg/dist-src/util/lowercase-keys.js
+function lowercaseKeys(object) {
+  if (!object) {
+    return {};
+  }
+  return Object.keys(object).reduce((newObj, key) => {
+    newObj[key.toLowerCase()] = object[key];
+    return newObj;
+  }, {});
+}
+
+// pkg/dist-src/util/is-plain-object.js
+function isPlainObject(value) {
+  if (typeof value !== "object" || value === null)
+    return false;
+  if (Object.prototype.toString.call(value) !== "[object Object]")
+    return false;
+  const proto = Object.getPrototypeOf(value);
+  if (proto === null)
+    return true;
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
+}
+
+// pkg/dist-src/util/merge-deep.js
+function mergeDeep(defaults, options) {
+  const result = Object.assign({}, defaults);
+  Object.keys(options).forEach((key) => {
+    if (isPlainObject(options[key])) {
+      if (!(key in defaults))
+        Object.assign(result, { [key]: options[key] });
+      else
+        result[key] = mergeDeep(defaults[key], options[key]);
+    } else {
+      Object.assign(result, { [key]: options[key] });
+    }
+  });
+  return result;
+}
+
+// pkg/dist-src/util/remove-undefined-properties.js
+function removeUndefinedProperties(obj) {
+  for (const key in obj) {
+    if (obj[key] === void 0) {
+      delete obj[key];
+    }
+  }
+  return obj;
+}
+
+// pkg/dist-src/merge.js
+function merge(defaults, route, options) {
+  if (typeof route === "string") {
+    let [method, url] = route.split(" ");
+    options = Object.assign(url ? { method, url } : { url: method }, options);
+  } else {
+    options = Object.assign({}, route);
+  }
+  options.headers = lowercaseKeys(options.headers);
+  removeUndefinedProperties(options);
+  removeUndefinedProperties(options.headers);
+  const mergedOptions = mergeDeep(defaults || {}, options);
+  if (options.url === "/graphql") {
+    if (defaults && defaults.mediaType.previews?.length) {
+      mergedOptions.mediaType.previews = defaults.mediaType.previews.filter(
+        (preview) => !mergedOptions.mediaType.previews.includes(preview)
+      ).concat(mergedOptions.mediaType.previews);
+    }
+    mergedOptions.mediaType.previews = (mergedOptions.mediaType.previews || []).map((preview) => preview.replace(/-preview/, ""));
+  }
+  return mergedOptions;
+}
+
+// pkg/dist-src/util/add-query-parameters.js
+function addQueryParameters(url, parameters) {
+  const separator = /\?/.test(url) ? "&" : "?";
+  const names = Object.keys(parameters);
+  if (names.length === 0) {
+    return url;
+  }
+  return url + separator + names.map((name) => {
+    if (name === "q") {
+      return "q=" + parameters.q.split("+").map(encodeURIComponent).join("+");
+    }
+    return `${name}=${encodeURIComponent(parameters[name])}`;
+  }).join("&");
+}
+
+// pkg/dist-src/util/extract-url-variable-names.js
+var urlVariableRegex = /\{[^}]+\}/g;
+function removeNonChars(variableName) {
+  return variableName.replace(/^\W+|\W+$/g, "").split(/,/);
+}
+function extractUrlVariableNames(url) {
+  const matches = url.match(urlVariableRegex);
+  if (!matches) {
+    return [];
+  }
+  return matches.map(removeNonChars).reduce((a, b) => a.concat(b), []);
+}
+
+// pkg/dist-src/util/omit.js
+function omit(object, keysToOmit) {
+  const result = { __proto__: null };
+  for (const key of Object.keys(object)) {
+    if (keysToOmit.indexOf(key) === -1) {
+      result[key] = object[key];
+    }
+  }
+  return result;
+}
+
+// pkg/dist-src/util/url-template.js
+function encodeReserved(str) {
+  return str.split(/(%[0-9A-Fa-f]{2})/g).map(function(part) {
+    if (!/%[0-9A-Fa-f]/.test(part)) {
+      part = encodeURI(part).replace(/%5B/g, "[").replace(/%5D/g, "]");
+    }
+    return part;
+  }).join("");
+}
+function encodeUnreserved(str) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+    return "%" + c.charCodeAt(0).toString(16).toUpperCase();
+  });
+}
+function encodeValue(operator, value, key) {
+  value = operator === "+" || operator === "#" ? encodeReserved(value) : encodeUnreserved(value);
+  if (key) {
+    return encodeUnreserved(key) + "=" + value;
+  } else {
+    return value;
+  }
+}
+function isDefined(value) {
+  return value !== void 0 && value !== null;
+}
+function isKeyOperator(operator) {
+  return operator === ";" || operator === "&" || operator === "?";
+}
+function getValues(context, operator, key, modifier) {
+  var value = context[key], result = [];
+  if (isDefined(value) && value !== "") {
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      value = value.toString();
+      if (modifier && modifier !== "*") {
+        value = value.substring(0, parseInt(modifier, 10));
+      }
+      result.push(
+        encodeValue(operator, value, isKeyOperator(operator) ? key : "")
+      );
+    } else {
+      if (modifier === "*") {
+        if (Array.isArray(value)) {
+          value.filter(isDefined).forEach(function(value2) {
+            result.push(
+              encodeValue(operator, value2, isKeyOperator(operator) ? key : "")
+            );
+          });
+        } else {
+          Object.keys(value).forEach(function(k) {
+            if (isDefined(value[k])) {
+              result.push(encodeValue(operator, value[k], k));
+            }
+          });
+        }
+      } else {
+        const tmp = [];
+        if (Array.isArray(value)) {
+          value.filter(isDefined).forEach(function(value2) {
+            tmp.push(encodeValue(operator, value2));
+          });
+        } else {
+          Object.keys(value).forEach(function(k) {
+            if (isDefined(value[k])) {
+              tmp.push(encodeUnreserved(k));
+              tmp.push(encodeValue(operator, value[k].toString()));
+            }
+          });
+        }
+        if (isKeyOperator(operator)) {
+          result.push(encodeUnreserved(key) + "=" + tmp.join(","));
+        } else if (tmp.length !== 0) {
+          result.push(tmp.join(","));
+        }
+      }
+    }
+  } else {
+    if (operator === ";") {
+      if (isDefined(value)) {
+        result.push(encodeUnreserved(key));
+      }
+    } else if (value === "" && (operator === "&" || operator === "?")) {
+      result.push(encodeUnreserved(key) + "=");
+    } else if (value === "") {
+      result.push("");
+    }
+  }
+  return result;
+}
+function parseUrl(template) {
+  return {
+    expand: expand.bind(null, template)
+  };
+}
+function expand(template, context) {
+  var operators = ["+", "#", ".", "/", ";", "?", "&"];
+  template = template.replace(
+    /\{([^\{\}]+)\}|([^\{\}]+)/g,
+    function(_, expression, literal) {
+      if (expression) {
+        let operator = "";
+        const values = [];
+        if (operators.indexOf(expression.charAt(0)) !== -1) {
+          operator = expression.charAt(0);
+          expression = expression.substr(1);
+        }
+        expression.split(/,/g).forEach(function(variable) {
+          var tmp = /([^:\*]*)(?::(\d+)|(\*))?/.exec(variable);
+          values.push(getValues(context, operator, tmp[1], tmp[2] || tmp[3]));
+        });
+        if (operator && operator !== "+") {
+          var separator = ",";
+          if (operator === "?") {
+            separator = "&";
+          } else if (operator !== "#") {
+            separator = operator;
+          }
+          return (values.length !== 0 ? operator : "") + values.join(separator);
+        } else {
+          return values.join(",");
+        }
+      } else {
+        return encodeReserved(literal);
+      }
+    }
+  );
+  if (template === "/") {
+    return template;
+  } else {
+    return template.replace(/\/$/, "");
+  }
+}
+
+// pkg/dist-src/parse.js
+function parse(options) {
+  let method = options.method.toUpperCase();
+  let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
+  let headers = Object.assign({}, options.headers);
+  let body;
+  let parameters = omit(options, [
+    "method",
+    "baseUrl",
+    "url",
+    "headers",
+    "request",
+    "mediaType"
+  ]);
+  const urlVariableNames = extractUrlVariableNames(url);
+  url = parseUrl(url).expand(parameters);
+  if (!/^http/.test(url)) {
+    url = options.baseUrl + url;
+  }
+  const omittedParameters = Object.keys(options).filter((option) => urlVariableNames.includes(option)).concat("baseUrl");
+  const remainingParameters = omit(parameters, omittedParameters);
+  const isBinaryRequest = /application\/octet-stream/i.test(headers.accept);
+  if (!isBinaryRequest) {
+    if (options.mediaType.format) {
+      headers.accept = headers.accept.split(/,/).map(
+        (format) => format.replace(
+          /application\/vnd(\.\w+)(\.v3)?(\.\w+)?(\+json)?$/,
+          `application/vnd$1$2.${options.mediaType.format}`
+        )
+      ).join(",");
+    }
+    if (url.endsWith("/graphql")) {
+      if (options.mediaType.previews?.length) {
+        const previewsFromAcceptHeader = headers.accept.match(/[\w-]+(?=-preview)/g) || [];
+        headers.accept = previewsFromAcceptHeader.concat(options.mediaType.previews).map((preview) => {
+          const format = options.mediaType.format ? `.${options.mediaType.format}` : "+json";
+          return `application/vnd.github.${preview}-preview${format}`;
+        }).join(",");
+      }
+    }
+  }
+  if (["GET", "HEAD"].includes(method)) {
+    url = addQueryParameters(url, remainingParameters);
+  } else {
+    if ("data" in remainingParameters) {
+      body = remainingParameters.data;
+    } else {
+      if (Object.keys(remainingParameters).length) {
+        body = remainingParameters;
+      }
+    }
+  }
+  if (!headers["content-type"] && typeof body !== "undefined") {
+    headers["content-type"] = "application/json; charset=utf-8";
+  }
+  if (["PATCH", "PUT"].includes(method) && typeof body === "undefined") {
+    body = "";
+  }
+  return Object.assign(
+    { method, url, headers },
+    typeof body !== "undefined" ? { body } : null,
+    options.request ? { request: options.request } : null
+  );
+}
+
+// pkg/dist-src/endpoint-with-defaults.js
+function endpointWithDefaults(defaults, route, options) {
+  return parse(merge(defaults, route, options));
+}
+
+// pkg/dist-src/with-defaults.js
+function withDefaults(oldDefaults, newDefaults) {
+  const DEFAULTS2 = merge(oldDefaults, newDefaults);
+  const endpoint2 = endpointWithDefaults.bind(null, DEFAULTS2);
+  return Object.assign(endpoint2, {
+    DEFAULTS: DEFAULTS2,
+    defaults: withDefaults.bind(null, DEFAULTS2),
+    merge: merge.bind(null, DEFAULTS2),
+    parse
+  });
+}
+
+// pkg/dist-src/index.js
+var endpoint = withDefaults(null, DEFAULTS);
+// Annotate the CommonJS export names for ESM import in node:
+0 && (0);
+
+
+/***/ }),
+
+/***/ 7:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// pkg/dist-src/index.js
+var dist_src_exports = {};
+__export(dist_src_exports, {
+  GraphqlResponseError: () => GraphqlResponseError,
+  graphql: () => graphql2,
+  withCustomRequest: () => withCustomRequest
+});
+module.exports = __toCommonJS(dist_src_exports);
+var import_request3 = __nccwpck_require__(8636);
+var import_universal_user_agent = __nccwpck_require__(3843);
+
+// pkg/dist-src/version.js
+var VERSION = "7.1.0";
+
+// pkg/dist-src/with-defaults.js
+var import_request2 = __nccwpck_require__(8636);
+
+// pkg/dist-src/graphql.js
+var import_request = __nccwpck_require__(8636);
+
+// pkg/dist-src/error.js
+function _buildMessageForResponseErrors(data) {
+  return `Request failed due to following response errors:
+` + data.errors.map((e) => ` - ${e.message}`).join("\n");
+}
+var GraphqlResponseError = class extends Error {
+  constructor(request2, headers, response) {
+    super(_buildMessageForResponseErrors(response));
+    this.request = request2;
+    this.headers = headers;
+    this.response = response;
+    this.name = "GraphqlResponseError";
+    this.errors = response.errors;
+    this.data = response.data;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+};
+
+// pkg/dist-src/graphql.js
+var NON_VARIABLE_OPTIONS = [
+  "method",
+  "baseUrl",
+  "url",
+  "headers",
+  "request",
+  "query",
+  "mediaType"
+];
+var FORBIDDEN_VARIABLE_OPTIONS = ["query", "method", "url"];
+var GHES_V3_SUFFIX_REGEX = /\/api\/v3\/?$/;
+function graphql(request2, query, options) {
+  if (options) {
+    if (typeof query === "string" && "query" in options) {
+      return Promise.reject(
+        new Error(`[@octokit/graphql] "query" cannot be used as variable name`)
+      );
+    }
+    for (const key in options) {
+      if (!FORBIDDEN_VARIABLE_OPTIONS.includes(key))
+        continue;
+      return Promise.reject(
+        new Error(
+          `[@octokit/graphql] "${key}" cannot be used as variable name`
+        )
+      );
+    }
+  }
+  const parsedOptions = typeof query === "string" ? Object.assign({ query }, options) : query;
+  const requestOptions = Object.keys(
+    parsedOptions
+  ).reduce((result, key) => {
+    if (NON_VARIABLE_OPTIONS.includes(key)) {
+      result[key] = parsedOptions[key];
+      return result;
+    }
+    if (!result.variables) {
+      result.variables = {};
+    }
+    result.variables[key] = parsedOptions[key];
+    return result;
+  }, {});
+  const baseUrl = parsedOptions.baseUrl || request2.endpoint.DEFAULTS.baseUrl;
+  if (GHES_V3_SUFFIX_REGEX.test(baseUrl)) {
+    requestOptions.url = baseUrl.replace(GHES_V3_SUFFIX_REGEX, "/api/graphql");
+  }
+  return request2(requestOptions).then((response) => {
+    if (response.data.errors) {
+      const headers = {};
+      for (const key of Object.keys(response.headers)) {
+        headers[key] = response.headers[key];
+      }
+      throw new GraphqlResponseError(
+        requestOptions,
+        headers,
+        response.data
+      );
+    }
+    return response.data.data;
+  });
+}
+
+// pkg/dist-src/with-defaults.js
+function withDefaults(request2, newDefaults) {
+  const newRequest = request2.defaults(newDefaults);
+  const newApi = (query, options) => {
+    return graphql(newRequest, query, options);
+  };
+  return Object.assign(newApi, {
+    defaults: withDefaults.bind(null, newRequest),
+    endpoint: newRequest.endpoint
+  });
+}
+
+// pkg/dist-src/index.js
+var graphql2 = withDefaults(import_request3.request, {
+  headers: {
+    "user-agent": `octokit-graphql.js/${VERSION} ${(0, import_universal_user_agent.getUserAgent)()}`
+  },
+  method: "POST",
+  url: "/graphql"
+});
+function withCustomRequest(customRequest) {
+  return withDefaults(customRequest, {
+    method: "POST",
+    url: "/graphql"
+  });
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (0);
+
+
+/***/ }),
+
+/***/ 8082:
+/***/ ((module) => {
+
+"use strict";
+
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// pkg/dist-src/index.js
+var dist_src_exports = {};
+__export(dist_src_exports, {
+  composePaginateRest: () => composePaginateRest,
+  isPaginatingEndpoint: () => isPaginatingEndpoint,
+  paginateRest: () => paginateRest,
+  paginatingEndpoints: () => paginatingEndpoints
+});
+module.exports = __toCommonJS(dist_src_exports);
+
+// pkg/dist-src/version.js
+var VERSION = "9.2.1";
+
+// pkg/dist-src/normalize-paginated-list-response.js
+function normalizePaginatedListResponse(response) {
+  if (!response.data) {
+    return {
+      ...response,
+      data: []
+    };
+  }
+  const responseNeedsNormalization = "total_count" in response.data && !("url" in response.data);
+  if (!responseNeedsNormalization)
+    return response;
+  const incompleteResults = response.data.incomplete_results;
+  const repositorySelection = response.data.repository_selection;
+  const totalCount = response.data.total_count;
+  delete response.data.incomplete_results;
+  delete response.data.repository_selection;
+  delete response.data.total_count;
+  const namespaceKey = Object.keys(response.data)[0];
+  const data = response.data[namespaceKey];
+  response.data = data;
+  if (typeof incompleteResults !== "undefined") {
+    response.data.incomplete_results = incompleteResults;
+  }
+  if (typeof repositorySelection !== "undefined") {
+    response.data.repository_selection = repositorySelection;
+  }
+  response.data.total_count = totalCount;
+  return response;
+}
+
+// pkg/dist-src/iterator.js
+function iterator(octokit, route, parameters) {
+  const options = typeof route === "function" ? route.endpoint(parameters) : octokit.request.endpoint(route, parameters);
+  const requestMethod = typeof route === "function" ? route : octokit.request;
+  const method = options.method;
+  const headers = options.headers;
+  let url = options.url;
+  return {
+    [Symbol.asyncIterator]: () => ({
+      async next() {
+        if (!url)
+          return { done: true };
+        try {
+          const response = await requestMethod({ method, url, headers });
+          const normalizedResponse = normalizePaginatedListResponse(response);
+          url = ((normalizedResponse.headers.link || "").match(
+            /<([^>]+)>;\s*rel="next"/
+          ) || [])[1];
+          return { value: normalizedResponse };
+        } catch (error) {
+          if (error.status !== 409)
+            throw error;
+          url = "";
+          return {
+            value: {
+              status: 200,
+              headers: {},
+              data: []
+            }
+          };
+        }
+      }
+    })
+  };
+}
+
+// pkg/dist-src/paginate.js
+function paginate(octokit, route, parameters, mapFn) {
+  if (typeof parameters === "function") {
+    mapFn = parameters;
+    parameters = void 0;
+  }
+  return gather(
+    octokit,
+    [],
+    iterator(octokit, route, parameters)[Symbol.asyncIterator](),
+    mapFn
+  );
+}
+function gather(octokit, results, iterator2, mapFn) {
+  return iterator2.next().then((result) => {
+    if (result.done) {
+      return results;
+    }
+    let earlyExit = false;
+    function done() {
+      earlyExit = true;
+    }
+    results = results.concat(
+      mapFn ? mapFn(result.value, done) : result.value.data
+    );
+    if (earlyExit) {
+      return results;
+    }
+    return gather(octokit, results, iterator2, mapFn);
+  });
+}
+
+// pkg/dist-src/compose-paginate.js
+var composePaginateRest = Object.assign(paginate, {
+  iterator
+});
+
+// pkg/dist-src/generated/paginating-endpoints.js
+var paginatingEndpoints = [
+  "GET /advisories",
+  "GET /app/hook/deliveries",
+  "GET /app/installation-requests",
+  "GET /app/installations",
+  "GET /assignments/{assignment_id}/accepted_assignments",
+  "GET /classrooms",
+  "GET /classrooms/{classroom_id}/assignments",
+  "GET /enterprises/{enterprise}/dependabot/alerts",
+  "GET /enterprises/{enterprise}/secret-scanning/alerts",
+  "GET /events",
+  "GET /gists",
+  "GET /gists/public",
+  "GET /gists/starred",
+  "GET /gists/{gist_id}/comments",
+  "GET /gists/{gist_id}/commits",
+  "GET /gists/{gist_id}/forks",
+  "GET /installation/repositories",
+  "GET /issues",
+  "GET /licenses",
+  "GET /marketplace_listing/plans",
+  "GET /marketplace_listing/plans/{plan_id}/accounts",
+  "GET /marketplace_listing/stubbed/plans",
+  "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts",
+  "GET /networks/{owner}/{repo}/events",
+  "GET /notifications",
+  "GET /organizations",
+  "GET /orgs/{org}/actions/cache/usage-by-repository",
+  "GET /orgs/{org}/actions/permissions/repositories",
+  "GET /orgs/{org}/actions/runners",
+  "GET /orgs/{org}/actions/secrets",
+  "GET /orgs/{org}/actions/secrets/{secret_name}/repositories",
+  "GET /orgs/{org}/actions/variables",
+  "GET /orgs/{org}/actions/variables/{name}/repositories",
+  "GET /orgs/{org}/blocks",
+  "GET /orgs/{org}/code-scanning/alerts",
+  "GET /orgs/{org}/codespaces",
+  "GET /orgs/{org}/codespaces/secrets",
+  "GET /orgs/{org}/codespaces/secrets/{secret_name}/repositories",
+  "GET /orgs/{org}/copilot/billing/seats",
+  "GET /orgs/{org}/dependabot/alerts",
+  "GET /orgs/{org}/dependabot/secrets",
+  "GET /orgs/{org}/dependabot/secrets/{secret_name}/repositories",
+  "GET /orgs/{org}/events",
+  "GET /orgs/{org}/failed_invitations",
+  "GET /orgs/{org}/hooks",
+  "GET /orgs/{org}/hooks/{hook_id}/deliveries",
+  "GET /orgs/{org}/installations",
+  "GET /orgs/{org}/invitations",
+  "GET /orgs/{org}/invitations/{invitation_id}/teams",
+  "GET /orgs/{org}/issues",
+  "GET /orgs/{org}/members",
+  "GET /orgs/{org}/members/{username}/codespaces",
+  "GET /orgs/{org}/migrations",
+  "GET /orgs/{org}/migrations/{migration_id}/repositories",
+  "GET /orgs/{org}/organization-roles/{role_id}/teams",
+  "GET /orgs/{org}/organization-roles/{role_id}/users",
+  "GET /orgs/{org}/outside_collaborators",
+  "GET /orgs/{org}/packages",
+  "GET /orgs/{org}/packages/{package_type}/{package_name}/versions",
+  "GET /orgs/{org}/personal-access-token-requests",
+  "GET /orgs/{org}/personal-access-token-requests/{pat_request_id}/repositories",
+  "GET /orgs/{org}/personal-access-tokens",
+  "GET /orgs/{org}/personal-access-tokens/{pat_id}/repositories",
+  "GET /orgs/{org}/projects",
+  "GET /orgs/{org}/properties/values",
+  "GET /orgs/{org}/public_members",
+  "GET /orgs/{org}/repos",
+  "GET /orgs/{org}/rulesets",
+  "GET /orgs/{org}/rulesets/rule-suites",
+  "GET /orgs/{org}/secret-scanning/alerts",
+  "GET /orgs/{org}/security-advisories",
+  "GET /orgs/{org}/teams",
+  "GET /orgs/{org}/teams/{team_slug}/discussions",
+  "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments",
+  "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions",
+  "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions",
+  "GET /orgs/{org}/teams/{team_slug}/invitations",
+  "GET /orgs/{org}/teams/{team_slug}/members",
+  "GET /orgs/{org}/teams/{team_slug}/projects",
+  "GET /orgs/{org}/teams/{team_slug}/repos",
+  "GET /orgs/{org}/teams/{team_slug}/teams",
+  "GET /projects/columns/{column_id}/cards",
+  "GET /projects/{project_id}/collaborators",
+  "GET /projects/{project_id}/columns",
+  "GET /repos/{owner}/{repo}/actions/artifacts",
+  "GET /repos/{owner}/{repo}/actions/caches",
+  "GET /repos/{owner}/{repo}/actions/organization-secrets",
+  "GET /repos/{owner}/{repo}/actions/organization-variables",
+  "GET /repos/{owner}/{repo}/actions/runners",
+  "GET /repos/{owner}/{repo}/actions/runs",
+  "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts",
+  "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs",
+  "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs",
+  "GET /repos/{owner}/{repo}/actions/secrets",
+  "GET /repos/{owner}/{repo}/actions/variables",
+  "GET /repos/{owner}/{repo}/actions/workflows",
+  "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs",
+  "GET /repos/{owner}/{repo}/activity",
+  "GET /repos/{owner}/{repo}/assignees",
+  "GET /repos/{owner}/{repo}/branches",
+  "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations",
+  "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs",
+  "GET /repos/{owner}/{repo}/code-scanning/alerts",
+  "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances",
+  "GET /repos/{owner}/{repo}/code-scanning/analyses",
+  "GET /repos/{owner}/{repo}/codespaces",
+  "GET /repos/{owner}/{repo}/codespaces/devcontainers",
+  "GET /repos/{owner}/{repo}/codespaces/secrets",
+  "GET /repos/{owner}/{repo}/collaborators",
+  "GET /repos/{owner}/{repo}/comments",
+  "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions",
+  "GET /repos/{owner}/{repo}/commits",
+  "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments",
+  "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls",
+  "GET /repos/{owner}/{repo}/commits/{ref}/check-runs",
+  "GET /repos/{owner}/{repo}/commits/{ref}/check-suites",
+  "GET /repos/{owner}/{repo}/commits/{ref}/status",
+  "GET /repos/{owner}/{repo}/commits/{ref}/statuses",
+  "GET /repos/{owner}/{repo}/contributors",
+  "GET /repos/{owner}/{repo}/dependabot/alerts",
+  "GET /repos/{owner}/{repo}/dependabot/secrets",
+  "GET /repos/{owner}/{repo}/deployments",
+  "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses",
+  "GET /repos/{owner}/{repo}/environments",
+  "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies",
+  "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/apps",
+  "GET /repos/{owner}/{repo}/events",
+  "GET /repos/{owner}/{repo}/forks",
+  "GET /repos/{owner}/{repo}/hooks",
+  "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries",
+  "GET /repos/{owner}/{repo}/invitations",
+  "GET /repos/{owner}/{repo}/issues",
+  "GET /repos/{owner}/{repo}/issues/comments",
+  "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions",
+  "GET /repos/{owner}/{repo}/issues/events",
+  "GET /repos/{owner}/{repo}/issues/{issue_number}/comments",
+  "GET /repos/{owner}/{repo}/issues/{issue_number}/events",
+  "GET /repos/{owner}/{repo}/issues/{issue_number}/labels",
+  "GET /repos/{owner}/{repo}/issues/{issue_number}/reactions",
+  "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline",
+  "GET /repos/{owner}/{repo}/keys",
+  "GET /repos/{owner}/{repo}/labels",
+  "GET /repos/{owner}/{repo}/milestones",
+  "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels",
+  "GET /repos/{owner}/{repo}/notifications",
+  "GET /repos/{owner}/{repo}/pages/builds",
+  "GET /repos/{owner}/{repo}/projects",
+  "GET /repos/{owner}/{repo}/pulls",
+  "GET /repos/{owner}/{repo}/pulls/comments",
+  "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions",
+  "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments",
+  "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits",
+  "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
+  "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+  "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments",
+  "GET /repos/{owner}/{repo}/releases",
+  "GET /repos/{owner}/{repo}/releases/{release_id}/assets",
+  "GET /repos/{owner}/{repo}/releases/{release_id}/reactions",
+  "GET /repos/{owner}/{repo}/rules/branches/{branch}",
+  "GET /repos/{owner}/{repo}/rulesets",
+  "GET /repos/{owner}/{repo}/rulesets/rule-suites",
+  "GET /repos/{owner}/{repo}/secret-scanning/alerts",
+  "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations",
+  "GET /repos/{owner}/{repo}/security-advisories",
+  "GET /repos/{owner}/{repo}/stargazers",
+  "GET /repos/{owner}/{repo}/subscribers",
+  "GET /repos/{owner}/{repo}/tags",
+  "GET /repos/{owner}/{repo}/teams",
+  "GET /repos/{owner}/{repo}/topics",
+  "GET /repositories",
+  "GET /repositories/{repository_id}/environments/{environment_name}/secrets",
+  "GET /repositories/{repository_id}/environments/{environment_name}/variables",
+  "GET /search/code",
+  "GET /search/commits",
+  "GET /search/issues",
+  "GET /search/labels",
+  "GET /search/repositories",
+  "GET /search/topics",
+  "GET /search/users",
+  "GET /teams/{team_id}/discussions",
+  "GET /teams/{team_id}/discussions/{discussion_number}/comments",
+  "GET /teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions",
+  "GET /teams/{team_id}/discussions/{discussion_number}/reactions",
+  "GET /teams/{team_id}/invitations",
+  "GET /teams/{team_id}/members",
+  "GET /teams/{team_id}/projects",
+  "GET /teams/{team_id}/repos",
+  "GET /teams/{team_id}/teams",
+  "GET /user/blocks",
+  "GET /user/codespaces",
+  "GET /user/codespaces/secrets",
+  "GET /user/emails",
+  "GET /user/followers",
+  "GET /user/following",
+  "GET /user/gpg_keys",
+  "GET /user/installations",
+  "GET /user/installations/{installation_id}/repositories",
+  "GET /user/issues",
+  "GET /user/keys",
+  "GET /user/marketplace_purchases",
+  "GET /user/marketplace_purchases/stubbed",
+  "GET /user/memberships/orgs",
+  "GET /user/migrations",
+  "GET /user/migrations/{migration_id}/repositories",
+  "GET /user/orgs",
+  "GET /user/packages",
+  "GET /user/packages/{package_type}/{package_name}/versions",
+  "GET /user/public_emails",
+  "GET /user/repos",
+  "GET /user/repository_invitations",
+  "GET /user/social_accounts",
+  "GET /user/ssh_signing_keys",
+  "GET /user/starred",
+  "GET /user/subscriptions",
+  "GET /user/teams",
+  "GET /users",
+  "GET /users/{username}/events",
+  "GET /users/{username}/events/orgs/{org}",
+  "GET /users/{username}/events/public",
+  "GET /users/{username}/followers",
+  "GET /users/{username}/following",
+  "GET /users/{username}/gists",
+  "GET /users/{username}/gpg_keys",
+  "GET /users/{username}/keys",
+  "GET /users/{username}/orgs",
+  "GET /users/{username}/packages",
+  "GET /users/{username}/projects",
+  "GET /users/{username}/received_events",
+  "GET /users/{username}/received_events/public",
+  "GET /users/{username}/repos",
+  "GET /users/{username}/social_accounts",
+  "GET /users/{username}/ssh_signing_keys",
+  "GET /users/{username}/starred",
+  "GET /users/{username}/subscriptions"
+];
+
+// pkg/dist-src/paginating-endpoints.js
+function isPaginatingEndpoint(arg) {
+  if (typeof arg === "string") {
+    return paginatingEndpoints.includes(arg);
+  } else {
+    return false;
+  }
+}
+
+// pkg/dist-src/index.js
+function paginateRest(octokit) {
+  return {
+    paginate: Object.assign(paginate.bind(null, octokit), {
+      iterator: iterator.bind(null, octokit)
+    })
+  };
+}
+paginateRest.VERSION = VERSION;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (0);
+
+
+/***/ }),
+
+/***/ 4935:
+/***/ ((module) => {
+
+"use strict";
+
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// pkg/dist-src/index.js
+var dist_src_exports = {};
+__export(dist_src_exports, {
+  legacyRestEndpointMethods: () => legacyRestEndpointMethods,
+  restEndpointMethods: () => restEndpointMethods
+});
+module.exports = __toCommonJS(dist_src_exports);
+
+// pkg/dist-src/version.js
+var VERSION = "10.4.1";
+
+// pkg/dist-src/generated/endpoints.js
+var Endpoints = {
+  actions: {
+    addCustomLabelsToSelfHostedRunnerForOrg: [
+      "POST /orgs/{org}/actions/runners/{runner_id}/labels"
+    ],
+    addCustomLabelsToSelfHostedRunnerForRepo: [
+      "POST /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
+    ],
+    addSelectedRepoToOrgSecret: [
+      "PUT /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    addSelectedRepoToOrgVariable: [
+      "PUT /orgs/{org}/actions/variables/{name}/repositories/{repository_id}"
+    ],
+    approveWorkflowRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/approve"
+    ],
+    cancelWorkflowRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel"
+    ],
+    createEnvironmentVariable: [
+      "POST /repositories/{repository_id}/environments/{environment_name}/variables"
+    ],
+    createOrUpdateEnvironmentSecret: [
+      "PUT /repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}"
+    ],
+    createOrUpdateOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}"],
+    createOrUpdateRepoSecret: [
+      "PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}"
+    ],
+    createOrgVariable: ["POST /orgs/{org}/actions/variables"],
+    createRegistrationTokenForOrg: [
+      "POST /orgs/{org}/actions/runners/registration-token"
+    ],
+    createRegistrationTokenForRepo: [
+      "POST /repos/{owner}/{repo}/actions/runners/registration-token"
+    ],
+    createRemoveTokenForOrg: ["POST /orgs/{org}/actions/runners/remove-token"],
+    createRemoveTokenForRepo: [
+      "POST /repos/{owner}/{repo}/actions/runners/remove-token"
+    ],
+    createRepoVariable: ["POST /repos/{owner}/{repo}/actions/variables"],
+    createWorkflowDispatch: [
+      "POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches"
+    ],
+    deleteActionsCacheById: [
+      "DELETE /repos/{owner}/{repo}/actions/caches/{cache_id}"
+    ],
+    deleteActionsCacheByKey: [
+      "DELETE /repos/{owner}/{repo}/actions/caches{?key,ref}"
+    ],
+    deleteArtifact: [
+      "DELETE /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"
+    ],
+    deleteEnvironmentSecret: [
+      "DELETE /repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}"
+    ],
+    deleteEnvironmentVariable: [
+      "DELETE /repositories/{repository_id}/environments/{environment_name}/variables/{name}"
+    ],
+    deleteOrgSecret: ["DELETE /orgs/{org}/actions/secrets/{secret_name}"],
+    deleteOrgVariable: ["DELETE /orgs/{org}/actions/variables/{name}"],
+    deleteRepoSecret: [
+      "DELETE /repos/{owner}/{repo}/actions/secrets/{secret_name}"
+    ],
+    deleteRepoVariable: [
+      "DELETE /repos/{owner}/{repo}/actions/variables/{name}"
+    ],
+    deleteSelfHostedRunnerFromOrg: [
+      "DELETE /orgs/{org}/actions/runners/{runner_id}"
+    ],
+    deleteSelfHostedRunnerFromRepo: [
+      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}"
+    ],
+    deleteWorkflowRun: ["DELETE /repos/{owner}/{repo}/actions/runs/{run_id}"],
+    deleteWorkflowRunLogs: [
+      "DELETE /repos/{owner}/{repo}/actions/runs/{run_id}/logs"
+    ],
+    disableSelectedRepositoryGithubActionsOrganization: [
+      "DELETE /orgs/{org}/actions/permissions/repositories/{repository_id}"
+    ],
+    disableWorkflow: [
+      "PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable"
+    ],
+    downloadArtifact: [
+      "GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}"
+    ],
+    downloadJobLogsForWorkflowRun: [
+      "GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs"
+    ],
+    downloadWorkflowRunAttemptLogs: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/logs"
+    ],
+    downloadWorkflowRunLogs: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs"
+    ],
+    enableSelectedRepositoryGithubActionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions/repositories/{repository_id}"
+    ],
+    enableWorkflow: [
+      "PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable"
+    ],
+    forceCancelWorkflowRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/force-cancel"
+    ],
+    generateRunnerJitconfigForOrg: [
+      "POST /orgs/{org}/actions/runners/generate-jitconfig"
+    ],
+    generateRunnerJitconfigForRepo: [
+      "POST /repos/{owner}/{repo}/actions/runners/generate-jitconfig"
+    ],
+    getActionsCacheList: ["GET /repos/{owner}/{repo}/actions/caches"],
+    getActionsCacheUsage: ["GET /repos/{owner}/{repo}/actions/cache/usage"],
+    getActionsCacheUsageByRepoForOrg: [
+      "GET /orgs/{org}/actions/cache/usage-by-repository"
+    ],
+    getActionsCacheUsageForOrg: ["GET /orgs/{org}/actions/cache/usage"],
+    getAllowedActionsOrganization: [
+      "GET /orgs/{org}/actions/permissions/selected-actions"
+    ],
+    getAllowedActionsRepository: [
+      "GET /repos/{owner}/{repo}/actions/permissions/selected-actions"
+    ],
+    getArtifact: ["GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
+    getCustomOidcSubClaimForRepo: [
+      "GET /repos/{owner}/{repo}/actions/oidc/customization/sub"
+    ],
+    getEnvironmentPublicKey: [
+      "GET /repositories/{repository_id}/environments/{environment_name}/secrets/public-key"
+    ],
+    getEnvironmentSecret: [
+      "GET /repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}"
+    ],
+    getEnvironmentVariable: [
+      "GET /repositories/{repository_id}/environments/{environment_name}/variables/{name}"
+    ],
+    getGithubActionsDefaultWorkflowPermissionsOrganization: [
+      "GET /orgs/{org}/actions/permissions/workflow"
+    ],
+    getGithubActionsDefaultWorkflowPermissionsRepository: [
+      "GET /repos/{owner}/{repo}/actions/permissions/workflow"
+    ],
+    getGithubActionsPermissionsOrganization: [
+      "GET /orgs/{org}/actions/permissions"
+    ],
+    getGithubActionsPermissionsRepository: [
+      "GET /repos/{owner}/{repo}/actions/permissions"
+    ],
+    getJobForWorkflowRun: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}"],
+    getOrgPublicKey: ["GET /orgs/{org}/actions/secrets/public-key"],
+    getOrgSecret: ["GET /orgs/{org}/actions/secrets/{secret_name}"],
+    getOrgVariable: ["GET /orgs/{org}/actions/variables/{name}"],
+    getPendingDeploymentsForRun: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
+    ],
+    getRepoPermissions: [
+      "GET /repos/{owner}/{repo}/actions/permissions",
+      {},
+      { renamed: ["actions", "getGithubActionsPermissionsRepository"] }
+    ],
+    getRepoPublicKey: ["GET /repos/{owner}/{repo}/actions/secrets/public-key"],
+    getRepoSecret: ["GET /repos/{owner}/{repo}/actions/secrets/{secret_name}"],
+    getRepoVariable: ["GET /repos/{owner}/{repo}/actions/variables/{name}"],
+    getReviewsForRun: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/approvals"
+    ],
+    getSelfHostedRunnerForOrg: ["GET /orgs/{org}/actions/runners/{runner_id}"],
+    getSelfHostedRunnerForRepo: [
+      "GET /repos/{owner}/{repo}/actions/runners/{runner_id}"
+    ],
+    getWorkflow: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}"],
+    getWorkflowAccessToRepository: [
+      "GET /repos/{owner}/{repo}/actions/permissions/access"
+    ],
+    getWorkflowRun: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}"],
+    getWorkflowRunAttempt: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}"
+    ],
+    getWorkflowRunUsage: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/timing"
+    ],
+    getWorkflowUsage: [
+      "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/timing"
+    ],
+    listArtifactsForRepo: ["GET /repos/{owner}/{repo}/actions/artifacts"],
+    listEnvironmentSecrets: [
+      "GET /repositories/{repository_id}/environments/{environment_name}/secrets"
+    ],
+    listEnvironmentVariables: [
+      "GET /repositories/{repository_id}/environments/{environment_name}/variables"
+    ],
+    listJobsForWorkflowRun: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
+    ],
+    listJobsForWorkflowRunAttempt: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs"
+    ],
+    listLabelsForSelfHostedRunnerForOrg: [
+      "GET /orgs/{org}/actions/runners/{runner_id}/labels"
+    ],
+    listLabelsForSelfHostedRunnerForRepo: [
+      "GET /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
+    ],
+    listOrgSecrets: ["GET /orgs/{org}/actions/secrets"],
+    listOrgVariables: ["GET /orgs/{org}/actions/variables"],
+    listRepoOrganizationSecrets: [
+      "GET /repos/{owner}/{repo}/actions/organization-secrets"
+    ],
+    listRepoOrganizationVariables: [
+      "GET /repos/{owner}/{repo}/actions/organization-variables"
+    ],
+    listRepoSecrets: ["GET /repos/{owner}/{repo}/actions/secrets"],
+    listRepoVariables: ["GET /repos/{owner}/{repo}/actions/variables"],
+    listRepoWorkflows: ["GET /repos/{owner}/{repo}/actions/workflows"],
+    listRunnerApplicationsForOrg: ["GET /orgs/{org}/actions/runners/downloads"],
+    listRunnerApplicationsForRepo: [
+      "GET /repos/{owner}/{repo}/actions/runners/downloads"
+    ],
+    listSelectedReposForOrgSecret: [
+      "GET /orgs/{org}/actions/secrets/{secret_name}/repositories"
+    ],
+    listSelectedReposForOrgVariable: [
+      "GET /orgs/{org}/actions/variables/{name}/repositories"
+    ],
+    listSelectedRepositoriesEnabledGithubActionsOrganization: [
+      "GET /orgs/{org}/actions/permissions/repositories"
+    ],
+    listSelfHostedRunnersForOrg: ["GET /orgs/{org}/actions/runners"],
+    listSelfHostedRunnersForRepo: ["GET /repos/{owner}/{repo}/actions/runners"],
+    listWorkflowRunArtifacts: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
+    ],
+    listWorkflowRuns: [
+      "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
+    ],
+    listWorkflowRunsForRepo: ["GET /repos/{owner}/{repo}/actions/runs"],
+    reRunJobForWorkflowRun: [
+      "POST /repos/{owner}/{repo}/actions/jobs/{job_id}/rerun"
+    ],
+    reRunWorkflow: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun"],
+    reRunWorkflowFailedJobs: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs"
+    ],
+    removeAllCustomLabelsFromSelfHostedRunnerForOrg: [
+      "DELETE /orgs/{org}/actions/runners/{runner_id}/labels"
+    ],
+    removeAllCustomLabelsFromSelfHostedRunnerForRepo: [
+      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
+    ],
+    removeCustomLabelFromSelfHostedRunnerForOrg: [
+      "DELETE /orgs/{org}/actions/runners/{runner_id}/labels/{name}"
+    ],
+    removeCustomLabelFromSelfHostedRunnerForRepo: [
+      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels/{name}"
+    ],
+    removeSelectedRepoFromOrgSecret: [
+      "DELETE /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    removeSelectedRepoFromOrgVariable: [
+      "DELETE /orgs/{org}/actions/variables/{name}/repositories/{repository_id}"
+    ],
+    reviewCustomGatesForRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/deployment_protection_rule"
+    ],
+    reviewPendingDeploymentsForRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
+    ],
+    setAllowedActionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions/selected-actions"
+    ],
+    setAllowedActionsRepository: [
+      "PUT /repos/{owner}/{repo}/actions/permissions/selected-actions"
+    ],
+    setCustomLabelsForSelfHostedRunnerForOrg: [
+      "PUT /orgs/{org}/actions/runners/{runner_id}/labels"
+    ],
+    setCustomLabelsForSelfHostedRunnerForRepo: [
+      "PUT /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
+    ],
+    setCustomOidcSubClaimForRepo: [
+      "PUT /repos/{owner}/{repo}/actions/oidc/customization/sub"
+    ],
+    setGithubActionsDefaultWorkflowPermissionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions/workflow"
+    ],
+    setGithubActionsDefaultWorkflowPermissionsRepository: [
+      "PUT /repos/{owner}/{repo}/actions/permissions/workflow"
+    ],
+    setGithubActionsPermissionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions"
+    ],
+    setGithubActionsPermissionsRepository: [
+      "PUT /repos/{owner}/{repo}/actions/permissions"
+    ],
+    setSelectedReposForOrgSecret: [
+      "PUT /orgs/{org}/actions/secrets/{secret_name}/repositories"
+    ],
+    setSelectedReposForOrgVariable: [
+      "PUT /orgs/{org}/actions/variables/{name}/repositories"
+    ],
+    setSelectedRepositoriesEnabledGithubActionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions/repositories"
+    ],
+    setWorkflowAccessToRepository: [
+      "PUT /repos/{owner}/{repo}/actions/permissions/access"
+    ],
+    updateEnvironmentVariable: [
+      "PATCH /repositories/{repository_id}/environments/{environment_name}/variables/{name}"
+    ],
+    updateOrgVariable: ["PATCH /orgs/{org}/actions/variables/{name}"],
+    updateRepoVariable: [
+      "PATCH /repos/{owner}/{repo}/actions/variables/{name}"
+    ]
+  },
+  activity: {
+    checkRepoIsStarredByAuthenticatedUser: ["GET /user/starred/{owner}/{repo}"],
+    deleteRepoSubscription: ["DELETE /repos/{owner}/{repo}/subscription"],
+    deleteThreadSubscription: [
+      "DELETE /notifications/threads/{thread_id}/subscription"
+    ],
+    getFeeds: ["GET /feeds"],
+    getRepoSubscription: ["GET /repos/{owner}/{repo}/subscription"],
+    getThread: ["GET /notifications/threads/{thread_id}"],
+    getThreadSubscriptionForAuthenticatedUser: [
+      "GET /notifications/threads/{thread_id}/subscription"
+    ],
+    listEventsForAuthenticatedUser: ["GET /users/{username}/events"],
+    listNotificationsForAuthenticatedUser: ["GET /notifications"],
+    listOrgEventsForAuthenticatedUser: [
+      "GET /users/{username}/events/orgs/{org}"
+    ],
+    listPublicEvents: ["GET /events"],
+    listPublicEventsForRepoNetwork: ["GET /networks/{owner}/{repo}/events"],
+    listPublicEventsForUser: ["GET /users/{username}/events/public"],
+    listPublicOrgEvents: ["GET /orgs/{org}/events"],
+    listReceivedEventsForUser: ["GET /users/{username}/received_events"],
+    listReceivedPublicEventsForUser: [
+      "GET /users/{username}/received_events/public"
+    ],
+    listRepoEvents: ["GET /repos/{owner}/{repo}/events"],
+    listRepoNotificationsForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/notifications"
+    ],
+    listReposStarredByAuthenticatedUser: ["GET /user/starred"],
+    listReposStarredByUser: ["GET /users/{username}/starred"],
+    listReposWatchedByUser: ["GET /users/{username}/subscriptions"],
+    listStargazersForRepo: ["GET /repos/{owner}/{repo}/stargazers"],
+    listWatchedReposForAuthenticatedUser: ["GET /user/subscriptions"],
+    listWatchersForRepo: ["GET /repos/{owner}/{repo}/subscribers"],
+    markNotificationsAsRead: ["PUT /notifications"],
+    markRepoNotificationsAsRead: ["PUT /repos/{owner}/{repo}/notifications"],
+    markThreadAsDone: ["DELETE /notifications/threads/{thread_id}"],
+    markThreadAsRead: ["PATCH /notifications/threads/{thread_id}"],
+    setRepoSubscription: ["PUT /repos/{owner}/{repo}/subscription"],
+    setThreadSubscription: [
+      "PUT /notifications/threads/{thread_id}/subscription"
+    ],
+    starRepoForAuthenticatedUser: ["PUT /user/starred/{owner}/{repo}"],
+    unstarRepoForAuthenticatedUser: ["DELETE /user/starred/{owner}/{repo}"]
+  },
+  apps: {
+    addRepoToInstallation: [
+      "PUT /user/installations/{installation_id}/repositories/{repository_id}",
+      {},
+      { renamed: ["apps", "addRepoToInstallationForAuthenticatedUser"] }
+    ],
+    addRepoToInstallationForAuthenticatedUser: [
+      "PUT /user/installations/{installation_id}/repositories/{repository_id}"
+    ],
+    checkToken: ["POST /applications/{client_id}/token"],
+    createFromManifest: ["POST /app-manifests/{code}/conversions"],
+    createInstallationAccessToken: [
+      "POST /app/installations/{installation_id}/access_tokens"
+    ],
+    deleteAuthorization: ["DELETE /applications/{client_id}/grant"],
+    deleteInstallation: ["DELETE /app/installations/{installation_id}"],
+    deleteToken: ["DELETE /applications/{client_id}/token"],
+    getAuthenticated: ["GET /app"],
+    getBySlug: ["GET /apps/{app_slug}"],
+    getInstallation: ["GET /app/installations/{installation_id}"],
+    getOrgInstallation: ["GET /orgs/{org}/installation"],
+    getRepoInstallation: ["GET /repos/{owner}/{repo}/installation"],
+    getSubscriptionPlanForAccount: [
+      "GET /marketplace_listing/accounts/{account_id}"
+    ],
+    getSubscriptionPlanForAccountStubbed: [
+      "GET /marketplace_listing/stubbed/accounts/{account_id}"
+    ],
+    getUserInstallation: ["GET /users/{username}/installation"],
+    getWebhookConfigForApp: ["GET /app/hook/config"],
+    getWebhookDelivery: ["GET /app/hook/deliveries/{delivery_id}"],
+    listAccountsForPlan: ["GET /marketplace_listing/plans/{plan_id}/accounts"],
+    listAccountsForPlanStubbed: [
+      "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts"
+    ],
+    listInstallationReposForAuthenticatedUser: [
+      "GET /user/installations/{installation_id}/repositories"
+    ],
+    listInstallationRequestsForAuthenticatedApp: [
+      "GET /app/installation-requests"
+    ],
+    listInstallations: ["GET /app/installations"],
+    listInstallationsForAuthenticatedUser: ["GET /user/installations"],
+    listPlans: ["GET /marketplace_listing/plans"],
+    listPlansStubbed: ["GET /marketplace_listing/stubbed/plans"],
+    listReposAccessibleToInstallation: ["GET /installation/repositories"],
+    listSubscriptionsForAuthenticatedUser: ["GET /user/marketplace_purchases"],
+    listSubscriptionsForAuthenticatedUserStubbed: [
+      "GET /user/marketplace_purchases/stubbed"
+    ],
+    listWebhookDeliveries: ["GET /app/hook/deliveries"],
+    redeliverWebhookDelivery: [
+      "POST /app/hook/deliveries/{delivery_id}/attempts"
+    ],
+    removeRepoFromInstallation: [
+      "DELETE /user/installations/{installation_id}/repositories/{repository_id}",
+      {},
+      { renamed: ["apps", "removeRepoFromInstallationForAuthenticatedUser"] }
+    ],
+    removeRepoFromInstallationForAuthenticatedUser: [
+      "DELETE /user/installations/{installation_id}/repositories/{repository_id}"
+    ],
+    resetToken: ["PATCH /applications/{client_id}/token"],
+    revokeInstallationAccessToken: ["DELETE /installation/token"],
+    scopeToken: ["POST /applications/{client_id}/token/scoped"],
+    suspendInstallation: ["PUT /app/installations/{installation_id}/suspended"],
+    unsuspendInstallation: [
+      "DELETE /app/installations/{installation_id}/suspended"
+    ],
+    updateWebhookConfigForApp: ["PATCH /app/hook/config"]
+  },
+  billing: {
+    getGithubActionsBillingOrg: ["GET /orgs/{org}/settings/billing/actions"],
+    getGithubActionsBillingUser: [
+      "GET /users/{username}/settings/billing/actions"
+    ],
+    getGithubPackagesBillingOrg: ["GET /orgs/{org}/settings/billing/packages"],
+    getGithubPackagesBillingUser: [
+      "GET /users/{username}/settings/billing/packages"
+    ],
+    getSharedStorageBillingOrg: [
+      "GET /orgs/{org}/settings/billing/shared-storage"
+    ],
+    getSharedStorageBillingUser: [
+      "GET /users/{username}/settings/billing/shared-storage"
+    ]
+  },
+  checks: {
+    create: ["POST /repos/{owner}/{repo}/check-runs"],
+    createSuite: ["POST /repos/{owner}/{repo}/check-suites"],
+    get: ["GET /repos/{owner}/{repo}/check-runs/{check_run_id}"],
+    getSuite: ["GET /repos/{owner}/{repo}/check-suites/{check_suite_id}"],
+    listAnnotations: [
+      "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations"
+    ],
+    listForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/check-runs"],
+    listForSuite: [
+      "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs"
+    ],
+    listSuitesForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/check-suites"],
+    rerequestRun: [
+      "POST /repos/{owner}/{repo}/check-runs/{check_run_id}/rerequest"
+    ],
+    rerequestSuite: [
+      "POST /repos/{owner}/{repo}/check-suites/{check_suite_id}/rerequest"
+    ],
+    setSuitesPreferences: [
+      "PATCH /repos/{owner}/{repo}/check-suites/preferences"
+    ],
+    update: ["PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}"]
+  },
+  codeScanning: {
+    deleteAnalysis: [
+      "DELETE /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}{?confirm_delete}"
+    ],
+    getAlert: [
+      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}",
+      {},
+      { renamedParameters: { alert_id: "alert_number" } }
+    ],
+    getAnalysis: [
+      "GET /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"
+    ],
+    getCodeqlDatabase: [
+      "GET /repos/{owner}/{repo}/code-scanning/codeql/databases/{language}"
+    ],
+    getDefaultSetup: ["GET /repos/{owner}/{repo}/code-scanning/default-setup"],
+    getSarif: ["GET /repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"],
+    listAlertInstances: [
+      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"
+    ],
+    listAlertsForOrg: ["GET /orgs/{org}/code-scanning/alerts"],
+    listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"],
+    listAlertsInstances: [
+      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances",
+      {},
+      { renamed: ["codeScanning", "listAlertInstances"] }
+    ],
+    listCodeqlDatabases: [
+      "GET /repos/{owner}/{repo}/code-scanning/codeql/databases"
+    ],
+    listRecentAnalyses: ["GET /repos/{owner}/{repo}/code-scanning/analyses"],
+    updateAlert: [
+      "PATCH /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"
+    ],
+    updateDefaultSetup: [
+      "PATCH /repos/{owner}/{repo}/code-scanning/default-setup"
+    ],
+    uploadSarif: ["POST /repos/{owner}/{repo}/code-scanning/sarifs"]
+  },
+  codesOfConduct: {
+    getAllCodesOfConduct: ["GET /codes_of_conduct"],
+    getConductCode: ["GET /codes_of_conduct/{key}"]
+  },
+  codespaces: {
+    addRepositoryForSecretForAuthenticatedUser: [
+      "PUT /user/codespaces/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    addSelectedRepoToOrgSecret: [
+      "PUT /orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    checkPermissionsForDevcontainer: [
+      "GET /repos/{owner}/{repo}/codespaces/permissions_check"
+    ],
+    codespaceMachinesForAuthenticatedUser: [
+      "GET /user/codespaces/{codespace_name}/machines"
+    ],
+    createForAuthenticatedUser: ["POST /user/codespaces"],
+    createOrUpdateOrgSecret: [
+      "PUT /orgs/{org}/codespaces/secrets/{secret_name}"
+    ],
+    createOrUpdateRepoSecret: [
+      "PUT /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
+    ],
+    createOrUpdateSecretForAuthenticatedUser: [
+      "PUT /user/codespaces/secrets/{secret_name}"
+    ],
+    createWithPrForAuthenticatedUser: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/codespaces"
+    ],
+    createWithRepoForAuthenticatedUser: [
+      "POST /repos/{owner}/{repo}/codespaces"
+    ],
+    deleteForAuthenticatedUser: ["DELETE /user/codespaces/{codespace_name}"],
+    deleteFromOrganization: [
+      "DELETE /orgs/{org}/members/{username}/codespaces/{codespace_name}"
+    ],
+    deleteOrgSecret: ["DELETE /orgs/{org}/codespaces/secrets/{secret_name}"],
+    deleteRepoSecret: [
+      "DELETE /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
+    ],
+    deleteSecretForAuthenticatedUser: [
+      "DELETE /user/codespaces/secrets/{secret_name}"
+    ],
+    exportForAuthenticatedUser: [
+      "POST /user/codespaces/{codespace_name}/exports"
+    ],
+    getCodespacesForUserInOrg: [
+      "GET /orgs/{org}/members/{username}/codespaces"
+    ],
+    getExportDetailsForAuthenticatedUser: [
+      "GET /user/codespaces/{codespace_name}/exports/{export_id}"
+    ],
+    getForAuthenticatedUser: ["GET /user/codespaces/{codespace_name}"],
+    getOrgPublicKey: ["GET /orgs/{org}/codespaces/secrets/public-key"],
+    getOrgSecret: ["GET /orgs/{org}/codespaces/secrets/{secret_name}"],
+    getPublicKeyForAuthenticatedUser: [
+      "GET /user/codespaces/secrets/public-key"
+    ],
+    getRepoPublicKey: [
+      "GET /repos/{owner}/{repo}/codespaces/secrets/public-key"
+    ],
+    getRepoSecret: [
+      "GET /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
+    ],
+    getSecretForAuthenticatedUser: [
+      "GET /user/codespaces/secrets/{secret_name}"
+    ],
+    listDevcontainersInRepositoryForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/codespaces/devcontainers"
+    ],
+    listForAuthenticatedUser: ["GET /user/codespaces"],
+    listInOrganization: [
+      "GET /orgs/{org}/codespaces",
+      {},
+      { renamedParameters: { org_id: "org" } }
+    ],
+    listInRepositoryForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/codespaces"
+    ],
+    listOrgSecrets: ["GET /orgs/{org}/codespaces/secrets"],
+    listRepoSecrets: ["GET /repos/{owner}/{repo}/codespaces/secrets"],
+    listRepositoriesForSecretForAuthenticatedUser: [
+      "GET /user/codespaces/secrets/{secret_name}/repositories"
+    ],
+    listSecretsForAuthenticatedUser: ["GET /user/codespaces/secrets"],
+    listSelectedReposForOrgSecret: [
+      "GET /orgs/{org}/codespaces/secrets/{secret_name}/repositories"
+    ],
+    preFlightWithRepoForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/codespaces/new"
+    ],
+    publishForAuthenticatedUser: [
+      "POST /user/codespaces/{codespace_name}/publish"
+    ],
+    removeRepositoryForSecretForAuthenticatedUser: [
+      "DELETE /user/codespaces/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    removeSelectedRepoFromOrgSecret: [
+      "DELETE /orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    repoMachinesForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/codespaces/machines"
+    ],
+    setRepositoriesForSecretForAuthenticatedUser: [
+      "PUT /user/codespaces/secrets/{secret_name}/repositories"
+    ],
+    setSelectedReposForOrgSecret: [
+      "PUT /orgs/{org}/codespaces/secrets/{secret_name}/repositories"
+    ],
+    startForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/start"],
+    stopForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/stop"],
+    stopInOrganization: [
+      "POST /orgs/{org}/members/{username}/codespaces/{codespace_name}/stop"
+    ],
+    updateForAuthenticatedUser: ["PATCH /user/codespaces/{codespace_name}"]
+  },
+  copilot: {
+    addCopilotSeatsForTeams: [
+      "POST /orgs/{org}/copilot/billing/selected_teams"
+    ],
+    addCopilotSeatsForUsers: [
+      "POST /orgs/{org}/copilot/billing/selected_users"
+    ],
+    cancelCopilotSeatAssignmentForTeams: [
+      "DELETE /orgs/{org}/copilot/billing/selected_teams"
+    ],
+    cancelCopilotSeatAssignmentForUsers: [
+      "DELETE /orgs/{org}/copilot/billing/selected_users"
+    ],
+    getCopilotOrganizationDetails: ["GET /orgs/{org}/copilot/billing"],
+    getCopilotSeatDetailsForUser: [
+      "GET /orgs/{org}/members/{username}/copilot"
+    ],
+    listCopilotSeats: ["GET /orgs/{org}/copilot/billing/seats"]
+  },
+  dependabot: {
+    addSelectedRepoToOrgSecret: [
+      "PUT /orgs/{org}/dependabot/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    createOrUpdateOrgSecret: [
+      "PUT /orgs/{org}/dependabot/secrets/{secret_name}"
+    ],
+    createOrUpdateRepoSecret: [
+      "PUT /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
+    ],
+    deleteOrgSecret: ["DELETE /orgs/{org}/dependabot/secrets/{secret_name}"],
+    deleteRepoSecret: [
+      "DELETE /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
+    ],
+    getAlert: ["GET /repos/{owner}/{repo}/dependabot/alerts/{alert_number}"],
+    getOrgPublicKey: ["GET /orgs/{org}/dependabot/secrets/public-key"],
+    getOrgSecret: ["GET /orgs/{org}/dependabot/secrets/{secret_name}"],
+    getRepoPublicKey: [
+      "GET /repos/{owner}/{repo}/dependabot/secrets/public-key"
+    ],
+    getRepoSecret: [
+      "GET /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
+    ],
+    listAlertsForEnterprise: [
+      "GET /enterprises/{enterprise}/dependabot/alerts"
+    ],
+    listAlertsForOrg: ["GET /orgs/{org}/dependabot/alerts"],
+    listAlertsForRepo: ["GET /repos/{owner}/{repo}/dependabot/alerts"],
+    listOrgSecrets: ["GET /orgs/{org}/dependabot/secrets"],
+    listRepoSecrets: ["GET /repos/{owner}/{repo}/dependabot/secrets"],
+    listSelectedReposForOrgSecret: [
+      "GET /orgs/{org}/dependabot/secrets/{secret_name}/repositories"
+    ],
+    removeSelectedRepoFromOrgSecret: [
+      "DELETE /orgs/{org}/dependabot/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    setSelectedReposForOrgSecret: [
+      "PUT /orgs/{org}/dependabot/secrets/{secret_name}/repositories"
+    ],
+    updateAlert: [
+      "PATCH /repos/{owner}/{repo}/dependabot/alerts/{alert_number}"
+    ]
+  },
+  dependencyGraph: {
+    createRepositorySnapshot: [
+      "POST /repos/{owner}/{repo}/dependency-graph/snapshots"
+    ],
+    diffRange: [
+      "GET /repos/{owner}/{repo}/dependency-graph/compare/{basehead}"
+    ],
+    exportSbom: ["GET /repos/{owner}/{repo}/dependency-graph/sbom"]
+  },
+  emojis: { get: ["GET /emojis"] },
+  gists: {
+    checkIsStarred: ["GET /gists/{gist_id}/star"],
+    create: ["POST /gists"],
+    createComment: ["POST /gists/{gist_id}/comments"],
+    delete: ["DELETE /gists/{gist_id}"],
+    deleteComment: ["DELETE /gists/{gist_id}/comments/{comment_id}"],
+    fork: ["POST /gists/{gist_id}/forks"],
+    get: ["GET /gists/{gist_id}"],
+    getComment: ["GET /gists/{gist_id}/comments/{comment_id}"],
+    getRevision: ["GET /gists/{gist_id}/{sha}"],
+    list: ["GET /gists"],
+    listComments: ["GET /gists/{gist_id}/comments"],
+    listCommits: ["GET /gists/{gist_id}/commits"],
+    listForUser: ["GET /users/{username}/gists"],
+    listForks: ["GET /gists/{gist_id}/forks"],
+    listPublic: ["GET /gists/public"],
+    listStarred: ["GET /gists/starred"],
+    star: ["PUT /gists/{gist_id}/star"],
+    unstar: ["DELETE /gists/{gist_id}/star"],
+    update: ["PATCH /gists/{gist_id}"],
+    updateComment: ["PATCH /gists/{gist_id}/comments/{comment_id}"]
+  },
+  git: {
+    createBlob: ["POST /repos/{owner}/{repo}/git/blobs"],
+    createCommit: ["POST /repos/{owner}/{repo}/git/commits"],
+    createRef: ["POST /repos/{owner}/{repo}/git/refs"],
+    createTag: ["POST /repos/{owner}/{repo}/git/tags"],
+    createTree: ["POST /repos/{owner}/{repo}/git/trees"],
+    deleteRef: ["DELETE /repos/{owner}/{repo}/git/refs/{ref}"],
+    getBlob: ["GET /repos/{owner}/{repo}/git/blobs/{file_sha}"],
+    getCommit: ["GET /repos/{owner}/{repo}/git/commits/{commit_sha}"],
+    getRef: ["GET /repos/{owner}/{repo}/git/ref/{ref}"],
+    getTag: ["GET /repos/{owner}/{repo}/git/tags/{tag_sha}"],
+    getTree: ["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"],
+    listMatchingRefs: ["GET /repos/{owner}/{repo}/git/matching-refs/{ref}"],
+    updateRef: ["PATCH /repos/{owner}/{repo}/git/refs/{ref}"]
+  },
+  gitignore: {
+    getAllTemplates: ["GET /gitignore/templates"],
+    getTemplate: ["GET /gitignore/templates/{name}"]
+  },
+  interactions: {
+    getRestrictionsForAuthenticatedUser: ["GET /user/interaction-limits"],
+    getRestrictionsForOrg: ["GET /orgs/{org}/interaction-limits"],
+    getRestrictionsForRepo: ["GET /repos/{owner}/{repo}/interaction-limits"],
+    getRestrictionsForYourPublicRepos: [
+      "GET /user/interaction-limits",
+      {},
+      { renamed: ["interactions", "getRestrictionsForAuthenticatedUser"] }
+    ],
+    removeRestrictionsForAuthenticatedUser: ["DELETE /user/interaction-limits"],
+    removeRestrictionsForOrg: ["DELETE /orgs/{org}/interaction-limits"],
+    removeRestrictionsForRepo: [
+      "DELETE /repos/{owner}/{repo}/interaction-limits"
+    ],
+    removeRestrictionsForYourPublicRepos: [
+      "DELETE /user/interaction-limits",
+      {},
+      { renamed: ["interactions", "removeRestrictionsForAuthenticatedUser"] }
+    ],
+    setRestrictionsForAuthenticatedUser: ["PUT /user/interaction-limits"],
+    setRestrictionsForOrg: ["PUT /orgs/{org}/interaction-limits"],
+    setRestrictionsForRepo: ["PUT /repos/{owner}/{repo}/interaction-limits"],
+    setRestrictionsForYourPublicRepos: [
+      "PUT /user/interaction-limits",
+      {},
+      { renamed: ["interactions", "setRestrictionsForAuthenticatedUser"] }
+    ]
+  },
+  issues: {
+    addAssignees: [
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/assignees"
+    ],
+    addLabels: ["POST /repos/{owner}/{repo}/issues/{issue_number}/labels"],
+    checkUserCanBeAssigned: ["GET /repos/{owner}/{repo}/assignees/{assignee}"],
+    checkUserCanBeAssignedToIssue: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/assignees/{assignee}"
+    ],
+    create: ["POST /repos/{owner}/{repo}/issues"],
+    createComment: [
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/comments"
+    ],
+    createLabel: ["POST /repos/{owner}/{repo}/labels"],
+    createMilestone: ["POST /repos/{owner}/{repo}/milestones"],
+    deleteComment: [
+      "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}"
+    ],
+    deleteLabel: ["DELETE /repos/{owner}/{repo}/labels/{name}"],
+    deleteMilestone: [
+      "DELETE /repos/{owner}/{repo}/milestones/{milestone_number}"
+    ],
+    get: ["GET /repos/{owner}/{repo}/issues/{issue_number}"],
+    getComment: ["GET /repos/{owner}/{repo}/issues/comments/{comment_id}"],
+    getEvent: ["GET /repos/{owner}/{repo}/issues/events/{event_id}"],
+    getLabel: ["GET /repos/{owner}/{repo}/labels/{name}"],
+    getMilestone: ["GET /repos/{owner}/{repo}/milestones/{milestone_number}"],
+    list: ["GET /issues"],
+    listAssignees: ["GET /repos/{owner}/{repo}/assignees"],
+    listComments: ["GET /repos/{owner}/{repo}/issues/{issue_number}/comments"],
+    listCommentsForRepo: ["GET /repos/{owner}/{repo}/issues/comments"],
+    listEvents: ["GET /repos/{owner}/{repo}/issues/{issue_number}/events"],
+    listEventsForRepo: ["GET /repos/{owner}/{repo}/issues/events"],
+    listEventsForTimeline: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline"
+    ],
+    listForAuthenticatedUser: ["GET /user/issues"],
+    listForOrg: ["GET /orgs/{org}/issues"],
+    listForRepo: ["GET /repos/{owner}/{repo}/issues"],
+    listLabelsForMilestone: [
+      "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels"
+    ],
+    listLabelsForRepo: ["GET /repos/{owner}/{repo}/labels"],
+    listLabelsOnIssue: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/labels"
+    ],
+    listMilestones: ["GET /repos/{owner}/{repo}/milestones"],
+    lock: ["PUT /repos/{owner}/{repo}/issues/{issue_number}/lock"],
+    removeAllLabels: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels"
+    ],
+    removeAssignees: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/assignees"
+    ],
+    removeLabel: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels/{name}"
+    ],
+    setLabels: ["PUT /repos/{owner}/{repo}/issues/{issue_number}/labels"],
+    unlock: ["DELETE /repos/{owner}/{repo}/issues/{issue_number}/lock"],
+    update: ["PATCH /repos/{owner}/{repo}/issues/{issue_number}"],
+    updateComment: ["PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}"],
+    updateLabel: ["PATCH /repos/{owner}/{repo}/labels/{name}"],
+    updateMilestone: [
+      "PATCH /repos/{owner}/{repo}/milestones/{milestone_number}"
+    ]
+  },
+  licenses: {
+    get: ["GET /licenses/{license}"],
+    getAllCommonlyUsed: ["GET /licenses"],
+    getForRepo: ["GET /repos/{owner}/{repo}/license"]
+  },
+  markdown: {
+    render: ["POST /markdown"],
+    renderRaw: [
+      "POST /markdown/raw",
+      { headers: { "content-type": "text/plain; charset=utf-8" } }
+    ]
+  },
+  meta: {
+    get: ["GET /meta"],
+    getAllVersions: ["GET /versions"],
+    getOctocat: ["GET /octocat"],
+    getZen: ["GET /zen"],
+    root: ["GET /"]
+  },
+  migrations: {
+    cancelImport: [
+      "DELETE /repos/{owner}/{repo}/import",
+      {},
+      {
+        deprecated: "octokit.rest.migrations.cancelImport() is deprecated, see https://docs.github.com/rest/migrations/source-imports#cancel-an-import"
+      }
+    ],
+    deleteArchiveForAuthenticatedUser: [
+      "DELETE /user/migrations/{migration_id}/archive"
+    ],
+    deleteArchiveForOrg: [
+      "DELETE /orgs/{org}/migrations/{migration_id}/archive"
+    ],
+    downloadArchiveForOrg: [
+      "GET /orgs/{org}/migrations/{migration_id}/archive"
+    ],
+    getArchiveForAuthenticatedUser: [
+      "GET /user/migrations/{migration_id}/archive"
+    ],
+    getCommitAuthors: [
+      "GET /repos/{owner}/{repo}/import/authors",
+      {},
+      {
+        deprecated: "octokit.rest.migrations.getCommitAuthors() is deprecated, see https://docs.github.com/rest/migrations/source-imports#get-commit-authors"
+      }
+    ],
+    getImportStatus: [
+      "GET /repos/{owner}/{repo}/import",
+      {},
+      {
+        deprecated: "octokit.rest.migrations.getImportStatus() is deprecated, see https://docs.github.com/rest/migrations/source-imports#get-an-import-status"
+      }
+    ],
+    getLargeFiles: [
+      "GET /repos/{owner}/{repo}/import/large_files",
+      {},
+      {
+        deprecated: "octokit.rest.migrations.getLargeFiles() is deprecated, see https://docs.github.com/rest/migrations/source-imports#get-large-files"
+      }
+    ],
+    getStatusForAuthenticatedUser: ["GET /user/migrations/{migration_id}"],
+    getStatusForOrg: ["GET /orgs/{org}/migrations/{migration_id}"],
+    listForAuthenticatedUser: ["GET /user/migrations"],
+    listForOrg: ["GET /orgs/{org}/migrations"],
+    listReposForAuthenticatedUser: [
+      "GET /user/migrations/{migration_id}/repositories"
+    ],
+    listReposForOrg: ["GET /orgs/{org}/migrations/{migration_id}/repositories"],
+    listReposForUser: [
+      "GET /user/migrations/{migration_id}/repositories",
+      {},
+      { renamed: ["migrations", "listReposForAuthenticatedUser"] }
+    ],
+    mapCommitAuthor: [
+      "PATCH /repos/{owner}/{repo}/import/authors/{author_id}",
+      {},
+      {
+        deprecated: "octokit.rest.migrations.mapCommitAuthor() is deprecated, see https://docs.github.com/rest/migrations/source-imports#map-a-commit-author"
+      }
+    ],
+    setLfsPreference: [
+      "PATCH /repos/{owner}/{repo}/import/lfs",
+      {},
+      {
+        deprecated: "octokit.rest.migrations.setLfsPreference() is deprecated, see https://docs.github.com/rest/migrations/source-imports#update-git-lfs-preference"
+      }
+    ],
+    startForAuthenticatedUser: ["POST /user/migrations"],
+    startForOrg: ["POST /orgs/{org}/migrations"],
+    startImport: [
+      "PUT /repos/{owner}/{repo}/import",
+      {},
+      {
+        deprecated: "octokit.rest.migrations.startImport() is deprecated, see https://docs.github.com/rest/migrations/source-imports#start-an-import"
+      }
+    ],
+    unlockRepoForAuthenticatedUser: [
+      "DELETE /user/migrations/{migration_id}/repos/{repo_name}/lock"
+    ],
+    unlockRepoForOrg: [
+      "DELETE /orgs/{org}/migrations/{migration_id}/repos/{repo_name}/lock"
+    ],
+    updateImport: [
+      "PATCH /repos/{owner}/{repo}/import",
+      {},
+      {
+        deprecated: "octokit.rest.migrations.updateImport() is deprecated, see https://docs.github.com/rest/migrations/source-imports#update-an-import"
+      }
+    ]
+  },
+  oidc: {
+    getOidcCustomSubTemplateForOrg: [
+      "GET /orgs/{org}/actions/oidc/customization/sub"
+    ],
+    updateOidcCustomSubTemplateForOrg: [
+      "PUT /orgs/{org}/actions/oidc/customization/sub"
+    ]
+  },
+  orgs: {
+    addSecurityManagerTeam: [
+      "PUT /orgs/{org}/security-managers/teams/{team_slug}"
+    ],
+    assignTeamToOrgRole: [
+      "PUT /orgs/{org}/organization-roles/teams/{team_slug}/{role_id}"
+    ],
+    assignUserToOrgRole: [
+      "PUT /orgs/{org}/organization-roles/users/{username}/{role_id}"
+    ],
+    blockUser: ["PUT /orgs/{org}/blocks/{username}"],
+    cancelInvitation: ["DELETE /orgs/{org}/invitations/{invitation_id}"],
+    checkBlockedUser: ["GET /orgs/{org}/blocks/{username}"],
+    checkMembershipForUser: ["GET /orgs/{org}/members/{username}"],
+    checkPublicMembershipForUser: ["GET /orgs/{org}/public_members/{username}"],
+    convertMemberToOutsideCollaborator: [
+      "PUT /orgs/{org}/outside_collaborators/{username}"
+    ],
+    createCustomOrganizationRole: ["POST /orgs/{org}/organization-roles"],
+    createInvitation: ["POST /orgs/{org}/invitations"],
+    createOrUpdateCustomProperties: ["PATCH /orgs/{org}/properties/schema"],
+    createOrUpdateCustomPropertiesValuesForRepos: [
+      "PATCH /orgs/{org}/properties/values"
+    ],
+    createOrUpdateCustomProperty: [
+      "PUT /orgs/{org}/properties/schema/{custom_property_name}"
+    ],
+    createWebhook: ["POST /orgs/{org}/hooks"],
+    delete: ["DELETE /orgs/{org}"],
+    deleteCustomOrganizationRole: [
+      "DELETE /orgs/{org}/organization-roles/{role_id}"
+    ],
+    deleteWebhook: ["DELETE /orgs/{org}/hooks/{hook_id}"],
+    enableOrDisableSecurityProductOnAllOrgRepos: [
+      "POST /orgs/{org}/{security_product}/{enablement}"
+    ],
+    get: ["GET /orgs/{org}"],
+    getAllCustomProperties: ["GET /orgs/{org}/properties/schema"],
+    getCustomProperty: [
+      "GET /orgs/{org}/properties/schema/{custom_property_name}"
+    ],
+    getMembershipForAuthenticatedUser: ["GET /user/memberships/orgs/{org}"],
+    getMembershipForUser: ["GET /orgs/{org}/memberships/{username}"],
+    getOrgRole: ["GET /orgs/{org}/organization-roles/{role_id}"],
+    getWebhook: ["GET /orgs/{org}/hooks/{hook_id}"],
+    getWebhookConfigForOrg: ["GET /orgs/{org}/hooks/{hook_id}/config"],
+    getWebhookDelivery: [
+      "GET /orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}"
+    ],
+    list: ["GET /organizations"],
+    listAppInstallations: ["GET /orgs/{org}/installations"],
+    listBlockedUsers: ["GET /orgs/{org}/blocks"],
+    listCustomPropertiesValuesForRepos: ["GET /orgs/{org}/properties/values"],
+    listFailedInvitations: ["GET /orgs/{org}/failed_invitations"],
+    listForAuthenticatedUser: ["GET /user/orgs"],
+    listForUser: ["GET /users/{username}/orgs"],
+    listInvitationTeams: ["GET /orgs/{org}/invitations/{invitation_id}/teams"],
+    listMembers: ["GET /orgs/{org}/members"],
+    listMembershipsForAuthenticatedUser: ["GET /user/memberships/orgs"],
+    listOrgRoleTeams: ["GET /orgs/{org}/organization-roles/{role_id}/teams"],
+    listOrgRoleUsers: ["GET /orgs/{org}/organization-roles/{role_id}/users"],
+    listOrgRoles: ["GET /orgs/{org}/organization-roles"],
+    listOrganizationFineGrainedPermissions: [
+      "GET /orgs/{org}/organization-fine-grained-permissions"
+    ],
+    listOutsideCollaborators: ["GET /orgs/{org}/outside_collaborators"],
+    listPatGrantRepositories: [
+      "GET /orgs/{org}/personal-access-tokens/{pat_id}/repositories"
+    ],
+    listPatGrantRequestRepositories: [
+      "GET /orgs/{org}/personal-access-token-requests/{pat_request_id}/repositories"
+    ],
+    listPatGrantRequests: ["GET /orgs/{org}/personal-access-token-requests"],
+    listPatGrants: ["GET /orgs/{org}/personal-access-tokens"],
+    listPendingInvitations: ["GET /orgs/{org}/invitations"],
+    listPublicMembers: ["GET /orgs/{org}/public_members"],
+    listSecurityManagerTeams: ["GET /orgs/{org}/security-managers"],
+    listWebhookDeliveries: ["GET /orgs/{org}/hooks/{hook_id}/deliveries"],
+    listWebhooks: ["GET /orgs/{org}/hooks"],
+    patchCustomOrganizationRole: [
+      "PATCH /orgs/{org}/organization-roles/{role_id}"
+    ],
+    pingWebhook: ["POST /orgs/{org}/hooks/{hook_id}/pings"],
+    redeliverWebhookDelivery: [
+      "POST /orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}/attempts"
+    ],
+    removeCustomProperty: [
+      "DELETE /orgs/{org}/properties/schema/{custom_property_name}"
+    ],
+    removeMember: ["DELETE /orgs/{org}/members/{username}"],
+    removeMembershipForUser: ["DELETE /orgs/{org}/memberships/{username}"],
+    removeOutsideCollaborator: [
+      "DELETE /orgs/{org}/outside_collaborators/{username}"
+    ],
+    removePublicMembershipForAuthenticatedUser: [
+      "DELETE /orgs/{org}/public_members/{username}"
+    ],
+    removeSecurityManagerTeam: [
+      "DELETE /orgs/{org}/security-managers/teams/{team_slug}"
+    ],
+    reviewPatGrantRequest: [
+      "POST /orgs/{org}/personal-access-token-requests/{pat_request_id}"
+    ],
+    reviewPatGrantRequestsInBulk: [
+      "POST /orgs/{org}/personal-access-token-requests"
+    ],
+    revokeAllOrgRolesTeam: [
+      "DELETE /orgs/{org}/organization-roles/teams/{team_slug}"
+    ],
+    revokeAllOrgRolesUser: [
+      "DELETE /orgs/{org}/organization-roles/users/{username}"
+    ],
+    revokeOrgRoleTeam: [
+      "DELETE /orgs/{org}/organization-roles/teams/{team_slug}/{role_id}"
+    ],
+    revokeOrgRoleUser: [
+      "DELETE /orgs/{org}/organization-roles/users/{username}/{role_id}"
+    ],
+    setMembershipForUser: ["PUT /orgs/{org}/memberships/{username}"],
+    setPublicMembershipForAuthenticatedUser: [
+      "PUT /orgs/{org}/public_members/{username}"
+    ],
+    unblockUser: ["DELETE /orgs/{org}/blocks/{username}"],
+    update: ["PATCH /orgs/{org}"],
+    updateMembershipForAuthenticatedUser: [
+      "PATCH /user/memberships/orgs/{org}"
+    ],
+    updatePatAccess: ["POST /orgs/{org}/personal-access-tokens/{pat_id}"],
+    updatePatAccesses: ["POST /orgs/{org}/personal-access-tokens"],
+    updateWebhook: ["PATCH /orgs/{org}/hooks/{hook_id}"],
+    updateWebhookConfigForOrg: ["PATCH /orgs/{org}/hooks/{hook_id}/config"]
+  },
+  packages: {
+    deletePackageForAuthenticatedUser: [
+      "DELETE /user/packages/{package_type}/{package_name}"
+    ],
+    deletePackageForOrg: [
+      "DELETE /orgs/{org}/packages/{package_type}/{package_name}"
+    ],
+    deletePackageForUser: [
+      "DELETE /users/{username}/packages/{package_type}/{package_name}"
+    ],
+    deletePackageVersionForAuthenticatedUser: [
+      "DELETE /user/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    deletePackageVersionForOrg: [
+      "DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    deletePackageVersionForUser: [
+      "DELETE /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    getAllPackageVersionsForAPackageOwnedByAnOrg: [
+      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions",
+      {},
+      { renamed: ["packages", "getAllPackageVersionsForPackageOwnedByOrg"] }
+    ],
+    getAllPackageVersionsForAPackageOwnedByTheAuthenticatedUser: [
+      "GET /user/packages/{package_type}/{package_name}/versions",
+      {},
+      {
+        renamed: [
+          "packages",
+          "getAllPackageVersionsForPackageOwnedByAuthenticatedUser"
+        ]
+      }
+    ],
+    getAllPackageVersionsForPackageOwnedByAuthenticatedUser: [
+      "GET /user/packages/{package_type}/{package_name}/versions"
+    ],
+    getAllPackageVersionsForPackageOwnedByOrg: [
+      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions"
+    ],
+    getAllPackageVersionsForPackageOwnedByUser: [
+      "GET /users/{username}/packages/{package_type}/{package_name}/versions"
+    ],
+    getPackageForAuthenticatedUser: [
+      "GET /user/packages/{package_type}/{package_name}"
+    ],
+    getPackageForOrganization: [
+      "GET /orgs/{org}/packages/{package_type}/{package_name}"
+    ],
+    getPackageForUser: [
+      "GET /users/{username}/packages/{package_type}/{package_name}"
+    ],
+    getPackageVersionForAuthenticatedUser: [
+      "GET /user/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    getPackageVersionForOrganization: [
+      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    getPackageVersionForUser: [
+      "GET /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    listDockerMigrationConflictingPackagesForAuthenticatedUser: [
+      "GET /user/docker/conflicts"
+    ],
+    listDockerMigrationConflictingPackagesForOrganization: [
+      "GET /orgs/{org}/docker/conflicts"
+    ],
+    listDockerMigrationConflictingPackagesForUser: [
+      "GET /users/{username}/docker/conflicts"
+    ],
+    listPackagesForAuthenticatedUser: ["GET /user/packages"],
+    listPackagesForOrganization: ["GET /orgs/{org}/packages"],
+    listPackagesForUser: ["GET /users/{username}/packages"],
+    restorePackageForAuthenticatedUser: [
+      "POST /user/packages/{package_type}/{package_name}/restore{?token}"
+    ],
+    restorePackageForOrg: [
+      "POST /orgs/{org}/packages/{package_type}/{package_name}/restore{?token}"
+    ],
+    restorePackageForUser: [
+      "POST /users/{username}/packages/{package_type}/{package_name}/restore{?token}"
+    ],
+    restorePackageVersionForAuthenticatedUser: [
+      "POST /user/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
+    ],
+    restorePackageVersionForOrg: [
+      "POST /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
+    ],
+    restorePackageVersionForUser: [
+      "POST /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
+    ]
+  },
+  projects: {
+    addCollaborator: ["PUT /projects/{project_id}/collaborators/{username}"],
+    createCard: ["POST /projects/columns/{column_id}/cards"],
+    createColumn: ["POST /projects/{project_id}/columns"],
+    createForAuthenticatedUser: ["POST /user/projects"],
+    createForOrg: ["POST /orgs/{org}/projects"],
+    createForRepo: ["POST /repos/{owner}/{repo}/projects"],
+    delete: ["DELETE /projects/{project_id}"],
+    deleteCard: ["DELETE /projects/columns/cards/{card_id}"],
+    deleteColumn: ["DELETE /projects/columns/{column_id}"],
+    get: ["GET /projects/{project_id}"],
+    getCard: ["GET /projects/columns/cards/{card_id}"],
+    getColumn: ["GET /projects/columns/{column_id}"],
+    getPermissionForUser: [
+      "GET /projects/{project_id}/collaborators/{username}/permission"
+    ],
+    listCards: ["GET /projects/columns/{column_id}/cards"],
+    listCollaborators: ["GET /projects/{project_id}/collaborators"],
+    listColumns: ["GET /projects/{project_id}/columns"],
+    listForOrg: ["GET /orgs/{org}/projects"],
+    listForRepo: ["GET /repos/{owner}/{repo}/projects"],
+    listForUser: ["GET /users/{username}/projects"],
+    moveCard: ["POST /projects/columns/cards/{card_id}/moves"],
+    moveColumn: ["POST /projects/columns/{column_id}/moves"],
+    removeCollaborator: [
+      "DELETE /projects/{project_id}/collaborators/{username}"
+    ],
+    update: ["PATCH /projects/{project_id}"],
+    updateCard: ["PATCH /projects/columns/cards/{card_id}"],
+    updateColumn: ["PATCH /projects/columns/{column_id}"]
+  },
+  pulls: {
+    checkIfMerged: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/merge"],
+    create: ["POST /repos/{owner}/{repo}/pulls"],
+    createReplyForReviewComment: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies"
+    ],
+    createReview: ["POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews"],
+    createReviewComment: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/comments"
+    ],
+    deletePendingReview: [
+      "DELETE /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
+    ],
+    deleteReviewComment: [
+      "DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}"
+    ],
+    dismissReview: [
+      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/dismissals"
+    ],
+    get: ["GET /repos/{owner}/{repo}/pulls/{pull_number}"],
+    getReview: [
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
+    ],
+    getReviewComment: ["GET /repos/{owner}/{repo}/pulls/comments/{comment_id}"],
+    list: ["GET /repos/{owner}/{repo}/pulls"],
+    listCommentsForReview: [
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments"
+    ],
+    listCommits: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/commits"],
+    listFiles: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/files"],
+    listRequestedReviewers: [
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
+    ],
+    listReviewComments: [
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments"
+    ],
+    listReviewCommentsForRepo: ["GET /repos/{owner}/{repo}/pulls/comments"],
+    listReviews: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews"],
+    merge: ["PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge"],
+    removeRequestedReviewers: [
+      "DELETE /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
+    ],
+    requestReviewers: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
+    ],
+    submitReview: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/events"
+    ],
+    update: ["PATCH /repos/{owner}/{repo}/pulls/{pull_number}"],
+    updateBranch: [
+      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/update-branch"
+    ],
+    updateReview: [
+      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
+    ],
+    updateReviewComment: [
+      "PATCH /repos/{owner}/{repo}/pulls/comments/{comment_id}"
+    ]
+  },
+  rateLimit: { get: ["GET /rate_limit"] },
+  reactions: {
+    createForCommitComment: [
+      "POST /repos/{owner}/{repo}/comments/{comment_id}/reactions"
+    ],
+    createForIssue: [
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/reactions"
+    ],
+    createForIssueComment: [
+      "POST /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
+    ],
+    createForPullRequestReviewComment: [
+      "POST /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
+    ],
+    createForRelease: [
+      "POST /repos/{owner}/{repo}/releases/{release_id}/reactions"
+    ],
+    createForTeamDiscussionCommentInOrg: [
+      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
+    ],
+    createForTeamDiscussionInOrg: [
+      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
+    ],
+    deleteForCommitComment: [
+      "DELETE /repos/{owner}/{repo}/comments/{comment_id}/reactions/{reaction_id}"
+    ],
+    deleteForIssue: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/reactions/{reaction_id}"
+    ],
+    deleteForIssueComment: [
+      "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions/{reaction_id}"
+    ],
+    deleteForPullRequestComment: [
+      "DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions/{reaction_id}"
+    ],
+    deleteForRelease: [
+      "DELETE /repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id}"
+    ],
+    deleteForTeamDiscussion: [
+      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions/{reaction_id}"
+    ],
+    deleteForTeamDiscussionComment: [
+      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions/{reaction_id}"
+    ],
+    listForCommitComment: [
+      "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions"
+    ],
+    listForIssue: ["GET /repos/{owner}/{repo}/issues/{issue_number}/reactions"],
+    listForIssueComment: [
+      "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
+    ],
+    listForPullRequestReviewComment: [
+      "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
+    ],
+    listForRelease: [
+      "GET /repos/{owner}/{repo}/releases/{release_id}/reactions"
+    ],
+    listForTeamDiscussionCommentInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
+    ],
+    listForTeamDiscussionInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
+    ]
+  },
+  repos: {
+    acceptInvitation: [
+      "PATCH /user/repository_invitations/{invitation_id}",
+      {},
+      { renamed: ["repos", "acceptInvitationForAuthenticatedUser"] }
+    ],
+    acceptInvitationForAuthenticatedUser: [
+      "PATCH /user/repository_invitations/{invitation_id}"
+    ],
+    addAppAccessRestrictions: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
+      {},
+      { mapToData: "apps" }
+    ],
+    addCollaborator: ["PUT /repos/{owner}/{repo}/collaborators/{username}"],
+    addStatusCheckContexts: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
+      {},
+      { mapToData: "contexts" }
+    ],
+    addTeamAccessRestrictions: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
+      {},
+      { mapToData: "teams" }
+    ],
+    addUserAccessRestrictions: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
+      {},
+      { mapToData: "users" }
+    ],
+    cancelPagesDeployment: [
+      "POST /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}/cancel"
+    ],
+    checkAutomatedSecurityFixes: [
+      "GET /repos/{owner}/{repo}/automated-security-fixes"
+    ],
+    checkCollaborator: ["GET /repos/{owner}/{repo}/collaborators/{username}"],
+    checkVulnerabilityAlerts: [
+      "GET /repos/{owner}/{repo}/vulnerability-alerts"
+    ],
+    codeownersErrors: ["GET /repos/{owner}/{repo}/codeowners/errors"],
+    compareCommits: ["GET /repos/{owner}/{repo}/compare/{base}...{head}"],
+    compareCommitsWithBasehead: [
+      "GET /repos/{owner}/{repo}/compare/{basehead}"
+    ],
+    createAutolink: ["POST /repos/{owner}/{repo}/autolinks"],
+    createCommitComment: [
+      "POST /repos/{owner}/{repo}/commits/{commit_sha}/comments"
+    ],
+    createCommitSignatureProtection: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
+    ],
+    createCommitStatus: ["POST /repos/{owner}/{repo}/statuses/{sha}"],
+    createDeployKey: ["POST /repos/{owner}/{repo}/keys"],
+    createDeployment: ["POST /repos/{owner}/{repo}/deployments"],
+    createDeploymentBranchPolicy: [
+      "POST /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies"
+    ],
+    createDeploymentProtectionRule: [
+      "POST /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules"
+    ],
+    createDeploymentStatus: [
+      "POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
+    ],
+    createDispatchEvent: ["POST /repos/{owner}/{repo}/dispatches"],
+    createForAuthenticatedUser: ["POST /user/repos"],
+    createFork: ["POST /repos/{owner}/{repo}/forks"],
+    createInOrg: ["POST /orgs/{org}/repos"],
+    createOrUpdateCustomPropertiesValues: [
+      "PATCH /repos/{owner}/{repo}/properties/values"
+    ],
+    createOrUpdateEnvironment: [
+      "PUT /repos/{owner}/{repo}/environments/{environment_name}"
+    ],
+    createOrUpdateFileContents: ["PUT /repos/{owner}/{repo}/contents/{path}"],
+    createOrgRuleset: ["POST /orgs/{org}/rulesets"],
+    createPagesDeployment: ["POST /repos/{owner}/{repo}/pages/deployments"],
+    createPagesSite: ["POST /repos/{owner}/{repo}/pages"],
+    createRelease: ["POST /repos/{owner}/{repo}/releases"],
+    createRepoRuleset: ["POST /repos/{owner}/{repo}/rulesets"],
+    createTagProtection: ["POST /repos/{owner}/{repo}/tags/protection"],
+    createUsingTemplate: [
+      "POST /repos/{template_owner}/{template_repo}/generate"
+    ],
+    createWebhook: ["POST /repos/{owner}/{repo}/hooks"],
+    declineInvitation: [
+      "DELETE /user/repository_invitations/{invitation_id}",
+      {},
+      { renamed: ["repos", "declineInvitationForAuthenticatedUser"] }
+    ],
+    declineInvitationForAuthenticatedUser: [
+      "DELETE /user/repository_invitations/{invitation_id}"
+    ],
+    delete: ["DELETE /repos/{owner}/{repo}"],
+    deleteAccessRestrictions: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions"
+    ],
+    deleteAdminBranchProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
+    ],
+    deleteAnEnvironment: [
+      "DELETE /repos/{owner}/{repo}/environments/{environment_name}"
+    ],
+    deleteAutolink: ["DELETE /repos/{owner}/{repo}/autolinks/{autolink_id}"],
+    deleteBranchProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection"
+    ],
+    deleteCommitComment: ["DELETE /repos/{owner}/{repo}/comments/{comment_id}"],
+    deleteCommitSignatureProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
+    ],
+    deleteDeployKey: ["DELETE /repos/{owner}/{repo}/keys/{key_id}"],
+    deleteDeployment: [
+      "DELETE /repos/{owner}/{repo}/deployments/{deployment_id}"
+    ],
+    deleteDeploymentBranchPolicy: [
+      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
+    ],
+    deleteFile: ["DELETE /repos/{owner}/{repo}/contents/{path}"],
+    deleteInvitation: [
+      "DELETE /repos/{owner}/{repo}/invitations/{invitation_id}"
+    ],
+    deleteOrgRuleset: ["DELETE /orgs/{org}/rulesets/{ruleset_id}"],
+    deletePagesSite: ["DELETE /repos/{owner}/{repo}/pages"],
+    deletePullRequestReviewProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
+    ],
+    deleteRelease: ["DELETE /repos/{owner}/{repo}/releases/{release_id}"],
+    deleteReleaseAsset: [
+      "DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}"
+    ],
+    deleteRepoRuleset: ["DELETE /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
+    deleteTagProtection: [
+      "DELETE /repos/{owner}/{repo}/tags/protection/{tag_protection_id}"
+    ],
+    deleteWebhook: ["DELETE /repos/{owner}/{repo}/hooks/{hook_id}"],
+    disableAutomatedSecurityFixes: [
+      "DELETE /repos/{owner}/{repo}/automated-security-fixes"
+    ],
+    disableDeploymentProtectionRule: [
+      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/{protection_rule_id}"
+    ],
+    disablePrivateVulnerabilityReporting: [
+      "DELETE /repos/{owner}/{repo}/private-vulnerability-reporting"
+    ],
+    disableVulnerabilityAlerts: [
+      "DELETE /repos/{owner}/{repo}/vulnerability-alerts"
+    ],
+    downloadArchive: [
+      "GET /repos/{owner}/{repo}/zipball/{ref}",
+      {},
+      { renamed: ["repos", "downloadZipballArchive"] }
+    ],
+    downloadTarballArchive: ["GET /repos/{owner}/{repo}/tarball/{ref}"],
+    downloadZipballArchive: ["GET /repos/{owner}/{repo}/zipball/{ref}"],
+    enableAutomatedSecurityFixes: [
+      "PUT /repos/{owner}/{repo}/automated-security-fixes"
+    ],
+    enablePrivateVulnerabilityReporting: [
+      "PUT /repos/{owner}/{repo}/private-vulnerability-reporting"
+    ],
+    enableVulnerabilityAlerts: [
+      "PUT /repos/{owner}/{repo}/vulnerability-alerts"
+    ],
+    generateReleaseNotes: [
+      "POST /repos/{owner}/{repo}/releases/generate-notes"
+    ],
+    get: ["GET /repos/{owner}/{repo}"],
+    getAccessRestrictions: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions"
+    ],
+    getAdminBranchProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
+    ],
+    getAllDeploymentProtectionRules: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules"
+    ],
+    getAllEnvironments: ["GET /repos/{owner}/{repo}/environments"],
+    getAllStatusCheckContexts: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts"
+    ],
+    getAllTopics: ["GET /repos/{owner}/{repo}/topics"],
+    getAppsWithAccessToProtectedBranch: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps"
+    ],
+    getAutolink: ["GET /repos/{owner}/{repo}/autolinks/{autolink_id}"],
+    getBranch: ["GET /repos/{owner}/{repo}/branches/{branch}"],
+    getBranchProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection"
+    ],
+    getBranchRules: ["GET /repos/{owner}/{repo}/rules/branches/{branch}"],
+    getClones: ["GET /repos/{owner}/{repo}/traffic/clones"],
+    getCodeFrequencyStats: ["GET /repos/{owner}/{repo}/stats/code_frequency"],
+    getCollaboratorPermissionLevel: [
+      "GET /repos/{owner}/{repo}/collaborators/{username}/permission"
+    ],
+    getCombinedStatusForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/status"],
+    getCommit: ["GET /repos/{owner}/{repo}/commits/{ref}"],
+    getCommitActivityStats: ["GET /repos/{owner}/{repo}/stats/commit_activity"],
+    getCommitComment: ["GET /repos/{owner}/{repo}/comments/{comment_id}"],
+    getCommitSignatureProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
+    ],
+    getCommunityProfileMetrics: ["GET /repos/{owner}/{repo}/community/profile"],
+    getContent: ["GET /repos/{owner}/{repo}/contents/{path}"],
+    getContributorsStats: ["GET /repos/{owner}/{repo}/stats/contributors"],
+    getCustomDeploymentProtectionRule: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/{protection_rule_id}"
+    ],
+    getCustomPropertiesValues: ["GET /repos/{owner}/{repo}/properties/values"],
+    getDeployKey: ["GET /repos/{owner}/{repo}/keys/{key_id}"],
+    getDeployment: ["GET /repos/{owner}/{repo}/deployments/{deployment_id}"],
+    getDeploymentBranchPolicy: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
+    ],
+    getDeploymentStatus: [
+      "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses/{status_id}"
+    ],
+    getEnvironment: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}"
+    ],
+    getLatestPagesBuild: ["GET /repos/{owner}/{repo}/pages/builds/latest"],
+    getLatestRelease: ["GET /repos/{owner}/{repo}/releases/latest"],
+    getOrgRuleSuite: ["GET /orgs/{org}/rulesets/rule-suites/{rule_suite_id}"],
+    getOrgRuleSuites: ["GET /orgs/{org}/rulesets/rule-suites"],
+    getOrgRuleset: ["GET /orgs/{org}/rulesets/{ruleset_id}"],
+    getOrgRulesets: ["GET /orgs/{org}/rulesets"],
+    getPages: ["GET /repos/{owner}/{repo}/pages"],
+    getPagesBuild: ["GET /repos/{owner}/{repo}/pages/builds/{build_id}"],
+    getPagesDeployment: [
+      "GET /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}"
+    ],
+    getPagesHealthCheck: ["GET /repos/{owner}/{repo}/pages/health"],
+    getParticipationStats: ["GET /repos/{owner}/{repo}/stats/participation"],
+    getPullRequestReviewProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
+    ],
+    getPunchCardStats: ["GET /repos/{owner}/{repo}/stats/punch_card"],
+    getReadme: ["GET /repos/{owner}/{repo}/readme"],
+    getReadmeInDirectory: ["GET /repos/{owner}/{repo}/readme/{dir}"],
+    getRelease: ["GET /repos/{owner}/{repo}/releases/{release_id}"],
+    getReleaseAsset: ["GET /repos/{owner}/{repo}/releases/assets/{asset_id}"],
+    getReleaseByTag: ["GET /repos/{owner}/{repo}/releases/tags/{tag}"],
+    getRepoRuleSuite: [
+      "GET /repos/{owner}/{repo}/rulesets/rule-suites/{rule_suite_id}"
+    ],
+    getRepoRuleSuites: ["GET /repos/{owner}/{repo}/rulesets/rule-suites"],
+    getRepoRuleset: ["GET /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
+    getRepoRulesets: ["GET /repos/{owner}/{repo}/rulesets"],
+    getStatusChecksProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
+    ],
+    getTeamsWithAccessToProtectedBranch: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams"
+    ],
+    getTopPaths: ["GET /repos/{owner}/{repo}/traffic/popular/paths"],
+    getTopReferrers: ["GET /repos/{owner}/{repo}/traffic/popular/referrers"],
+    getUsersWithAccessToProtectedBranch: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users"
+    ],
+    getViews: ["GET /repos/{owner}/{repo}/traffic/views"],
+    getWebhook: ["GET /repos/{owner}/{repo}/hooks/{hook_id}"],
+    getWebhookConfigForRepo: [
+      "GET /repos/{owner}/{repo}/hooks/{hook_id}/config"
+    ],
+    getWebhookDelivery: [
+      "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}"
+    ],
+    listActivities: ["GET /repos/{owner}/{repo}/activity"],
+    listAutolinks: ["GET /repos/{owner}/{repo}/autolinks"],
+    listBranches: ["GET /repos/{owner}/{repo}/branches"],
+    listBranchesForHeadCommit: [
+      "GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head"
+    ],
+    listCollaborators: ["GET /repos/{owner}/{repo}/collaborators"],
+    listCommentsForCommit: [
+      "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments"
+    ],
+    listCommitCommentsForRepo: ["GET /repos/{owner}/{repo}/comments"],
+    listCommitStatusesForRef: [
+      "GET /repos/{owner}/{repo}/commits/{ref}/statuses"
+    ],
+    listCommits: ["GET /repos/{owner}/{repo}/commits"],
+    listContributors: ["GET /repos/{owner}/{repo}/contributors"],
+    listCustomDeploymentRuleIntegrations: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/apps"
+    ],
+    listDeployKeys: ["GET /repos/{owner}/{repo}/keys"],
+    listDeploymentBranchPolicies: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies"
+    ],
+    listDeploymentStatuses: [
+      "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
+    ],
+    listDeployments: ["GET /repos/{owner}/{repo}/deployments"],
+    listForAuthenticatedUser: ["GET /user/repos"],
+    listForOrg: ["GET /orgs/{org}/repos"],
+    listForUser: ["GET /users/{username}/repos"],
+    listForks: ["GET /repos/{owner}/{repo}/forks"],
+    listInvitations: ["GET /repos/{owner}/{repo}/invitations"],
+    listInvitationsForAuthenticatedUser: ["GET /user/repository_invitations"],
+    listLanguages: ["GET /repos/{owner}/{repo}/languages"],
+    listPagesBuilds: ["GET /repos/{owner}/{repo}/pages/builds"],
+    listPublic: ["GET /repositories"],
+    listPullRequestsAssociatedWithCommit: [
+      "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls"
+    ],
+    listReleaseAssets: [
+      "GET /repos/{owner}/{repo}/releases/{release_id}/assets"
+    ],
+    listReleases: ["GET /repos/{owner}/{repo}/releases"],
+    listTagProtection: ["GET /repos/{owner}/{repo}/tags/protection"],
+    listTags: ["GET /repos/{owner}/{repo}/tags"],
+    listTeams: ["GET /repos/{owner}/{repo}/teams"],
+    listWebhookDeliveries: [
+      "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries"
+    ],
+    listWebhooks: ["GET /repos/{owner}/{repo}/hooks"],
+    merge: ["POST /repos/{owner}/{repo}/merges"],
+    mergeUpstream: ["POST /repos/{owner}/{repo}/merge-upstream"],
+    pingWebhook: ["POST /repos/{owner}/{repo}/hooks/{hook_id}/pings"],
+    redeliverWebhookDelivery: [
+      "POST /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}/attempts"
+    ],
+    removeAppAccessRestrictions: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
+      {},
+      { mapToData: "apps" }
+    ],
+    removeCollaborator: [
+      "DELETE /repos/{owner}/{repo}/collaborators/{username}"
+    ],
+    removeStatusCheckContexts: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
+      {},
+      { mapToData: "contexts" }
+    ],
+    removeStatusCheckProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
+    ],
+    removeTeamAccessRestrictions: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
+      {},
+      { mapToData: "teams" }
+    ],
+    removeUserAccessRestrictions: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
+      {},
+      { mapToData: "users" }
+    ],
+    renameBranch: ["POST /repos/{owner}/{repo}/branches/{branch}/rename"],
+    replaceAllTopics: ["PUT /repos/{owner}/{repo}/topics"],
+    requestPagesBuild: ["POST /repos/{owner}/{repo}/pages/builds"],
+    setAdminBranchProtection: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
+    ],
+    setAppAccessRestrictions: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
+      {},
+      { mapToData: "apps" }
+    ],
+    setStatusCheckContexts: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
+      {},
+      { mapToData: "contexts" }
+    ],
+    setTeamAccessRestrictions: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
+      {},
+      { mapToData: "teams" }
+    ],
+    setUserAccessRestrictions: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
+      {},
+      { mapToData: "users" }
+    ],
+    testPushWebhook: ["POST /repos/{owner}/{repo}/hooks/{hook_id}/tests"],
+    transfer: ["POST /repos/{owner}/{repo}/transfer"],
+    update: ["PATCH /repos/{owner}/{repo}"],
+    updateBranchProtection: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection"
+    ],
+    updateCommitComment: ["PATCH /repos/{owner}/{repo}/comments/{comment_id}"],
+    updateDeploymentBranchPolicy: [
+      "PUT /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
+    ],
+    updateInformationAboutPagesSite: ["PUT /repos/{owner}/{repo}/pages"],
+    updateInvitation: [
+      "PATCH /repos/{owner}/{repo}/invitations/{invitation_id}"
+    ],
+    updateOrgRuleset: ["PUT /orgs/{org}/rulesets/{ruleset_id}"],
+    updatePullRequestReviewProtection: [
+      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
+    ],
+    updateRelease: ["PATCH /repos/{owner}/{repo}/releases/{release_id}"],
+    updateReleaseAsset: [
+      "PATCH /repos/{owner}/{repo}/releases/assets/{asset_id}"
+    ],
+    updateRepoRuleset: ["PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
+    updateStatusCheckPotection: [
+      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks",
+      {},
+      { renamed: ["repos", "updateStatusCheckProtection"] }
+    ],
+    updateStatusCheckProtection: [
+      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
+    ],
+    updateWebhook: ["PATCH /repos/{owner}/{repo}/hooks/{hook_id}"],
+    updateWebhookConfigForRepo: [
+      "PATCH /repos/{owner}/{repo}/hooks/{hook_id}/config"
+    ],
+    uploadReleaseAsset: [
+      "POST /repos/{owner}/{repo}/releases/{release_id}/assets{?name,label}",
+      { baseUrl: "https://uploads.github.com" }
+    ]
+  },
+  search: {
+    code: ["GET /search/code"],
+    commits: ["GET /search/commits"],
+    issuesAndPullRequests: ["GET /search/issues"],
+    labels: ["GET /search/labels"],
+    repos: ["GET /search/repositories"],
+    topics: ["GET /search/topics"],
+    users: ["GET /search/users"]
+  },
+  secretScanning: {
+    getAlert: [
+      "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
+    ],
+    listAlertsForEnterprise: [
+      "GET /enterprises/{enterprise}/secret-scanning/alerts"
+    ],
+    listAlertsForOrg: ["GET /orgs/{org}/secret-scanning/alerts"],
+    listAlertsForRepo: ["GET /repos/{owner}/{repo}/secret-scanning/alerts"],
+    listLocationsForAlert: [
+      "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations"
+    ],
+    updateAlert: [
+      "PATCH /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
+    ]
+  },
+  securityAdvisories: {
+    createFork: [
+      "POST /repos/{owner}/{repo}/security-advisories/{ghsa_id}/forks"
+    ],
+    createPrivateVulnerabilityReport: [
+      "POST /repos/{owner}/{repo}/security-advisories/reports"
+    ],
+    createRepositoryAdvisory: [
+      "POST /repos/{owner}/{repo}/security-advisories"
+    ],
+    createRepositoryAdvisoryCveRequest: [
+      "POST /repos/{owner}/{repo}/security-advisories/{ghsa_id}/cve"
+    ],
+    getGlobalAdvisory: ["GET /advisories/{ghsa_id}"],
+    getRepositoryAdvisory: [
+      "GET /repos/{owner}/{repo}/security-advisories/{ghsa_id}"
+    ],
+    listGlobalAdvisories: ["GET /advisories"],
+    listOrgRepositoryAdvisories: ["GET /orgs/{org}/security-advisories"],
+    listRepositoryAdvisories: ["GET /repos/{owner}/{repo}/security-advisories"],
+    updateRepositoryAdvisory: [
+      "PATCH /repos/{owner}/{repo}/security-advisories/{ghsa_id}"
+    ]
+  },
+  teams: {
+    addOrUpdateMembershipForUserInOrg: [
+      "PUT /orgs/{org}/teams/{team_slug}/memberships/{username}"
+    ],
+    addOrUpdateProjectPermissionsInOrg: [
+      "PUT /orgs/{org}/teams/{team_slug}/projects/{project_id}"
+    ],
+    addOrUpdateRepoPermissionsInOrg: [
+      "PUT /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
+    ],
+    checkPermissionsForProjectInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/projects/{project_id}"
+    ],
+    checkPermissionsForRepoInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
+    ],
+    create: ["POST /orgs/{org}/teams"],
+    createDiscussionCommentInOrg: [
+      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
+    ],
+    createDiscussionInOrg: ["POST /orgs/{org}/teams/{team_slug}/discussions"],
+    deleteDiscussionCommentInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
+    ],
+    deleteDiscussionInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
+    ],
+    deleteInOrg: ["DELETE /orgs/{org}/teams/{team_slug}"],
+    getByName: ["GET /orgs/{org}/teams/{team_slug}"],
+    getDiscussionCommentInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
+    ],
+    getDiscussionInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
+    ],
+    getMembershipForUserInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/memberships/{username}"
+    ],
+    list: ["GET /orgs/{org}/teams"],
+    listChildInOrg: ["GET /orgs/{org}/teams/{team_slug}/teams"],
+    listDiscussionCommentsInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
+    ],
+    listDiscussionsInOrg: ["GET /orgs/{org}/teams/{team_slug}/discussions"],
+    listForAuthenticatedUser: ["GET /user/teams"],
+    listMembersInOrg: ["GET /orgs/{org}/teams/{team_slug}/members"],
+    listPendingInvitationsInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/invitations"
+    ],
+    listProjectsInOrg: ["GET /orgs/{org}/teams/{team_slug}/projects"],
+    listReposInOrg: ["GET /orgs/{org}/teams/{team_slug}/repos"],
+    removeMembershipForUserInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}"
+    ],
+    removeProjectInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/projects/{project_id}"
+    ],
+    removeRepoInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
+    ],
+    updateDiscussionCommentInOrg: [
+      "PATCH /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
+    ],
+    updateDiscussionInOrg: [
+      "PATCH /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
+    ],
+    updateInOrg: ["PATCH /orgs/{org}/teams/{team_slug}"]
+  },
+  users: {
+    addEmailForAuthenticated: [
+      "POST /user/emails",
+      {},
+      { renamed: ["users", "addEmailForAuthenticatedUser"] }
+    ],
+    addEmailForAuthenticatedUser: ["POST /user/emails"],
+    addSocialAccountForAuthenticatedUser: ["POST /user/social_accounts"],
+    block: ["PUT /user/blocks/{username}"],
+    checkBlocked: ["GET /user/blocks/{username}"],
+    checkFollowingForUser: ["GET /users/{username}/following/{target_user}"],
+    checkPersonIsFollowedByAuthenticated: ["GET /user/following/{username}"],
+    createGpgKeyForAuthenticated: [
+      "POST /user/gpg_keys",
+      {},
+      { renamed: ["users", "createGpgKeyForAuthenticatedUser"] }
+    ],
+    createGpgKeyForAuthenticatedUser: ["POST /user/gpg_keys"],
+    createPublicSshKeyForAuthenticated: [
+      "POST /user/keys",
+      {},
+      { renamed: ["users", "createPublicSshKeyForAuthenticatedUser"] }
+    ],
+    createPublicSshKeyForAuthenticatedUser: ["POST /user/keys"],
+    createSshSigningKeyForAuthenticatedUser: ["POST /user/ssh_signing_keys"],
+    deleteEmailForAuthenticated: [
+      "DELETE /user/emails",
+      {},
+      { renamed: ["users", "deleteEmailForAuthenticatedUser"] }
+    ],
+    deleteEmailForAuthenticatedUser: ["DELETE /user/emails"],
+    deleteGpgKeyForAuthenticated: [
+      "DELETE /user/gpg_keys/{gpg_key_id}",
+      {},
+      { renamed: ["users", "deleteGpgKeyForAuthenticatedUser"] }
+    ],
+    deleteGpgKeyForAuthenticatedUser: ["DELETE /user/gpg_keys/{gpg_key_id}"],
+    deletePublicSshKeyForAuthenticated: [
+      "DELETE /user/keys/{key_id}",
+      {},
+      { renamed: ["users", "deletePublicSshKeyForAuthenticatedUser"] }
+    ],
+    deletePublicSshKeyForAuthenticatedUser: ["DELETE /user/keys/{key_id}"],
+    deleteSocialAccountForAuthenticatedUser: ["DELETE /user/social_accounts"],
+    deleteSshSigningKeyForAuthenticatedUser: [
+      "DELETE /user/ssh_signing_keys/{ssh_signing_key_id}"
+    ],
+    follow: ["PUT /user/following/{username}"],
+    getAuthenticated: ["GET /user"],
+    getByUsername: ["GET /users/{username}"],
+    getContextForUser: ["GET /users/{username}/hovercard"],
+    getGpgKeyForAuthenticated: [
+      "GET /user/gpg_keys/{gpg_key_id}",
+      {},
+      { renamed: ["users", "getGpgKeyForAuthenticatedUser"] }
+    ],
+    getGpgKeyForAuthenticatedUser: ["GET /user/gpg_keys/{gpg_key_id}"],
+    getPublicSshKeyForAuthenticated: [
+      "GET /user/keys/{key_id}",
+      {},
+      { renamed: ["users", "getPublicSshKeyForAuthenticatedUser"] }
+    ],
+    getPublicSshKeyForAuthenticatedUser: ["GET /user/keys/{key_id}"],
+    getSshSigningKeyForAuthenticatedUser: [
+      "GET /user/ssh_signing_keys/{ssh_signing_key_id}"
+    ],
+    list: ["GET /users"],
+    listBlockedByAuthenticated: [
+      "GET /user/blocks",
+      {},
+      { renamed: ["users", "listBlockedByAuthenticatedUser"] }
+    ],
+    listBlockedByAuthenticatedUser: ["GET /user/blocks"],
+    listEmailsForAuthenticated: [
+      "GET /user/emails",
+      {},
+      { renamed: ["users", "listEmailsForAuthenticatedUser"] }
+    ],
+    listEmailsForAuthenticatedUser: ["GET /user/emails"],
+    listFollowedByAuthenticated: [
+      "GET /user/following",
+      {},
+      { renamed: ["users", "listFollowedByAuthenticatedUser"] }
+    ],
+    listFollowedByAuthenticatedUser: ["GET /user/following"],
+    listFollowersForAuthenticatedUser: ["GET /user/followers"],
+    listFollowersForUser: ["GET /users/{username}/followers"],
+    listFollowingForUser: ["GET /users/{username}/following"],
+    listGpgKeysForAuthenticated: [
+      "GET /user/gpg_keys",
+      {},
+      { renamed: ["users", "listGpgKeysForAuthenticatedUser"] }
+    ],
+    listGpgKeysForAuthenticatedUser: ["GET /user/gpg_keys"],
+    listGpgKeysForUser: ["GET /users/{username}/gpg_keys"],
+    listPublicEmailsForAuthenticated: [
+      "GET /user/public_emails",
+      {},
+      { renamed: ["users", "listPublicEmailsForAuthenticatedUser"] }
+    ],
+    listPublicEmailsForAuthenticatedUser: ["GET /user/public_emails"],
+    listPublicKeysForUser: ["GET /users/{username}/keys"],
+    listPublicSshKeysForAuthenticated: [
+      "GET /user/keys",
+      {},
+      { renamed: ["users", "listPublicSshKeysForAuthenticatedUser"] }
+    ],
+    listPublicSshKeysForAuthenticatedUser: ["GET /user/keys"],
+    listSocialAccountsForAuthenticatedUser: ["GET /user/social_accounts"],
+    listSocialAccountsForUser: ["GET /users/{username}/social_accounts"],
+    listSshSigningKeysForAuthenticatedUser: ["GET /user/ssh_signing_keys"],
+    listSshSigningKeysForUser: ["GET /users/{username}/ssh_signing_keys"],
+    setPrimaryEmailVisibilityForAuthenticated: [
+      "PATCH /user/email/visibility",
+      {},
+      { renamed: ["users", "setPrimaryEmailVisibilityForAuthenticatedUser"] }
+    ],
+    setPrimaryEmailVisibilityForAuthenticatedUser: [
+      "PATCH /user/email/visibility"
+    ],
+    unblock: ["DELETE /user/blocks/{username}"],
+    unfollow: ["DELETE /user/following/{username}"],
+    updateAuthenticated: ["PATCH /user"]
+  }
+};
+var endpoints_default = Endpoints;
+
+// pkg/dist-src/endpoints-to-methods.js
+var endpointMethodsMap = /* @__PURE__ */ new Map();
+for (const [scope, endpoints] of Object.entries(endpoints_default)) {
+  for (const [methodName, endpoint] of Object.entries(endpoints)) {
+    const [route, defaults, decorations] = endpoint;
+    const [method, url] = route.split(/ /);
+    const endpointDefaults = Object.assign(
+      {
+        method,
+        url
+      },
+      defaults
+    );
+    if (!endpointMethodsMap.has(scope)) {
+      endpointMethodsMap.set(scope, /* @__PURE__ */ new Map());
+    }
+    endpointMethodsMap.get(scope).set(methodName, {
+      scope,
+      methodName,
+      endpointDefaults,
+      decorations
+    });
+  }
+}
+var handler = {
+  has({ scope }, methodName) {
+    return endpointMethodsMap.get(scope).has(methodName);
+  },
+  getOwnPropertyDescriptor(target, methodName) {
+    return {
+      value: this.get(target, methodName),
+      // ensures method is in the cache
+      configurable: true,
+      writable: true,
+      enumerable: true
+    };
+  },
+  defineProperty(target, methodName, descriptor) {
+    Object.defineProperty(target.cache, methodName, descriptor);
+    return true;
+  },
+  deleteProperty(target, methodName) {
+    delete target.cache[methodName];
+    return true;
+  },
+  ownKeys({ scope }) {
+    return [...endpointMethodsMap.get(scope).keys()];
+  },
+  set(target, methodName, value) {
+    return target.cache[methodName] = value;
+  },
+  get({ octokit, scope, cache }, methodName) {
+    if (cache[methodName]) {
+      return cache[methodName];
+    }
+    const method = endpointMethodsMap.get(scope).get(methodName);
+    if (!method) {
+      return void 0;
+    }
+    const { endpointDefaults, decorations } = method;
+    if (decorations) {
+      cache[methodName] = decorate(
+        octokit,
+        scope,
+        methodName,
+        endpointDefaults,
+        decorations
+      );
+    } else {
+      cache[methodName] = octokit.request.defaults(endpointDefaults);
+    }
+    return cache[methodName];
+  }
+};
+function endpointsToMethods(octokit) {
+  const newMethods = {};
+  for (const scope of endpointMethodsMap.keys()) {
+    newMethods[scope] = new Proxy({ octokit, scope, cache: {} }, handler);
+  }
+  return newMethods;
+}
+function decorate(octokit, scope, methodName, defaults, decorations) {
+  const requestWithDefaults = octokit.request.defaults(defaults);
+  function withDecorations(...args) {
+    let options = requestWithDefaults.endpoint.merge(...args);
+    if (decorations.mapToData) {
+      options = Object.assign({}, options, {
+        data: options[decorations.mapToData],
+        [decorations.mapToData]: void 0
+      });
+      return requestWithDefaults(options);
+    }
+    if (decorations.renamed) {
+      const [newScope, newMethodName] = decorations.renamed;
+      octokit.log.warn(
+        `octokit.${scope}.${methodName}() has been renamed to octokit.${newScope}.${newMethodName}()`
+      );
+    }
+    if (decorations.deprecated) {
+      octokit.log.warn(decorations.deprecated);
+    }
+    if (decorations.renamedParameters) {
+      const options2 = requestWithDefaults.endpoint.merge(...args);
+      for (const [name, alias] of Object.entries(
+        decorations.renamedParameters
+      )) {
+        if (name in options2) {
+          octokit.log.warn(
+            `"${name}" parameter is deprecated for "octokit.${scope}.${methodName}()". Use "${alias}" instead`
+          );
+          if (!(alias in options2)) {
+            options2[alias] = options2[name];
+          }
+          delete options2[name];
+        }
+      }
+      return requestWithDefaults(options2);
+    }
+    return requestWithDefaults(...args);
+  }
+  return Object.assign(withDecorations, requestWithDefaults);
+}
+
+// pkg/dist-src/index.js
+function restEndpointMethods(octokit) {
+  const api = endpointsToMethods(octokit);
+  return {
+    rest: api
+  };
+}
+restEndpointMethods.VERSION = VERSION;
+function legacyRestEndpointMethods(octokit) {
+  const api = endpointsToMethods(octokit);
+  return {
+    ...api,
+    rest: api
+  };
+}
+legacyRestEndpointMethods.VERSION = VERSION;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (0);
+
+
+/***/ }),
+
+/***/ 3708:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// pkg/dist-src/index.js
+var dist_src_exports = {};
+__export(dist_src_exports, {
+  RequestError: () => RequestError
+});
+module.exports = __toCommonJS(dist_src_exports);
+var import_deprecation = __nccwpck_require__(4150);
+var import_once = __toESM(__nccwpck_require__(5560));
+var logOnceCode = (0, import_once.default)((deprecation) => console.warn(deprecation));
+var logOnceHeaders = (0, import_once.default)((deprecation) => console.warn(deprecation));
+var RequestError = class extends Error {
+  constructor(message, statusCode, options) {
+    super(message);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+    this.name = "HttpError";
+    this.status = statusCode;
+    let headers;
+    if ("headers" in options && typeof options.headers !== "undefined") {
+      headers = options.headers;
+    }
+    if ("response" in options) {
+      this.response = options.response;
+      headers = options.response.headers;
+    }
+    const requestCopy = Object.assign({}, options.request);
+    if (options.request.headers.authorization) {
+      requestCopy.headers = Object.assign({}, options.request.headers, {
+        authorization: options.request.headers.authorization.replace(
+          / .*$/,
+          " [REDACTED]"
+        )
+      });
+    }
+    requestCopy.url = requestCopy.url.replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]").replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
+    this.request = requestCopy;
+    Object.defineProperty(this, "code", {
+      get() {
+        logOnceCode(
+          new import_deprecation.Deprecation(
+            "[@octokit/request-error] `error.code` is deprecated, use `error.status`."
+          )
+        );
+        return statusCode;
+      }
+    });
+    Object.defineProperty(this, "headers", {
+      get() {
+        logOnceHeaders(
+          new import_deprecation.Deprecation(
+            "[@octokit/request-error] `error.headers` is deprecated, use `error.response.headers`."
+          )
+        );
+        return headers || {};
+      }
+    });
+  }
+};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (0);
+
+
+/***/ }),
+
+/***/ 8636:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// pkg/dist-src/index.js
+var dist_src_exports = {};
+__export(dist_src_exports, {
+  request: () => request
+});
+module.exports = __toCommonJS(dist_src_exports);
+var import_endpoint = __nccwpck_require__(4471);
+var import_universal_user_agent = __nccwpck_require__(3843);
+
+// pkg/dist-src/version.js
+var VERSION = "8.4.0";
+
+// pkg/dist-src/is-plain-object.js
+function isPlainObject(value) {
+  if (typeof value !== "object" || value === null)
+    return false;
+  if (Object.prototype.toString.call(value) !== "[object Object]")
+    return false;
+  const proto = Object.getPrototypeOf(value);
+  if (proto === null)
+    return true;
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
+}
+
+// pkg/dist-src/fetch-wrapper.js
+var import_request_error = __nccwpck_require__(3708);
+
+// pkg/dist-src/get-buffer-response.js
+function getBufferResponse(response) {
+  return response.arrayBuffer();
+}
+
+// pkg/dist-src/fetch-wrapper.js
+function fetchWrapper(requestOptions) {
+  var _a, _b, _c, _d;
+  const log = requestOptions.request && requestOptions.request.log ? requestOptions.request.log : console;
+  const parseSuccessResponseBody = ((_a = requestOptions.request) == null ? void 0 : _a.parseSuccessResponseBody) !== false;
+  if (isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
+    requestOptions.body = JSON.stringify(requestOptions.body);
+  }
+  let headers = {};
+  let status;
+  let url;
+  let { fetch } = globalThis;
+  if ((_b = requestOptions.request) == null ? void 0 : _b.fetch) {
+    fetch = requestOptions.request.fetch;
+  }
+  if (!fetch) {
+    throw new Error(
+      "fetch is not set. Please pass a fetch implementation as new Octokit({ request: { fetch }}). Learn more at https://github.com/octokit/octokit.js/#fetch-missing"
+    );
+  }
+  return fetch(requestOptions.url, {
+    method: requestOptions.method,
+    body: requestOptions.body,
+    redirect: (_c = requestOptions.request) == null ? void 0 : _c.redirect,
+    headers: requestOptions.headers,
+    signal: (_d = requestOptions.request) == null ? void 0 : _d.signal,
+    // duplex must be set if request.body is ReadableStream or Async Iterables.
+    // See https://fetch.spec.whatwg.org/#dom-requestinit-duplex.
+    ...requestOptions.body && { duplex: "half" }
+  }).then(async (response) => {
+    url = response.url;
+    status = response.status;
+    for (const keyAndValue of response.headers) {
+      headers[keyAndValue[0]] = keyAndValue[1];
+    }
+    if ("deprecation" in headers) {
+      const matches = headers.link && headers.link.match(/<([^>]+)>; rel="deprecation"/);
+      const deprecationLink = matches && matches.pop();
+      log.warn(
+        `[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${headers.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`
+      );
+    }
+    if (status === 204 || status === 205) {
+      return;
+    }
+    if (requestOptions.method === "HEAD") {
+      if (status < 400) {
+        return;
+      }
+      throw new import_request_error.RequestError(response.statusText, status, {
+        response: {
+          url,
+          status,
+          headers,
+          data: void 0
+        },
+        request: requestOptions
+      });
+    }
+    if (status === 304) {
+      throw new import_request_error.RequestError("Not modified", status, {
+        response: {
+          url,
+          status,
+          headers,
+          data: await getResponseData(response)
+        },
+        request: requestOptions
+      });
+    }
+    if (status >= 400) {
+      const data = await getResponseData(response);
+      const error = new import_request_error.RequestError(toErrorMessage(data), status, {
+        response: {
+          url,
+          status,
+          headers,
+          data
+        },
+        request: requestOptions
+      });
+      throw error;
+    }
+    return parseSuccessResponseBody ? await getResponseData(response) : response.body;
+  }).then((data) => {
+    return {
+      status,
+      url,
+      headers,
+      data
+    };
+  }).catch((error) => {
+    if (error instanceof import_request_error.RequestError)
+      throw error;
+    else if (error.name === "AbortError")
+      throw error;
+    let message = error.message;
+    if (error.name === "TypeError" && "cause" in error) {
+      if (error.cause instanceof Error) {
+        message = error.cause.message;
+      } else if (typeof error.cause === "string") {
+        message = error.cause;
+      }
+    }
+    throw new import_request_error.RequestError(message, 500, {
+      request: requestOptions
+    });
+  });
+}
+async function getResponseData(response) {
+  const contentType = response.headers.get("content-type");
+  if (/application\/json/.test(contentType)) {
+    return response.json().catch(() => response.text()).catch(() => "");
+  }
+  if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
+    return response.text();
+  }
+  return getBufferResponse(response);
+}
+function toErrorMessage(data) {
+  if (typeof data === "string")
+    return data;
+  let suffix;
+  if ("documentation_url" in data) {
+    suffix = ` - ${data.documentation_url}`;
+  } else {
+    suffix = "";
+  }
+  if ("message" in data) {
+    if (Array.isArray(data.errors)) {
+      return `${data.message}: ${data.errors.map(JSON.stringify).join(", ")}${suffix}`;
+    }
+    return `${data.message}${suffix}`;
+  }
+  return `Unknown error: ${JSON.stringify(data)}`;
+}
+
+// pkg/dist-src/with-defaults.js
+function withDefaults(oldEndpoint, newDefaults) {
+  const endpoint2 = oldEndpoint.defaults(newDefaults);
+  const newApi = function(route, parameters) {
+    const endpointOptions = endpoint2.merge(route, parameters);
+    if (!endpointOptions.request || !endpointOptions.request.hook) {
+      return fetchWrapper(endpoint2.parse(endpointOptions));
+    }
+    const request2 = (route2, parameters2) => {
+      return fetchWrapper(
+        endpoint2.parse(endpoint2.merge(route2, parameters2))
+      );
+    };
+    Object.assign(request2, {
+      endpoint: endpoint2,
+      defaults: withDefaults.bind(null, endpoint2)
+    });
+    return endpointOptions.request.hook(request2, endpointOptions);
+  };
+  return Object.assign(newApi, {
+    endpoint: endpoint2,
+    defaults: withDefaults.bind(null, endpoint2)
+  });
+}
+
+// pkg/dist-src/index.js
+var request = withDefaults(import_endpoint.endpoint, {
+  headers: {
+    "user-agent": `octokit-request.js/${VERSION} ${(0, import_universal_user_agent.getUserAgent)()}`
+  }
+});
+// Annotate the CommonJS export names for ESM import in node:
+0 && (0);
+
+
+/***/ }),
+
+/***/ 2732:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var register = __nccwpck_require__(1063);
+var addHook = __nccwpck_require__(2027);
+var removeHook = __nccwpck_require__(9934);
+
+// bind with array of arguments: https://stackoverflow.com/a/21792913
+var bind = Function.bind;
+var bindable = bind.bind(bind);
+
+function bindApi(hook, state, name) {
+  var removeHookRef = bindable(removeHook, null).apply(
+    null,
+    name ? [state, name] : [state]
+  );
+  hook.api = { remove: removeHookRef };
+  hook.remove = removeHookRef;
+  ["before", "error", "after", "wrap"].forEach(function (kind) {
+    var args = name ? [state, kind, name] : [state, kind];
+    hook[kind] = hook.api[kind] = bindable(addHook, null).apply(null, args);
+  });
+}
+
+function HookSingular() {
+  var singularHookName = "h";
+  var singularHookState = {
+    registry: {},
+  };
+  var singularHook = register.bind(null, singularHookState, singularHookName);
+  bindApi(singularHook, singularHookState, singularHookName);
+  return singularHook;
+}
+
+function HookCollection() {
+  var state = {
+    registry: {},
+  };
+
+  var hook = register.bind(null, state);
+  bindApi(hook, state);
+
+  return hook;
+}
+
+var collectionHookDeprecationMessageDisplayed = false;
+function Hook() {
+  if (!collectionHookDeprecationMessageDisplayed) {
+    console.warn(
+      '[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4'
+    );
+    collectionHookDeprecationMessageDisplayed = true;
+  }
+  return HookCollection();
+}
+
+Hook.Singular = HookSingular.bind();
+Hook.Collection = HookCollection.bind();
+
+module.exports = Hook;
+// expose constructors as a named property for TypeScript
+module.exports.Hook = Hook;
+module.exports.Singular = Hook.Singular;
+module.exports.Collection = Hook.Collection;
+
+
+/***/ }),
+
+/***/ 2027:
+/***/ ((module) => {
+
+module.exports = addHook;
+
+function addHook(state, kind, name, hook) {
+  var orig = hook;
+  if (!state.registry[name]) {
+    state.registry[name] = [];
+  }
+
+  if (kind === "before") {
+    hook = function (method, options) {
+      return Promise.resolve()
+        .then(orig.bind(null, options))
+        .then(method.bind(null, options));
+    };
+  }
+
+  if (kind === "after") {
+    hook = function (method, options) {
+      var result;
+      return Promise.resolve()
+        .then(method.bind(null, options))
+        .then(function (result_) {
+          result = result_;
+          return orig(result, options);
+        })
+        .then(function () {
+          return result;
+        });
+    };
+  }
+
+  if (kind === "error") {
+    hook = function (method, options) {
+      return Promise.resolve()
+        .then(method.bind(null, options))
+        .catch(function (error) {
+          return orig(error, options);
+        });
+    };
+  }
+
+  state.registry[name].push({
+    hook: hook,
+    orig: orig,
+  });
+}
+
+
+/***/ }),
+
+/***/ 1063:
+/***/ ((module) => {
+
+module.exports = register;
+
+function register(state, name, method, options) {
+  if (typeof method !== "function") {
+    throw new Error("method for before hook must be a function");
+  }
+
+  if (!options) {
+    options = {};
+  }
+
+  if (Array.isArray(name)) {
+    return name.reverse().reduce(function (callback, name) {
+      return register.bind(null, state, name, callback, options);
+    }, method)();
+  }
+
+  return Promise.resolve().then(function () {
+    if (!state.registry[name]) {
+      return method(options);
+    }
+
+    return state.registry[name].reduce(function (method, registered) {
+      return registered.hook.bind(null, method, options);
+    }, method)();
+  });
+}
+
+
+/***/ }),
+
+/***/ 9934:
+/***/ ((module) => {
+
+module.exports = removeHook;
+
+function removeHook(state, name, method) {
+  if (!state.registry[name]) {
+    return;
+  }
+
+  var index = state.registry[name]
+    .map(function (registered) {
+      return registered.orig;
+    })
+    .indexOf(method);
+
+  if (index === -1) {
+    return;
+  }
+
+  state.registry[name].splice(index, 1);
+}
+
+
+/***/ }),
+
+/***/ 4150:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+class Deprecation extends Error {
+  constructor(message) {
+    super(message); // Maintains proper stack trace (only available on V8)
+
+    /* istanbul ignore next */
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+
+    this.name = 'Deprecation';
+  }
+
+}
+
+exports.Deprecation = Deprecation;
+
+
+/***/ }),
+
+/***/ 9766:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.convertChangesToDMP = convertChangesToDMP;
+/*istanbul ignore end*/
+// See: http://code.google.com/p/google-diff-match-patch/wiki/API
+function convertChangesToDMP(changes) {
+  var ret = [],
+    change,
+    operation;
+  for (var i = 0; i < changes.length; i++) {
+    change = changes[i];
+    if (change.added) {
+      operation = 1;
+    } else if (change.removed) {
+      operation = -1;
+    } else {
+      operation = 0;
+    }
+    ret.push([operation, change.value]);
+  }
+  return ret;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb252ZXJ0Q2hhbmdlc1RvRE1QIiwiY2hhbmdlcyIsInJldCIsImNoYW5nZSIsIm9wZXJhdGlvbiIsImkiLCJsZW5ndGgiLCJhZGRlZCIsInJlbW92ZWQiLCJwdXNoIiwidmFsdWUiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvY29udmVydC9kbXAuanMiXSwic291cmNlc0NvbnRlbnQiOlsiLy8gU2VlOiBodHRwOi8vY29kZS5nb29nbGUuY29tL3AvZ29vZ2xlLWRpZmYtbWF0Y2gtcGF0Y2gvd2lraS9BUElcbmV4cG9ydCBmdW5jdGlvbiBjb252ZXJ0Q2hhbmdlc1RvRE1QKGNoYW5nZXMpIHtcbiAgbGV0IHJldCA9IFtdLFxuICAgICAgY2hhbmdlLFxuICAgICAgb3BlcmF0aW9uO1xuICBmb3IgKGxldCBpID0gMDsgaSA8IGNoYW5nZXMubGVuZ3RoOyBpKyspIHtcbiAgICBjaGFuZ2UgPSBjaGFuZ2VzW2ldO1xuICAgIGlmIChjaGFuZ2UuYWRkZWQpIHtcbiAgICAgIG9wZXJhdGlvbiA9IDE7XG4gICAgfSBlbHNlIGlmIChjaGFuZ2UucmVtb3ZlZCkge1xuICAgICAgb3BlcmF0aW9uID0gLTE7XG4gICAgfSBlbHNlIHtcbiAgICAgIG9wZXJhdGlvbiA9IDA7XG4gICAgfVxuXG4gICAgcmV0LnB1c2goW29wZXJhdGlvbiwgY2hhbmdlLnZhbHVlXSk7XG4gIH1cbiAgcmV0dXJuIHJldDtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7QUFBQTtBQUNPLFNBQVNBLG1CQUFtQkEsQ0FBQ0MsT0FBTyxFQUFFO0VBQzNDLElBQUlDLEdBQUcsR0FBRyxFQUFFO0lBQ1JDLE1BQU07SUFDTkMsU0FBUztFQUNiLEtBQUssSUFBSUMsQ0FBQyxHQUFHLENBQUMsRUFBRUEsQ0FBQyxHQUFHSixPQUFPLENBQUNLLE1BQU0sRUFBRUQsQ0FBQyxFQUFFLEVBQUU7SUFDdkNGLE1BQU0sR0FBR0YsT0FBTyxDQUFDSSxDQUFDLENBQUM7SUFDbkIsSUFBSUYsTUFBTSxDQUFDSSxLQUFLLEVBQUU7TUFDaEJILFNBQVMsR0FBRyxDQUFDO0lBQ2YsQ0FBQyxNQUFNLElBQUlELE1BQU0sQ0FBQ0ssT0FBTyxFQUFFO01BQ3pCSixTQUFTLEdBQUcsQ0FBQyxDQUFDO0lBQ2hCLENBQUMsTUFBTTtNQUNMQSxTQUFTLEdBQUcsQ0FBQztJQUNmO0lBRUFGLEdBQUcsQ0FBQ08sSUFBSSxDQUFDLENBQUNMLFNBQVMsRUFBRUQsTUFBTSxDQUFDTyxLQUFLLENBQUMsQ0FBQztFQUNyQztFQUNBLE9BQU9SLEdBQUc7QUFDWiIsImlnbm9yZUxpc3QiOltdfQ==
+
+
+/***/ }),
+
+/***/ 1110:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.convertChangesToXML = convertChangesToXML;
+/*istanbul ignore end*/
+function convertChangesToXML(changes) {
+  var ret = [];
+  for (var i = 0; i < changes.length; i++) {
+    var change = changes[i];
+    if (change.added) {
+      ret.push('<ins>');
+    } else if (change.removed) {
+      ret.push('<del>');
+    }
+    ret.push(escapeHTML(change.value));
+    if (change.added) {
+      ret.push('</ins>');
+    } else if (change.removed) {
+      ret.push('</del>');
+    }
+  }
+  return ret.join('');
+}
+function escapeHTML(s) {
+  var n = s;
+  n = n.replace(/&/g, '&amp;');
+  n = n.replace(/</g, '&lt;');
+  n = n.replace(/>/g, '&gt;');
+  n = n.replace(/"/g, '&quot;');
+  return n;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb252ZXJ0Q2hhbmdlc1RvWE1MIiwiY2hhbmdlcyIsInJldCIsImkiLCJsZW5ndGgiLCJjaGFuZ2UiLCJhZGRlZCIsInB1c2giLCJyZW1vdmVkIiwiZXNjYXBlSFRNTCIsInZhbHVlIiwiam9pbiIsInMiLCJuIiwicmVwbGFjZSJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9jb252ZXJ0L3htbC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZnVuY3Rpb24gY29udmVydENoYW5nZXNUb1hNTChjaGFuZ2VzKSB7XG4gIGxldCByZXQgPSBbXTtcbiAgZm9yIChsZXQgaSA9IDA7IGkgPCBjaGFuZ2VzLmxlbmd0aDsgaSsrKSB7XG4gICAgbGV0IGNoYW5nZSA9IGNoYW5nZXNbaV07XG4gICAgaWYgKGNoYW5nZS5hZGRlZCkge1xuICAgICAgcmV0LnB1c2goJzxpbnM+Jyk7XG4gICAgfSBlbHNlIGlmIChjaGFuZ2UucmVtb3ZlZCkge1xuICAgICAgcmV0LnB1c2goJzxkZWw+Jyk7XG4gICAgfVxuXG4gICAgcmV0LnB1c2goZXNjYXBlSFRNTChjaGFuZ2UudmFsdWUpKTtcblxuICAgIGlmIChjaGFuZ2UuYWRkZWQpIHtcbiAgICAgIHJldC5wdXNoKCc8L2lucz4nKTtcbiAgICB9IGVsc2UgaWYgKGNoYW5nZS5yZW1vdmVkKSB7XG4gICAgICByZXQucHVzaCgnPC9kZWw+Jyk7XG4gICAgfVxuICB9XG4gIHJldHVybiByZXQuam9pbignJyk7XG59XG5cbmZ1bmN0aW9uIGVzY2FwZUhUTUwocykge1xuICBsZXQgbiA9IHM7XG4gIG4gPSBuLnJlcGxhY2UoLyYvZywgJyZhbXA7Jyk7XG4gIG4gPSBuLnJlcGxhY2UoLzwvZywgJyZsdDsnKTtcbiAgbiA9IG4ucmVwbGFjZSgvPi9nLCAnJmd0OycpO1xuICBuID0gbi5yZXBsYWNlKC9cIi9nLCAnJnF1b3Q7Jyk7XG5cbiAgcmV0dXJuIG47XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7O0FBQU8sU0FBU0EsbUJBQW1CQSxDQUFDQyxPQUFPLEVBQUU7RUFDM0MsSUFBSUMsR0FBRyxHQUFHLEVBQUU7RUFDWixLQUFLLElBQUlDLENBQUMsR0FBRyxDQUFDLEVBQUVBLENBQUMsR0FBR0YsT0FBTyxDQUFDRyxNQUFNLEVBQUVELENBQUMsRUFBRSxFQUFFO0lBQ3ZDLElBQUlFLE1BQU0sR0FBR0osT0FBTyxDQUFDRSxDQUFDLENBQUM7SUFDdkIsSUFBSUUsTUFBTSxDQUFDQyxLQUFLLEVBQUU7TUFDaEJKLEdBQUcsQ0FBQ0ssSUFBSSxDQUFDLE9BQU8sQ0FBQztJQUNuQixDQUFDLE1BQU0sSUFBSUYsTUFBTSxDQUFDRyxPQUFPLEVBQUU7TUFDekJOLEdBQUcsQ0FBQ0ssSUFBSSxDQUFDLE9BQU8sQ0FBQztJQUNuQjtJQUVBTCxHQUFHLENBQUNLLElBQUksQ0FBQ0UsVUFBVSxDQUFDSixNQUFNLENBQUNLLEtBQUssQ0FBQyxDQUFDO0lBRWxDLElBQUlMLE1BQU0sQ0FBQ0MsS0FBSyxFQUFFO01BQ2hCSixHQUFHLENBQUNLLElBQUksQ0FBQyxRQUFRLENBQUM7SUFDcEIsQ0FBQyxNQUFNLElBQUlGLE1BQU0sQ0FBQ0csT0FBTyxFQUFFO01BQ3pCTixHQUFHLENBQUNLLElBQUksQ0FBQyxRQUFRLENBQUM7SUFDcEI7RUFDRjtFQUNBLE9BQU9MLEdBQUcsQ0FBQ1MsSUFBSSxDQUFDLEVBQUUsQ0FBQztBQUNyQjtBQUVBLFNBQVNGLFVBQVVBLENBQUNHLENBQUMsRUFBRTtFQUNyQixJQUFJQyxDQUFDLEdBQUdELENBQUM7RUFDVEMsQ0FBQyxHQUFHQSxDQUFDLENBQUNDLE9BQU8sQ0FBQyxJQUFJLEVBQUUsT0FBTyxDQUFDO0VBQzVCRCxDQUFDLEdBQUdBLENBQUMsQ0FBQ0MsT0FBTyxDQUFDLElBQUksRUFBRSxNQUFNLENBQUM7RUFDM0JELENBQUMsR0FBR0EsQ0FBQyxDQUFDQyxPQUFPLENBQUMsSUFBSSxFQUFFLE1BQU0sQ0FBQztFQUMzQkQsQ0FBQyxHQUFHQSxDQUFDLENBQUNDLE9BQU8sQ0FBQyxJQUFJLEVBQUUsUUFBUSxDQUFDO0VBRTdCLE9BQU9ELENBQUM7QUFDViIsImlnbm9yZUxpc3QiOltdfQ==
+
+
+/***/ }),
+
+/***/ 9882:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.arrayDiff = void 0;
+exports.diffArrays = diffArrays;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_base = _interopRequireDefault(__nccwpck_require__(7106))
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*istanbul ignore end*/
+var arrayDiff =
+/*istanbul ignore start*/
+exports.arrayDiff =
+/*istanbul ignore end*/
+new
+/*istanbul ignore start*/
+_base
+/*istanbul ignore end*/
+[
+/*istanbul ignore start*/
+"default"
+/*istanbul ignore end*/
+]();
+arrayDiff.tokenize = function (value) {
+  return value.slice();
+};
+arrayDiff.join = arrayDiff.removeEmpty = function (value) {
+  return value;
+};
+function diffArrays(oldArr, newArr, callback) {
+  return arrayDiff.diff(oldArr, newArr, callback);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYmFzZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwib2JqIiwiX19lc01vZHVsZSIsImFycmF5RGlmZiIsImV4cG9ydHMiLCJEaWZmIiwidG9rZW5pemUiLCJ2YWx1ZSIsInNsaWNlIiwiam9pbiIsInJlbW92ZUVtcHR5IiwiZGlmZkFycmF5cyIsIm9sZEFyciIsIm5ld0FyciIsImNhbGxiYWNrIiwiZGlmZiJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9kaWZmL2FycmF5LmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBEaWZmIGZyb20gJy4vYmFzZSc7XG5cbmV4cG9ydCBjb25zdCBhcnJheURpZmYgPSBuZXcgRGlmZigpO1xuYXJyYXlEaWZmLnRva2VuaXplID0gZnVuY3Rpb24odmFsdWUpIHtcbiAgcmV0dXJuIHZhbHVlLnNsaWNlKCk7XG59O1xuYXJyYXlEaWZmLmpvaW4gPSBhcnJheURpZmYucmVtb3ZlRW1wdHkgPSBmdW5jdGlvbih2YWx1ZSkge1xuICByZXR1cm4gdmFsdWU7XG59O1xuXG5leHBvcnQgZnVuY3Rpb24gZGlmZkFycmF5cyhvbGRBcnIsIG5ld0FyciwgY2FsbGJhY2spIHsgcmV0dXJuIGFycmF5RGlmZi5kaWZmKG9sZEFyciwgbmV3QXJyLCBjYWxsYmFjayk7IH1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUE7QUFBQTtBQUFBQSxLQUFBLEdBQUFDLHNCQUFBLENBQUFDLE9BQUE7QUFBQTtBQUFBO0FBQTBCLG1DQUFBRCx1QkFBQUUsR0FBQSxXQUFBQSxHQUFBLElBQUFBLEdBQUEsQ0FBQUMsVUFBQSxHQUFBRCxHQUFBLGdCQUFBQSxHQUFBO0FBQUE7QUFFbkIsSUFBTUUsU0FBUztBQUFBO0FBQUFDLE9BQUEsQ0FBQUQsU0FBQTtBQUFBO0FBQUc7QUFBSUU7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUEsQ0FBSSxDQUFDLENBQUM7QUFDbkNGLFNBQVMsQ0FBQ0csUUFBUSxHQUFHLFVBQVNDLEtBQUssRUFBRTtFQUNuQyxPQUFPQSxLQUFLLENBQUNDLEtBQUssQ0FBQyxDQUFDO0FBQ3RCLENBQUM7QUFDREwsU0FBUyxDQUFDTSxJQUFJLEdBQUdOLFNBQVMsQ0FBQ08sV0FBVyxHQUFHLFVBQVNILEtBQUssRUFBRTtFQUN2RCxPQUFPQSxLQUFLO0FBQ2QsQ0FBQztBQUVNLFNBQVNJLFVBQVVBLENBQUNDLE1BQU0sRUFBRUMsTUFBTSxFQUFFQyxRQUFRLEVBQUU7RUFBRSxPQUFPWCxTQUFTLENBQUNZLElBQUksQ0FBQ0gsTUFBTSxFQUFFQyxNQUFNLEVBQUVDLFFBQVEsQ0FBQztBQUFFIiwiaWdub3JlTGlzdCI6W119
+
+
+/***/ }),
+
+/***/ 7106:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = Diff;
+/*istanbul ignore end*/
+function Diff() {}
+Diff.prototype = {
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  diff: function diff(oldString, newString) {
+    /*istanbul ignore start*/
+    var _options$timeout;
+    var
+    /*istanbul ignore end*/
+    options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var callback = options.callback;
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+    var self = this;
+    function done(value) {
+      value = self.postProcess(value, options);
+      if (callback) {
+        setTimeout(function () {
+          callback(value);
+        }, 0);
+        return true;
+      } else {
+        return value;
+      }
+    }
+
+    // Allow subclasses to massage the input prior to running
+    oldString = this.castInput(oldString, options);
+    newString = this.castInput(newString, options);
+    oldString = this.removeEmpty(this.tokenize(oldString, options));
+    newString = this.removeEmpty(this.tokenize(newString, options));
+    var newLen = newString.length,
+      oldLen = oldString.length;
+    var editLength = 1;
+    var maxEditLength = newLen + oldLen;
+    if (options.maxEditLength != null) {
+      maxEditLength = Math.min(maxEditLength, options.maxEditLength);
+    }
+    var maxExecutionTime =
+    /*istanbul ignore start*/
+    (_options$timeout =
+    /*istanbul ignore end*/
+    options.timeout) !== null && _options$timeout !== void 0 ? _options$timeout : Infinity;
+    var abortAfterTimestamp = Date.now() + maxExecutionTime;
+    var bestPath = [{
+      oldPos: -1,
+      lastComponent: undefined
+    }];
+
+    // Seed editLength = 0, i.e. the content starts with the same values
+    var newPos = this.extractCommon(bestPath[0], newString, oldString, 0, options);
+    if (bestPath[0].oldPos + 1 >= oldLen && newPos + 1 >= newLen) {
+      // Identity per the equality and tokenizer
+      return done(buildValues(self, bestPath[0].lastComponent, newString, oldString, self.useLongestToken));
+    }
+
+    // Once we hit the right edge of the edit graph on some diagonal k, we can
+    // definitely reach the end of the edit graph in no more than k edits, so
+    // there's no point in considering any moves to diagonal k+1 any more (from
+    // which we're guaranteed to need at least k+1 more edits).
+    // Similarly, once we've reached the bottom of the edit graph, there's no
+    // point considering moves to lower diagonals.
+    // We record this fact by setting minDiagonalToConsider and
+    // maxDiagonalToConsider to some finite value once we've hit the edge of
+    // the edit graph.
+    // This optimization is not faithful to the original algorithm presented in
+    // Myers's paper, which instead pointlessly extends D-paths off the end of
+    // the edit graph - see page 7 of Myers's paper which notes this point
+    // explicitly and illustrates it with a diagram. This has major performance
+    // implications for some common scenarios. For instance, to compute a diff
+    // where the new text simply appends d characters on the end of the
+    // original text of length n, the true Myers algorithm will take O(n+d^2)
+    // time while this optimization needs only O(n+d) time.
+    var minDiagonalToConsider = -Infinity,
+      maxDiagonalToConsider = Infinity;
+
+    // Main worker method. checks all permutations of a given edit length for acceptance.
+    function execEditLength() {
+      for (var diagonalPath = Math.max(minDiagonalToConsider, -editLength); diagonalPath <= Math.min(maxDiagonalToConsider, editLength); diagonalPath += 2) {
+        var basePath =
+        /*istanbul ignore start*/
+        void 0
+        /*istanbul ignore end*/
+        ;
+        var removePath = bestPath[diagonalPath - 1],
+          addPath = bestPath[diagonalPath + 1];
+        if (removePath) {
+          // No one else is going to attempt to use this value, clear it
+          bestPath[diagonalPath - 1] = undefined;
+        }
+        var canAdd = false;
+        if (addPath) {
+          // what newPos will be after we do an insertion:
+          var addPathNewPos = addPath.oldPos - diagonalPath;
+          canAdd = addPath && 0 <= addPathNewPos && addPathNewPos < newLen;
+        }
+        var canRemove = removePath && removePath.oldPos + 1 < oldLen;
+        if (!canAdd && !canRemove) {
+          // If this path is a terminal then prune
+          bestPath[diagonalPath] = undefined;
+          continue;
+        }
+
+        // Select the diagonal that we want to branch from. We select the prior
+        // path whose position in the old string is the farthest from the origin
+        // and does not pass the bounds of the diff graph
+        if (!canRemove || canAdd && removePath.oldPos < addPath.oldPos) {
+          basePath = self.addToPath(addPath, true, false, 0, options);
+        } else {
+          basePath = self.addToPath(removePath, false, true, 1, options);
+        }
+        newPos = self.extractCommon(basePath, newString, oldString, diagonalPath, options);
+        if (basePath.oldPos + 1 >= oldLen && newPos + 1 >= newLen) {
+          // If we have hit the end of both strings, then we are done
+          return done(buildValues(self, basePath.lastComponent, newString, oldString, self.useLongestToken));
+        } else {
+          bestPath[diagonalPath] = basePath;
+          if (basePath.oldPos + 1 >= oldLen) {
+            maxDiagonalToConsider = Math.min(maxDiagonalToConsider, diagonalPath - 1);
+          }
+          if (newPos + 1 >= newLen) {
+            minDiagonalToConsider = Math.max(minDiagonalToConsider, diagonalPath + 1);
+          }
+        }
+      }
+      editLength++;
+    }
+
+    // Performs the length of edit iteration. Is a bit fugly as this has to support the
+    // sync and async mode which is never fun. Loops over execEditLength until a value
+    // is produced, or until the edit length exceeds options.maxEditLength (if given),
+    // in which case it will return undefined.
+    if (callback) {
+      (function exec() {
+        setTimeout(function () {
+          if (editLength > maxEditLength || Date.now() > abortAfterTimestamp) {
+            return callback();
+          }
+          if (!execEditLength()) {
+            exec();
+          }
+        }, 0);
+      })();
+    } else {
+      while (editLength <= maxEditLength && Date.now() <= abortAfterTimestamp) {
+        var ret = execEditLength();
+        if (ret) {
+          return ret;
+        }
+      }
+    }
+  },
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  addToPath: function addToPath(path, added, removed, oldPosInc, options) {
+    var last = path.lastComponent;
+    if (last && !options.oneChangePerToken && last.added === added && last.removed === removed) {
+      return {
+        oldPos: path.oldPos + oldPosInc,
+        lastComponent: {
+          count: last.count + 1,
+          added: added,
+          removed: removed,
+          previousComponent: last.previousComponent
+        }
+      };
+    } else {
+      return {
+        oldPos: path.oldPos + oldPosInc,
+        lastComponent: {
+          count: 1,
+          added: added,
+          removed: removed,
+          previousComponent: last
+        }
+      };
+    }
+  },
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  extractCommon: function extractCommon(basePath, newString, oldString, diagonalPath, options) {
+    var newLen = newString.length,
+      oldLen = oldString.length,
+      oldPos = basePath.oldPos,
+      newPos = oldPos - diagonalPath,
+      commonCount = 0;
+    while (newPos + 1 < newLen && oldPos + 1 < oldLen && this.equals(oldString[oldPos + 1], newString[newPos + 1], options)) {
+      newPos++;
+      oldPos++;
+      commonCount++;
+      if (options.oneChangePerToken) {
+        basePath.lastComponent = {
+          count: 1,
+          previousComponent: basePath.lastComponent,
+          added: false,
+          removed: false
+        };
+      }
+    }
+    if (commonCount && !options.oneChangePerToken) {
+      basePath.lastComponent = {
+        count: commonCount,
+        previousComponent: basePath.lastComponent,
+        added: false,
+        removed: false
+      };
+    }
+    basePath.oldPos = oldPos;
+    return newPos;
+  },
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  equals: function equals(left, right, options) {
+    if (options.comparator) {
+      return options.comparator(left, right);
+    } else {
+      return left === right || options.ignoreCase && left.toLowerCase() === right.toLowerCase();
+    }
+  },
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  removeEmpty: function removeEmpty(array) {
+    var ret = [];
+    for (var i = 0; i < array.length; i++) {
+      if (array[i]) {
+        ret.push(array[i]);
+      }
+    }
+    return ret;
+  },
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  castInput: function castInput(value) {
+    return value;
+  },
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  tokenize: function tokenize(value) {
+    return Array.from(value);
+  },
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  join: function join(chars) {
+    return chars.join('');
+  },
+  /*istanbul ignore start*/
+  /*istanbul ignore end*/
+  postProcess: function postProcess(changeObjects) {
+    return changeObjects;
+  }
+};
+function buildValues(diff, lastComponent, newString, oldString, useLongestToken) {
+  // First we convert our linked list of components in reverse order to an
+  // array in the right order:
+  var components = [];
+  var nextComponent;
+  while (lastComponent) {
+    components.push(lastComponent);
+    nextComponent = lastComponent.previousComponent;
+    delete lastComponent.previousComponent;
+    lastComponent = nextComponent;
+  }
+  components.reverse();
+  var componentPos = 0,
+    componentLen = components.length,
+    newPos = 0,
+    oldPos = 0;
+  for (; componentPos < componentLen; componentPos++) {
+    var component = components[componentPos];
+    if (!component.removed) {
+      if (!component.added && useLongestToken) {
+        var value = newString.slice(newPos, newPos + component.count);
+        value = value.map(function (value, i) {
+          var oldValue = oldString[oldPos + i];
+          return oldValue.length > value.length ? oldValue : value;
+        });
+        component.value = diff.join(value);
+      } else {
+        component.value = diff.join(newString.slice(newPos, newPos + component.count));
+      }
+      newPos += component.count;
+
+      // Common case
+      if (!component.added) {
+        oldPos += component.count;
+      }
+    } else {
+      component.value = diff.join(oldString.slice(oldPos, oldPos + component.count));
+      oldPos += component.count;
+    }
+  }
+  return components;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJEaWZmIiwicHJvdG90eXBlIiwiZGlmZiIsIm9sZFN0cmluZyIsIm5ld1N0cmluZyIsIl9vcHRpb25zJHRpbWVvdXQiLCJvcHRpb25zIiwiYXJndW1lbnRzIiwibGVuZ3RoIiwidW5kZWZpbmVkIiwiY2FsbGJhY2siLCJzZWxmIiwiZG9uZSIsInZhbHVlIiwicG9zdFByb2Nlc3MiLCJzZXRUaW1lb3V0IiwiY2FzdElucHV0IiwicmVtb3ZlRW1wdHkiLCJ0b2tlbml6ZSIsIm5ld0xlbiIsIm9sZExlbiIsImVkaXRMZW5ndGgiLCJtYXhFZGl0TGVuZ3RoIiwiTWF0aCIsIm1pbiIsIm1heEV4ZWN1dGlvblRpbWUiLCJ0aW1lb3V0IiwiSW5maW5pdHkiLCJhYm9ydEFmdGVyVGltZXN0YW1wIiwiRGF0ZSIsIm5vdyIsImJlc3RQYXRoIiwib2xkUG9zIiwibGFzdENvbXBvbmVudCIsIm5ld1BvcyIsImV4dHJhY3RDb21tb24iLCJidWlsZFZhbHVlcyIsInVzZUxvbmdlc3RUb2tlbiIsIm1pbkRpYWdvbmFsVG9Db25zaWRlciIsIm1heERpYWdvbmFsVG9Db25zaWRlciIsImV4ZWNFZGl0TGVuZ3RoIiwiZGlhZ29uYWxQYXRoIiwibWF4IiwiYmFzZVBhdGgiLCJyZW1vdmVQYXRoIiwiYWRkUGF0aCIsImNhbkFkZCIsImFkZFBhdGhOZXdQb3MiLCJjYW5SZW1vdmUiLCJhZGRUb1BhdGgiLCJleGVjIiwicmV0IiwicGF0aCIsImFkZGVkIiwicmVtb3ZlZCIsIm9sZFBvc0luYyIsImxhc3QiLCJvbmVDaGFuZ2VQZXJUb2tlbiIsImNvdW50IiwicHJldmlvdXNDb21wb25lbnQiLCJjb21tb25Db3VudCIsImVxdWFscyIsImxlZnQiLCJyaWdodCIsImNvbXBhcmF0b3IiLCJpZ25vcmVDYXNlIiwidG9Mb3dlckNhc2UiLCJhcnJheSIsImkiLCJwdXNoIiwiQXJyYXkiLCJmcm9tIiwiam9pbiIsImNoYXJzIiwiY2hhbmdlT2JqZWN0cyIsImNvbXBvbmVudHMiLCJuZXh0Q29tcG9uZW50IiwicmV2ZXJzZSIsImNvbXBvbmVudFBvcyIsImNvbXBvbmVudExlbiIsImNvbXBvbmVudCIsInNsaWNlIiwibWFwIiwib2xkVmFsdWUiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvZGlmZi9iYXNlLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIERpZmYoKSB7fVxuXG5EaWZmLnByb3RvdHlwZSA9IHtcbiAgZGlmZihvbGRTdHJpbmcsIG5ld1N0cmluZywgb3B0aW9ucyA9IHt9KSB7XG4gICAgbGV0IGNhbGxiYWNrID0gb3B0aW9ucy5jYWxsYmFjaztcbiAgICBpZiAodHlwZW9mIG9wdGlvbnMgPT09ICdmdW5jdGlvbicpIHtcbiAgICAgIGNhbGxiYWNrID0gb3B0aW9ucztcbiAgICAgIG9wdGlvbnMgPSB7fTtcbiAgICB9XG5cbiAgICBsZXQgc2VsZiA9IHRoaXM7XG5cbiAgICBmdW5jdGlvbiBkb25lKHZhbHVlKSB7XG4gICAgICB2YWx1ZSA9IHNlbGYucG9zdFByb2Nlc3ModmFsdWUsIG9wdGlvbnMpO1xuICAgICAgaWYgKGNhbGxiYWNrKSB7XG4gICAgICAgIHNldFRpbWVvdXQoZnVuY3Rpb24oKSB7IGNhbGxiYWNrKHZhbHVlKTsgfSwgMCk7XG4gICAgICAgIHJldHVybiB0cnVlO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgcmV0dXJuIHZhbHVlO1xuICAgICAgfVxuICAgIH1cblxuICAgIC8vIEFsbG93IHN1YmNsYXNzZXMgdG8gbWFzc2FnZSB0aGUgaW5wdXQgcHJpb3IgdG8gcnVubmluZ1xuICAgIG9sZFN0cmluZyA9IHRoaXMuY2FzdElucHV0KG9sZFN0cmluZywgb3B0aW9ucyk7XG4gICAgbmV3U3RyaW5nID0gdGhpcy5jYXN0SW5wdXQobmV3U3RyaW5nLCBvcHRpb25zKTtcblxuICAgIG9sZFN0cmluZyA9IHRoaXMucmVtb3ZlRW1wdHkodGhpcy50b2tlbml6ZShvbGRTdHJpbmcsIG9wdGlvbnMpKTtcbiAgICBuZXdTdHJpbmcgPSB0aGlzLnJlbW92ZUVtcHR5KHRoaXMudG9rZW5pemUobmV3U3RyaW5nLCBvcHRpb25zKSk7XG5cbiAgICBsZXQgbmV3TGVuID0gbmV3U3RyaW5nLmxlbmd0aCwgb2xkTGVuID0gb2xkU3RyaW5nLmxlbmd0aDtcbiAgICBsZXQgZWRpdExlbmd0aCA9IDE7XG4gICAgbGV0IG1heEVkaXRMZW5ndGggPSBuZXdMZW4gKyBvbGRMZW47XG4gICAgaWYob3B0aW9ucy5tYXhFZGl0TGVuZ3RoICE9IG51bGwpIHtcbiAgICAgIG1heEVkaXRMZW5ndGggPSBNYXRoLm1pbihtYXhFZGl0TGVuZ3RoLCBvcHRpb25zLm1heEVkaXRMZW5ndGgpO1xuICAgIH1cbiAgICBjb25zdCBtYXhFeGVjdXRpb25UaW1lID0gb3B0aW9ucy50aW1lb3V0ID8/IEluZmluaXR5O1xuICAgIGNvbnN0IGFib3J0QWZ0ZXJUaW1lc3RhbXAgPSBEYXRlLm5vdygpICsgbWF4RXhlY3V0aW9uVGltZTtcblxuICAgIGxldCBiZXN0UGF0aCA9IFt7IG9sZFBvczogLTEsIGxhc3RDb21wb25lbnQ6IHVuZGVmaW5lZCB9XTtcblxuICAgIC8vIFNlZWQgZWRpdExlbmd0aCA9IDAsIGkuZS4gdGhlIGNvbnRlbnQgc3RhcnRzIHdpdGggdGhlIHNhbWUgdmFsdWVzXG4gICAgbGV0IG5ld1BvcyA9IHRoaXMuZXh0cmFjdENvbW1vbihiZXN0UGF0aFswXSwgbmV3U3RyaW5nLCBvbGRTdHJpbmcsIDAsIG9wdGlvbnMpO1xuICAgIGlmIChiZXN0UGF0aFswXS5vbGRQb3MgKyAxID49IG9sZExlbiAmJiBuZXdQb3MgKyAxID49IG5ld0xlbikge1xuICAgICAgLy8gSWRlbnRpdHkgcGVyIHRoZSBlcXVhbGl0eSBhbmQgdG9rZW5pemVyXG4gICAgICByZXR1cm4gZG9uZShidWlsZFZhbHVlcyhzZWxmLCBiZXN0UGF0aFswXS5sYXN0Q29tcG9uZW50LCBuZXdTdHJpbmcsIG9sZFN0cmluZywgc2VsZi51c2VMb25nZXN0VG9rZW4pKTtcbiAgICB9XG5cbiAgICAvLyBPbmNlIHdlIGhpdCB0aGUgcmlnaHQgZWRnZSBvZiB0aGUgZWRpdCBncmFwaCBvbiBzb21lIGRpYWdvbmFsIGssIHdlIGNhblxuICAgIC8vIGRlZmluaXRlbHkgcmVhY2ggdGhlIGVuZCBvZiB0aGUgZWRpdCBncmFwaCBpbiBubyBtb3JlIHRoYW4gayBlZGl0cywgc29cbiAgICAvLyB0aGVyZSdzIG5vIHBvaW50IGluIGNvbnNpZGVyaW5nIGFueSBtb3ZlcyB0byBkaWFnb25hbCBrKzEgYW55IG1vcmUgKGZyb21cbiAgICAvLyB3aGljaCB3ZSdyZSBndWFyYW50ZWVkIHRvIG5lZWQgYXQgbGVhc3QgaysxIG1vcmUgZWRpdHMpLlxuICAgIC8vIFNpbWlsYXJseSwgb25jZSB3ZSd2ZSByZWFjaGVkIHRoZSBib3R0b20gb2YgdGhlIGVkaXQgZ3JhcGgsIHRoZXJlJ3Mgbm9cbiAgICAvLyBwb2ludCBjb25zaWRlcmluZyBtb3ZlcyB0byBsb3dlciBkaWFnb25hbHMuXG4gICAgLy8gV2UgcmVjb3JkIHRoaXMgZmFjdCBieSBzZXR0aW5nIG1pbkRpYWdvbmFsVG9Db25zaWRlciBhbmRcbiAgICAvLyBtYXhEaWFnb25hbFRvQ29uc2lkZXIgdG8gc29tZSBmaW5pdGUgdmFsdWUgb25jZSB3ZSd2ZSBoaXQgdGhlIGVkZ2Ugb2ZcbiAgICAvLyB0aGUgZWRpdCBncmFwaC5cbiAgICAvLyBUaGlzIG9wdGltaXphdGlvbiBpcyBub3QgZmFpdGhmdWwgdG8gdGhlIG9yaWdpbmFsIGFsZ29yaXRobSBwcmVzZW50ZWQgaW5cbiAgICAvLyBNeWVycydzIHBhcGVyLCB3aGljaCBpbnN0ZWFkIHBvaW50bGVzc2x5IGV4dGVuZHMgRC1wYXRocyBvZmYgdGhlIGVuZCBvZlxuICAgIC8vIHRoZSBlZGl0IGdyYXBoIC0gc2VlIHBhZ2UgNyBvZiBNeWVycydzIHBhcGVyIHdoaWNoIG5vdGVzIHRoaXMgcG9pbnRcbiAgICAvLyBleHBsaWNpdGx5IGFuZCBpbGx1c3RyYXRlcyBpdCB3aXRoIGEgZGlhZ3JhbS4gVGhpcyBoYXMgbWFqb3IgcGVyZm9ybWFuY2VcbiAgICAvLyBpbXBsaWNhdGlvbnMgZm9yIHNvbWUgY29tbW9uIHNjZW5hcmlvcy4gRm9yIGluc3RhbmNlLCB0byBjb21wdXRlIGEgZGlmZlxuICAgIC8vIHdoZXJlIHRoZSBuZXcgdGV4dCBzaW1wbHkgYXBwZW5kcyBkIGNoYXJhY3RlcnMgb24gdGhlIGVuZCBvZiB0aGVcbiAgICAvLyBvcmlnaW5hbCB0ZXh0IG9mIGxlbmd0aCBuLCB0aGUgdHJ1ZSBNeWVycyBhbGdvcml0aG0gd2lsbCB0YWtlIE8obitkXjIpXG4gICAgLy8gdGltZSB3aGlsZSB0aGlzIG9wdGltaXphdGlvbiBuZWVkcyBvbmx5IE8obitkKSB0aW1lLlxuICAgIGxldCBtaW5EaWFnb25hbFRvQ29uc2lkZXIgPSAtSW5maW5pdHksIG1heERpYWdvbmFsVG9Db25zaWRlciA9IEluZmluaXR5O1xuXG4gICAgLy8gTWFpbiB3b3JrZXIgbWV0aG9kLiBjaGVja3MgYWxsIHBlcm11dGF0aW9ucyBvZiBhIGdpdmVuIGVkaXQgbGVuZ3RoIGZvciBhY2NlcHRhbmNlLlxuICAgIGZ1bmN0aW9uIGV4ZWNFZGl0TGVuZ3RoKCkge1xuICAgICAgZm9yIChcbiAgICAgICAgbGV0IGRpYWdvbmFsUGF0aCA9IE1hdGgubWF4KG1pbkRpYWdvbmFsVG9Db25zaWRlciwgLWVkaXRMZW5ndGgpO1xuICAgICAgICBkaWFnb25hbFBhdGggPD0gTWF0aC5taW4obWF4RGlhZ29uYWxUb0NvbnNpZGVyLCBlZGl0TGVuZ3RoKTtcbiAgICAgICAgZGlhZ29uYWxQYXRoICs9IDJcbiAgICAgICkge1xuICAgICAgICBsZXQgYmFzZVBhdGg7XG4gICAgICAgIGxldCByZW1vdmVQYXRoID0gYmVzdFBhdGhbZGlhZ29uYWxQYXRoIC0gMV0sXG4gICAgICAgICAgICBhZGRQYXRoID0gYmVzdFBhdGhbZGlhZ29uYWxQYXRoICsgMV07XG4gICAgICAgIGlmIChyZW1vdmVQYXRoKSB7XG4gICAgICAgICAgLy8gTm8gb25lIGVsc2UgaXMgZ29pbmcgdG8gYXR0ZW1wdCB0byB1c2UgdGhpcyB2YWx1ZSwgY2xlYXIgaXRcbiAgICAgICAgICBiZXN0UGF0aFtkaWFnb25hbFBhdGggLSAxXSA9IHVuZGVmaW5lZDtcbiAgICAgICAgfVxuXG4gICAgICAgIGxldCBjYW5BZGQgPSBmYWxzZTtcbiAgICAgICAgaWYgKGFkZFBhdGgpIHtcbiAgICAgICAgICAvLyB3aGF0IG5ld1BvcyB3aWxsIGJlIGFmdGVyIHdlIGRvIGFuIGluc2VydGlvbjpcbiAgICAgICAgICBjb25zdCBhZGRQYXRoTmV3UG9zID0gYWRkUGF0aC5vbGRQb3MgLSBkaWFnb25hbFBhdGg7XG4gICAgICAgICAgY2FuQWRkID0gYWRkUGF0aCAmJiAwIDw9IGFkZFBhdGhOZXdQb3MgJiYgYWRkUGF0aE5ld1BvcyA8IG5ld0xlbjtcbiAgICAgICAgfVxuXG4gICAgICAgIGxldCBjYW5SZW1vdmUgPSByZW1vdmVQYXRoICYmIHJlbW92ZVBhdGgub2xkUG9zICsgMSA8IG9sZExlbjtcbiAgICAgICAgaWYgKCFjYW5BZGQgJiYgIWNhblJlbW92ZSkge1xuICAgICAgICAgIC8vIElmIHRoaXMgcGF0aCBpcyBhIHRlcm1pbmFsIHRoZW4gcHJ1bmVcbiAgICAgICAgICBiZXN0UGF0aFtkaWFnb25hbFBhdGhdID0gdW5kZWZpbmVkO1xuICAgICAgICAgIGNvbnRpbnVlO1xuICAgICAgICB9XG5cbiAgICAgICAgLy8gU2VsZWN0IHRoZSBkaWFnb25hbCB0aGF0IHdlIHdhbnQgdG8gYnJhbmNoIGZyb20uIFdlIHNlbGVjdCB0aGUgcHJpb3JcbiAgICAgICAgLy8gcGF0aCB3aG9zZSBwb3NpdGlvbiBpbiB0aGUgb2xkIHN0cmluZyBpcyB0aGUgZmFydGhlc3QgZnJvbSB0aGUgb3JpZ2luXG4gICAgICAgIC8vIGFuZCBkb2VzIG5vdCBwYXNzIHRoZSBib3VuZHMgb2YgdGhlIGRpZmYgZ3JhcGhcbiAgICAgICAgaWYgKCFjYW5SZW1vdmUgfHwgKGNhbkFkZCAmJiByZW1vdmVQYXRoLm9sZFBvcyA8IGFkZFBhdGgub2xkUG9zKSkge1xuICAgICAgICAgIGJhc2VQYXRoID0gc2VsZi5hZGRUb1BhdGgoYWRkUGF0aCwgdHJ1ZSwgZmFsc2UsIDAsIG9wdGlvbnMpO1xuICAgICAgICB9IGVsc2Uge1xuICAgICAgICAgIGJhc2VQYXRoID0gc2VsZi5hZGRUb1BhdGgocmVtb3ZlUGF0aCwgZmFsc2UsIHRydWUsIDEsIG9wdGlvbnMpO1xuICAgICAgICB9XG5cbiAgICAgICAgbmV3UG9zID0gc2VsZi5leHRyYWN0Q29tbW9uKGJhc2VQYXRoLCBuZXdTdHJpbmcsIG9sZFN0cmluZywgZGlhZ29uYWxQYXRoLCBvcHRpb25zKTtcblxuICAgICAgICBpZiAoYmFzZVBhdGgub2xkUG9zICsgMSA+PSBvbGRMZW4gJiYgbmV3UG9zICsgMSA+PSBuZXdMZW4pIHtcbiAgICAgICAgICAvLyBJZiB3ZSBoYXZlIGhpdCB0aGUgZW5kIG9mIGJvdGggc3RyaW5ncywgdGhlbiB3ZSBhcmUgZG9uZVxuICAgICAgICAgIHJldHVybiBkb25lKGJ1aWxkVmFsdWVzKHNlbGYsIGJhc2VQYXRoLmxhc3RDb21wb25lbnQsIG5ld1N0cmluZywgb2xkU3RyaW5nLCBzZWxmLnVzZUxvbmdlc3RUb2tlbikpO1xuICAgICAgICB9IGVsc2Uge1xuICAgICAgICAgIGJlc3RQYXRoW2RpYWdvbmFsUGF0aF0gPSBiYXNlUGF0aDtcbiAgICAgICAgICBpZiAoYmFzZVBhdGgub2xkUG9zICsgMSA+PSBvbGRMZW4pIHtcbiAgICAgICAgICAgIG1heERpYWdvbmFsVG9Db25zaWRlciA9IE1hdGgubWluKG1heERpYWdvbmFsVG9Db25zaWRlciwgZGlhZ29uYWxQYXRoIC0gMSk7XG4gICAgICAgICAgfVxuICAgICAgICAgIGlmIChuZXdQb3MgKyAxID49IG5ld0xlbikge1xuICAgICAgICAgICAgbWluRGlhZ29uYWxUb0NvbnNpZGVyID0gTWF0aC5tYXgobWluRGlhZ29uYWxUb0NvbnNpZGVyLCBkaWFnb25hbFBhdGggKyAxKTtcbiAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICAgIH1cblxuICAgICAgZWRpdExlbmd0aCsrO1xuICAgIH1cblxuICAgIC8vIFBlcmZvcm1zIHRoZSBsZW5ndGggb2YgZWRpdCBpdGVyYXRpb24uIElzIGEgYml0IGZ1Z2x5IGFzIHRoaXMgaGFzIHRvIHN1cHBvcnQgdGhlXG4gICAgLy8gc3luYyBhbmQgYXN5bmMgbW9kZSB3aGljaCBpcyBuZXZlciBmdW4uIExvb3BzIG92ZXIgZXhlY0VkaXRMZW5ndGggdW50aWwgYSB2YWx1ZVxuICAgIC8vIGlzIHByb2R1Y2VkLCBvciB1bnRpbCB0aGUgZWRpdCBsZW5ndGggZXhjZWVkcyBvcHRpb25zLm1heEVkaXRMZW5ndGggKGlmIGdpdmVuKSxcbiAgICAvLyBpbiB3aGljaCBjYXNlIGl0IHdpbGwgcmV0dXJuIHVuZGVmaW5lZC5cbiAgICBpZiAoY2FsbGJhY2spIHtcbiAgICAgIChmdW5jdGlvbiBleGVjKCkge1xuICAgICAgICBzZXRUaW1lb3V0KGZ1bmN0aW9uKCkge1xuICAgICAgICAgIGlmIChlZGl0TGVuZ3RoID4gbWF4RWRpdExlbmd0aCB8fCBEYXRlLm5vdygpID4gYWJvcnRBZnRlclRpbWVzdGFtcCkge1xuICAgICAgICAgICAgcmV0dXJuIGNhbGxiYWNrKCk7XG4gICAgICAgICAgfVxuXG4gICAgICAgICAgaWYgKCFleGVjRWRpdExlbmd0aCgpKSB7XG4gICAgICAgICAgICBleGVjKCk7XG4gICAgICAgICAgfVxuICAgICAgICB9LCAwKTtcbiAgICAgIH0oKSk7XG4gICAgfSBlbHNlIHtcbiAgICAgIHdoaWxlIChlZGl0TGVuZ3RoIDw9IG1heEVkaXRMZW5ndGggJiYgRGF0ZS5ub3coKSA8PSBhYm9ydEFmdGVyVGltZXN0YW1wKSB7XG4gICAgICAgIGxldCByZXQgPSBleGVjRWRpdExlbmd0aCgpO1xuICAgICAgICBpZiAocmV0KSB7XG4gICAgICAgICAgcmV0dXJuIHJldDtcbiAgICAgICAgfVxuICAgICAgfVxuICAgIH1cbiAgfSxcblxuICBhZGRUb1BhdGgocGF0aCwgYWRkZWQsIHJlbW92ZWQsIG9sZFBvc0luYywgb3B0aW9ucykge1xuICAgIGxldCBsYXN0ID0gcGF0aC5sYXN0Q29tcG9uZW50O1xuICAgIGlmIChsYXN0ICYmICFvcHRpb25zLm9uZUNoYW5nZVBlclRva2VuICYmIGxhc3QuYWRkZWQgPT09IGFkZGVkICYmIGxhc3QucmVtb3ZlZCA9PT0gcmVtb3ZlZCkge1xuICAgICAgcmV0dXJuIHtcbiAgICAgICAgb2xkUG9zOiBwYXRoLm9sZFBvcyArIG9sZFBvc0luYyxcbiAgICAgICAgbGFzdENvbXBvbmVudDoge2NvdW50OiBsYXN0LmNvdW50ICsgMSwgYWRkZWQ6IGFkZGVkLCByZW1vdmVkOiByZW1vdmVkLCBwcmV2aW91c0NvbXBvbmVudDogbGFzdC5wcmV2aW91c0NvbXBvbmVudCB9XG4gICAgICB9O1xuICAgIH0gZWxzZSB7XG4gICAgICByZXR1cm4ge1xuICAgICAgICBvbGRQb3M6IHBhdGgub2xkUG9zICsgb2xkUG9zSW5jLFxuICAgICAgICBsYXN0Q29tcG9uZW50OiB7Y291bnQ6IDEsIGFkZGVkOiBhZGRlZCwgcmVtb3ZlZDogcmVtb3ZlZCwgcHJldmlvdXNDb21wb25lbnQ6IGxhc3QgfVxuICAgICAgfTtcbiAgICB9XG4gIH0sXG4gIGV4dHJhY3RDb21tb24oYmFzZVBhdGgsIG5ld1N0cmluZywgb2xkU3RyaW5nLCBkaWFnb25hbFBhdGgsIG9wdGlvbnMpIHtcbiAgICBsZXQgbmV3TGVuID0gbmV3U3RyaW5nLmxlbmd0aCxcbiAgICAgICAgb2xkTGVuID0gb2xkU3RyaW5nLmxlbmd0aCxcbiAgICAgICAgb2xkUG9zID0gYmFzZVBhdGgub2xkUG9zLFxuICAgICAgICBuZXdQb3MgPSBvbGRQb3MgLSBkaWFnb25hbFBhdGgsXG5cbiAgICAgICAgY29tbW9uQ291bnQgPSAwO1xuICAgIHdoaWxlIChuZXdQb3MgKyAxIDwgbmV3TGVuICYmIG9sZFBvcyArIDEgPCBvbGRMZW4gJiYgdGhpcy5lcXVhbHMob2xkU3RyaW5nW29sZFBvcyArIDFdLCBuZXdTdHJpbmdbbmV3UG9zICsgMV0sIG9wdGlvbnMpKSB7XG4gICAgICBuZXdQb3MrKztcbiAgICAgIG9sZFBvcysrO1xuICAgICAgY29tbW9uQ291bnQrKztcbiAgICAgIGlmIChvcHRpb25zLm9uZUNoYW5nZVBlclRva2VuKSB7XG4gICAgICAgIGJhc2VQYXRoLmxhc3RDb21wb25lbnQgPSB7Y291bnQ6IDEsIHByZXZpb3VzQ29tcG9uZW50OiBiYXNlUGF0aC5sYXN0Q29tcG9uZW50LCBhZGRlZDogZmFsc2UsIHJlbW92ZWQ6IGZhbHNlfTtcbiAgICAgIH1cbiAgICB9XG5cbiAgICBpZiAoY29tbW9uQ291bnQgJiYgIW9wdGlvbnMub25lQ2hhbmdlUGVyVG9rZW4pIHtcbiAgICAgIGJhc2VQYXRoLmxhc3RDb21wb25lbnQgPSB7Y291bnQ6IGNvbW1vbkNvdW50LCBwcmV2aW91c0NvbXBvbmVudDogYmFzZVBhdGgubGFzdENvbXBvbmVudCwgYWRkZWQ6IGZhbHNlLCByZW1vdmVkOiBmYWxzZX07XG4gICAgfVxuXG4gICAgYmFzZVBhdGgub2xkUG9zID0gb2xkUG9zO1xuICAgIHJldHVybiBuZXdQb3M7XG4gIH0sXG5cbiAgZXF1YWxzKGxlZnQsIHJpZ2h0LCBvcHRpb25zKSB7XG4gICAgaWYgKG9wdGlvbnMuY29tcGFyYXRvcikge1xuICAgICAgcmV0dXJuIG9wdGlvbnMuY29tcGFyYXRvcihsZWZ0LCByaWdodCk7XG4gICAgfSBlbHNlIHtcbiAgICAgIHJldHVybiBsZWZ0ID09PSByaWdodFxuICAgICAgICB8fCAob3B0aW9ucy5pZ25vcmVDYXNlICYmIGxlZnQudG9Mb3dlckNhc2UoKSA9PT0gcmlnaHQudG9Mb3dlckNhc2UoKSk7XG4gICAgfVxuICB9LFxuICByZW1vdmVFbXB0eShhcnJheSkge1xuICAgIGxldCByZXQgPSBbXTtcbiAgICBmb3IgKGxldCBpID0gMDsgaSA8IGFycmF5Lmxlbmd0aDsgaSsrKSB7XG4gICAgICBpZiAoYXJyYXlbaV0pIHtcbiAgICAgICAgcmV0LnB1c2goYXJyYXlbaV0pO1xuICAgICAgfVxuICAgIH1cbiAgICByZXR1cm4gcmV0O1xuICB9LFxuICBjYXN0SW5wdXQodmFsdWUpIHtcbiAgICByZXR1cm4gdmFsdWU7XG4gIH0sXG4gIHRva2VuaXplKHZhbHVlKSB7XG4gICAgcmV0dXJuIEFycmF5LmZyb20odmFsdWUpO1xuICB9LFxuICBqb2luKGNoYXJzKSB7XG4gICAgcmV0dXJuIGNoYXJzLmpvaW4oJycpO1xuICB9LFxuICBwb3N0UHJvY2VzcyhjaGFuZ2VPYmplY3RzKSB7XG4gICAgcmV0dXJuIGNoYW5nZU9iamVjdHM7XG4gIH1cbn07XG5cbmZ1bmN0aW9uIGJ1aWxkVmFsdWVzKGRpZmYsIGxhc3RDb21wb25lbnQsIG5ld1N0cmluZywgb2xkU3RyaW5nLCB1c2VMb25nZXN0VG9rZW4pIHtcbiAgLy8gRmlyc3Qgd2UgY29udmVydCBvdXIgbGlua2VkIGxpc3Qgb2YgY29tcG9uZW50cyBpbiByZXZlcnNlIG9yZGVyIHRvIGFuXG4gIC8vIGFycmF5IGluIHRoZSByaWdodCBvcmRlcjpcbiAgY29uc3QgY29tcG9uZW50cyA9IFtdO1xuICBsZXQgbmV4dENvbXBvbmVudDtcbiAgd2hpbGUgKGxhc3RDb21wb25lbnQpIHtcbiAgICBjb21wb25lbnRzLnB1c2gobGFzdENvbXBvbmVudCk7XG4gICAgbmV4dENvbXBvbmVudCA9IGxhc3RDb21wb25lbnQucHJldmlvdXNDb21wb25lbnQ7XG4gICAgZGVsZXRlIGxhc3RDb21wb25lbnQucHJldmlvdXNDb21wb25lbnQ7XG4gICAgbGFzdENvbXBvbmVudCA9IG5leHRDb21wb25lbnQ7XG4gIH1cbiAgY29tcG9uZW50cy5yZXZlcnNlKCk7XG5cbiAgbGV0IGNvbXBvbmVudFBvcyA9IDAsXG4gICAgICBjb21wb25lbnRMZW4gPSBjb21wb25lbnRzLmxlbmd0aCxcbiAgICAgIG5ld1BvcyA9IDAsXG4gICAgICBvbGRQb3MgPSAwO1xuXG4gIGZvciAoOyBjb21wb25lbnRQb3MgPCBjb21wb25lbnRMZW47IGNvbXBvbmVudFBvcysrKSB7XG4gICAgbGV0IGNvbXBvbmVudCA9IGNvbXBvbmVudHNbY29tcG9uZW50UG9zXTtcbiAgICBpZiAoIWNvbXBvbmVudC5yZW1vdmVkKSB7XG4gICAgICBpZiAoIWNvbXBvbmVudC5hZGRlZCAmJiB1c2VMb25nZXN0VG9rZW4pIHtcbiAgICAgICAgbGV0IHZhbHVlID0gbmV3U3RyaW5nLnNsaWNlKG5ld1BvcywgbmV3UG9zICsgY29tcG9uZW50LmNvdW50KTtcbiAgICAgICAgdmFsdWUgPSB2YWx1ZS5tYXAoZnVuY3Rpb24odmFsdWUsIGkpIHtcbiAgICAgICAgICBsZXQgb2xkVmFsdWUgPSBvbGRTdHJpbmdbb2xkUG9zICsgaV07XG4gICAgICAgICAgcmV0dXJuIG9sZFZhbHVlLmxlbmd0aCA+IHZhbHVlLmxlbmd0aCA/IG9sZFZhbHVlIDogdmFsdWU7XG4gICAgICAgIH0pO1xuXG4gICAgICAgIGNvbXBvbmVudC52YWx1ZSA9IGRpZmYuam9pbih2YWx1ZSk7XG4gICAgICB9IGVsc2Uge1xuICAgICAgICBjb21wb25lbnQudmFsdWUgPSBkaWZmLmpvaW4obmV3U3RyaW5nLnNsaWNlKG5ld1BvcywgbmV3UG9zICsgY29tcG9uZW50LmNvdW50KSk7XG4gICAgICB9XG4gICAgICBuZXdQb3MgKz0gY29tcG9uZW50LmNvdW50O1xuXG4gICAgICAvLyBDb21tb24gY2FzZVxuICAgICAgaWYgKCFjb21wb25lbnQuYWRkZWQpIHtcbiAgICAgICAgb2xkUG9zICs9IGNvbXBvbmVudC5jb3VudDtcbiAgICAgIH1cbiAgICB9IGVsc2Uge1xuICAgICAgY29tcG9uZW50LnZhbHVlID0gZGlmZi5qb2luKG9sZFN0cmluZy5zbGljZShvbGRQb3MsIG9sZFBvcyArIGNvbXBvbmVudC5jb3VudCkpO1xuICAgICAgb2xkUG9zICs9IGNvbXBvbmVudC5jb3VudDtcbiAgICB9XG4gIH1cblxuICByZXR1cm4gY29tcG9uZW50cztcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7QUFBZSxTQUFTQSxJQUFJQSxDQUFBLEVBQUcsQ0FBQztBQUVoQ0EsSUFBSSxD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
+
+
+/***/ }),
+
+/***/ 6312:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.characterDiff = void 0;
+exports.diffChars = diffChars;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_base = _interopRequireDefault(__nccwpck_require__(7106))
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*istanbul ignore end*/
+var characterDiff =
+/*istanbul ignore start*/
+exports.characterDiff =
+/*istanbul ignore end*/
+new
+/*istanbul ignore start*/
+_base
+/*istanbul ignore end*/
+[
+/*istanbul ignore start*/
+"default"
+/*istanbul ignore end*/
+]();
+function diffChars(oldStr, newStr, options) {
+  return characterDiff.diff(oldStr, newStr, options);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYmFzZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwib2JqIiwiX19lc01vZHVsZSIsImNoYXJhY3RlckRpZmYiLCJleHBvcnRzIiwiRGlmZiIsImRpZmZDaGFycyIsIm9sZFN0ciIsIm5ld1N0ciIsIm9wdGlvbnMiLCJkaWZmIl0sInNvdXJjZXMiOlsiLi4vLi4vc3JjL2RpZmYvY2hhcmFjdGVyLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBEaWZmIGZyb20gJy4vYmFzZSc7XG5cbmV4cG9ydCBjb25zdCBjaGFyYWN0ZXJEaWZmID0gbmV3IERpZmYoKTtcbmV4cG9ydCBmdW5jdGlvbiBkaWZmQ2hhcnMob2xkU3RyLCBuZXdTdHIsIG9wdGlvbnMpIHsgcmV0dXJuIGNoYXJhY3RlckRpZmYuZGlmZihvbGRTdHIsIG5ld1N0ciwgb3B0aW9ucyk7IH1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUE7QUFBQTtBQUFBQSxLQUFBLEdBQUFDLHNCQUFBLENBQUFDLE9BQUE7QUFBQTtBQUFBO0FBQTBCLG1DQUFBRCx1QkFBQUUsR0FBQSxXQUFBQSxHQUFBLElBQUFBLEdBQUEsQ0FBQUMsVUFBQSxHQUFBRCxHQUFBLGdCQUFBQSxHQUFBO0FBQUE7QUFFbkIsSUFBTUUsYUFBYTtBQUFBO0FBQUFDLE9BQUEsQ0FBQUQsYUFBQTtBQUFBO0FBQUc7QUFBSUU7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUEsQ0FBSSxDQUFDLENBQUM7QUFDaEMsU0FBU0MsU0FBU0EsQ0FBQ0MsTUFBTSxFQUFFQyxNQUFNLEVBQUVDLE9BQU8sRUFBRTtFQUFFLE9BQU9OLGFBQWEsQ0FBQ08sSUFBSSxDQUFDSCxNQUFNLEVBQUVDLE1BQU0sRUFBRUMsT0FBTyxDQUFDO0FBQUUiLCJpZ25vcmVMaXN0IjpbXX0=
+
+
+/***/ }),
+
+/***/ 8336:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.cssDiff = void 0;
+exports.diffCss = diffCss;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_base = _interopRequireDefault(__nccwpck_require__(7106))
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*istanbul ignore end*/
+var cssDiff =
+/*istanbul ignore start*/
+exports.cssDiff =
+/*istanbul ignore end*/
+new
+/*istanbul ignore start*/
+_base
+/*istanbul ignore end*/
+[
+/*istanbul ignore start*/
+"default"
+/*istanbul ignore end*/
+]();
+cssDiff.tokenize = function (value) {
+  return value.split(/([{}:;,]|\s+)/);
+};
+function diffCss(oldStr, newStr, callback) {
+  return cssDiff.diff(oldStr, newStr, callback);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYmFzZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwib2JqIiwiX19lc01vZHVsZSIsImNzc0RpZmYiLCJleHBvcnRzIiwiRGlmZiIsInRva2VuaXplIiwidmFsdWUiLCJzcGxpdCIsImRpZmZDc3MiLCJvbGRTdHIiLCJuZXdTdHIiLCJjYWxsYmFjayIsImRpZmYiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvZGlmZi9jc3MuanMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IERpZmYgZnJvbSAnLi9iYXNlJztcblxuZXhwb3J0IGNvbnN0IGNzc0RpZmYgPSBuZXcgRGlmZigpO1xuY3NzRGlmZi50b2tlbml6ZSA9IGZ1bmN0aW9uKHZhbHVlKSB7XG4gIHJldHVybiB2YWx1ZS5zcGxpdCgvKFt7fTo7LF18XFxzKykvKTtcbn07XG5cbmV4cG9ydCBmdW5jdGlvbiBkaWZmQ3NzKG9sZFN0ciwgbmV3U3RyLCBjYWxsYmFjaykgeyByZXR1cm4gY3NzRGlmZi5kaWZmKG9sZFN0ciwgbmV3U3RyLCBjYWxsYmFjayk7IH1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUE7QUFBQTtBQUFBQSxLQUFBLEdBQUFDLHNCQUFBLENBQUFDLE9BQUE7QUFBQTtBQUFBO0FBQTBCLG1DQUFBRCx1QkFBQUUsR0FBQSxXQUFBQSxHQUFBLElBQUFBLEdBQUEsQ0FBQUMsVUFBQSxHQUFBRCxHQUFBLGdCQUFBQSxHQUFBO0FBQUE7QUFFbkIsSUFBTUUsT0FBTztBQUFBO0FBQUFDLE9BQUEsQ0FBQUQsT0FBQTtBQUFBO0FBQUc7QUFBSUU7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUEsQ0FBSSxDQUFDLENBQUM7QUFDakNGLE9BQU8sQ0FBQ0csUUFBUSxHQUFHLFVBQVNDLEtBQUssRUFBRTtFQUNqQyxPQUFPQSxLQUFLLENBQUNDLEtBQUssQ0FBQyxlQUFlLENBQUM7QUFDckMsQ0FBQztBQUVNLFNBQVNDLE9BQU9BLENBQUNDLE1BQU0sRUFBRUMsTUFBTSxFQUFFQyxRQUFRLEVBQUU7RUFBRSxPQUFPVCxPQUFPLENBQUNVLElBQUksQ0FBQ0gsTUFBTSxFQUFFQyxNQUFNLEVBQUVDLFFBQVEsQ0FBQztBQUFFIiwiaWdub3JlTGlzdCI6W119
+
+
+/***/ }),
+
+/***/ 1553:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.canonicalize = canonicalize;
+exports.diffJson = diffJson;
+exports.jsonDiff = void 0;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_base = _interopRequireDefault(__nccwpck_require__(7106))
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_line = __nccwpck_require__(5129)
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+/*istanbul ignore end*/
+var jsonDiff =
+/*istanbul ignore start*/
+exports.jsonDiff =
+/*istanbul ignore end*/
+new
+/*istanbul ignore start*/
+_base
+/*istanbul ignore end*/
+[
+/*istanbul ignore start*/
+"default"
+/*istanbul ignore end*/
+]();
+// Discriminate between two lines of pretty-printed, serialized JSON where one of them has a
+// dangling comma and the other doesn't. Turns out including the dangling comma yields the nicest output:
+jsonDiff.useLongestToken = true;
+jsonDiff.tokenize =
+/*istanbul ignore start*/
+_line
+/*istanbul ignore end*/
+.
+/*istanbul ignore start*/
+lineDiff
+/*istanbul ignore end*/
+.tokenize;
+jsonDiff.castInput = function (value, options) {
+  var
+    /*istanbul ignore start*/
+    /*istanbul ignore end*/
+    undefinedReplacement = options.undefinedReplacement,
+    /*istanbul ignore start*/
+    _options$stringifyRep =
+    /*istanbul ignore end*/
+    options.stringifyReplacer,
+    /*istanbul ignore start*/
+    /*istanbul ignore end*/
+    stringifyReplacer = _options$stringifyRep === void 0 ? function (k, v)
+    /*istanbul ignore start*/
+    {
+      return (
+        /*istanbul ignore end*/
+        typeof v === 'undefined' ? undefinedReplacement : v
+      );
+    } : _options$stringifyRep;
+  return typeof value === 'string' ? value : JSON.stringify(canonicalize(value, null, null, stringifyReplacer), stringifyReplacer, '  ');
+};
+jsonDiff.equals = function (left, right, options) {
+  return (
+    /*istanbul ignore start*/
+    _base
+    /*istanbul ignore end*/
+    [
+    /*istanbul ignore start*/
+    "default"
+    /*istanbul ignore end*/
+    ].prototype.equals.call(jsonDiff, left.replace(/,([\r\n])/g, '$1'), right.replace(/,([\r\n])/g, '$1'), options)
+  );
+};
+function diffJson(oldObj, newObj, options) {
+  return jsonDiff.diff(oldObj, newObj, options);
+}
+
+// This function handles the presence of circular references by bailing out when encountering an
+// object that is already on the "stack" of items being processed. Accepts an optional replacer
+function canonicalize(obj, stack, replacementStack, replacer, key) {
+  stack = stack || [];
+  replacementStack = replacementStack || [];
+  if (replacer) {
+    obj = replacer(key, obj);
+  }
+  var i;
+  for (i = 0; i < stack.length; i += 1) {
+    if (stack[i] === obj) {
+      return replacementStack[i];
+    }
+  }
+  var canonicalizedObj;
+  if ('[object Array]' === Object.prototype.toString.call(obj)) {
+    stack.push(obj);
+    canonicalizedObj = new Array(obj.length);
+    replacementStack.push(canonicalizedObj);
+    for (i = 0; i < obj.length; i += 1) {
+      canonicalizedObj[i] = canonicalize(obj[i], stack, replacementStack, replacer, key);
+    }
+    stack.pop();
+    replacementStack.pop();
+    return canonicalizedObj;
+  }
+  if (obj && obj.toJSON) {
+    obj = obj.toJSON();
+  }
+  if (
+  /*istanbul ignore start*/
+  _typeof(
+  /*istanbul ignore end*/
+  obj) === 'object' && obj !== null) {
+    stack.push(obj);
+    canonicalizedObj = {};
+    replacementStack.push(canonicalizedObj);
+    var sortedKeys = [],
+      _key;
+    for (_key in obj) {
+      /* istanbul ignore else */
+      if (Object.prototype.hasOwnProperty.call(obj, _key)) {
+        sortedKeys.push(_key);
+      }
+    }
+    sortedKeys.sort();
+    for (i = 0; i < sortedKeys.length; i += 1) {
+      _key = sortedKeys[i];
+      canonicalizedObj[_key] = canonicalize(obj[_key], stack, replacementStack, replacer, _key);
+    }
+    stack.pop();
+    replacementStack.pop();
+  } else {
+    canonicalizedObj = obj;
+  }
+  return canonicalizedObj;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYmFzZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwiX2xpbmUiLCJvYmoiLCJfX2VzTW9kdWxlIiwiX3R5cGVvZiIsIm8iLCJTeW1ib2wiLCJpdGVyYXRvciIsImNvbnN0cnVjdG9yIiwicHJvdG90eXBlIiwianNvbkRpZmYiLCJleHBvcnRzIiwiRGlmZiIsInVzZUxvbmdlc3RUb2tlbiIsInRva2VuaXplIiwibGluZURpZmYiLCJjYXN0SW5wdXQiLCJ2YWx1ZSIsIm9wdGlvbnMiLCJ1bmRlZmluZWRSZXBsYWNlbWVudCIsIl9vcHRpb25zJHN0cmluZ2lmeVJlcCIsInN0cmluZ2lmeVJlcGxhY2VyIiwiayIsInYiLCJKU09OIiwic3RyaW5naWZ5IiwiY2Fub25pY2FsaXplIiwiZXF1YWxzIiwibGVmdCIsInJpZ2h0IiwiY2FsbCIsInJlcGxhY2UiLCJkaWZmSnNvbiIsIm9sZE9iaiIsIm5ld09iaiIsImRpZmYiLCJzdGFjayIsInJlcGxhY2VtZW50U3RhY2siLCJyZXBsYWNlciIsImtleSIsImkiLCJsZW5ndGgiLCJjYW5vbmljYWxpemVkT2JqIiwiT2JqZWN0IiwidG9TdHJpbmciLCJwdXNoIiwiQXJyYXkiLCJwb3AiLCJ0b0pTT04iLCJzb3J0ZWRLZXlzIiwiaGFzT3duUHJvcGVydHkiLCJzb3J0Il0sInNvdXJjZXMiOlsiLi4vLi4vc3JjL2RpZmYvanNvbi5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgRGlmZiBmcm9tICcuL2Jhc2UnO1xuaW1wb3J0IHtsaW5lRGlmZn0gZnJvbSAnLi9saW5lJztcblxuZXhwb3J0IGNvbnN0IGpzb25EaWZmID0gbmV3IERpZmYoKTtcbi8vIERpc2NyaW1pbmF0ZSBiZXR3ZWVuIHR3byBsaW5lcyBvZiBwcmV0dHktcHJpbnRlZCwgc2VyaWFsaXplZCBKU09OIHdoZXJlIG9uZSBvZiB0aGVtIGhhcyBhXG4vLyBkYW5nbGluZyBjb21tYSBhbmQgdGhlIG90aGVyIGRvZXNuJ3QuIFR1cm5zIG91dCBpbmNsdWRpbmcgdGhlIGRhbmdsaW5nIGNvbW1hIHlpZWxkcyB0aGUgbmljZXN0IG91dHB1dDpcbmpzb25EaWZmLnVzZUxvbmdlc3RUb2tlbiA9IHRydWU7XG5cbmpzb25EaWZmLnRva2VuaXplID0gbGluZURpZmYudG9rZW5pemU7XG5qc29uRGlmZi5jYXN0SW5wdXQgPSBmdW5jdGlvbih2YWx1ZSwgb3B0aW9ucykge1xuICBjb25zdCB7dW5kZWZpbmVkUmVwbGFjZW1lbnQsIHN0cmluZ2lmeVJlcGxhY2VyID0gKGssIHYpID0+IHR5cGVvZiB2ID09PSAndW5kZWZpbmVkJyA/IHVuZGVmaW5lZFJlcGxhY2VtZW50IDogdn0gPSBvcHRpb25zO1xuXG4gIHJldHVybiB0eXBlb2YgdmFsdWUgPT09ICdzdHJpbmcnID8gdmFsdWUgOiBKU09OLnN0cmluZ2lmeShjYW5vbmljYWxpemUodmFsdWUsIG51bGwsIG51bGwsIHN0cmluZ2lmeVJlcGxhY2VyKSwgc3RyaW5naWZ5UmVwbGFjZXIsICcgICcpO1xufTtcbmpzb25EaWZmLmVxdWFscyA9IGZ1bmN0aW9uKGxlZnQsIHJpZ2h0LCBvcHRpb25zKSB7XG4gIHJldHVybiBEaWZmLnByb3RvdHlwZS5lcXVhbHMuY2FsbChqc29uRGlmZiwgbGVmdC5yZXBsYWNlKC8sKFtcXHJcXG5dKS9nLCAnJDEnKSwgcmlnaHQucmVwbGFjZSgvLChbXFxyXFxuXSkvZywgJyQxJyksIG9wdGlvbnMpO1xufTtcblxuZXhwb3J0IGZ1bmN0aW9uIGRpZmZKc29uKG9sZE9iaiwgbmV3T2JqLCBvcHRpb25zKSB7IHJldHVybiBqc29uRGlmZi5kaWZmKG9sZE9iaiwgbmV3T2JqLCBvcHRpb25zKTsgfVxuXG4vLyBUaGlzIGZ1bmN0aW9uIGhhbmRsZXMgdGhlIHByZXNlbmNlIG9mIGNpcmN1bGFyIHJlZmVyZW5jZXMgYnkgYmFpbGluZyBvdXQgd2hlbiBlbmNvdW50ZXJpbmcgYW5cbi8vIG9iamVjdCB0aGF0IGlzIGFscmVhZHkgb24gdGhlIFwic3RhY2tcIiBvZiBpdGVtcyBiZWluZyBwcm9jZXNzZWQuIEFjY2VwdHMgYW4gb3B0aW9uYWwgcmVwbGFjZXJcbmV4cG9ydCBmdW5jdGlvbiBjYW5vbmljYWxpemUob2JqLCBzdGFjaywgcmVwbGFjZW1lbnRTdGFjaywgcmVwbGFjZXIsIGtleSkge1xuICBzdGFjayA9IHN0YWNrIHx8IFtdO1xuICByZXBsYWNlbWVudFN0YWNrID0gcmVwbGFjZW1lbnRTdGFjayB8fCBbXTtcblxuICBpZiAocmVwbGFjZXIpIHtcbiAgICBvYmogPSByZXBsYWNlcihrZXksIG9iaik7XG4gIH1cblxuICBsZXQgaTtcblxuICBmb3IgKGkgPSAwOyBpIDwgc3RhY2subGVuZ3RoOyBpICs9IDEpIHtcbiAgICBpZiAoc3RhY2tbaV0gPT09IG9iaikge1xuICAgICAgcmV0dXJuIHJlcGxhY2VtZW50U3RhY2tbaV07XG4gICAgfVxuICB9XG5cbiAgbGV0IGNhbm9uaWNhbGl6ZWRPYmo7XG5cbiAgaWYgKCdbb2JqZWN0IEFycmF5XScgPT09IE9iamVjdC5wcm90b3R5cGUudG9TdHJpbmcuY2FsbChvYmopKSB7XG4gICAgc3RhY2sucHVzaChvYmopO1xuICAgIGNhbm9uaWNhbGl6ZWRPYmogPSBuZXcgQXJyYXkob2JqLmxlbmd0aCk7XG4gICAgcmVwbGFjZW1lbnRTdGFjay5wdXNoKGNhbm9uaWNhbGl6ZWRPYmopO1xuICAgIGZvciAoaSA9IDA7IGkgPCBvYmoubGVuZ3RoOyBpICs9IDEpIHtcbiAgICAgIGNhbm9uaWNhbGl6ZWRPYmpbaV0gPSBjYW5vbmljYWxpemUob2JqW2ldLCBzdGFjaywgcmVwbGFjZW1lbnRTdGFjaywgcmVwbGFjZXIsIGtleSk7XG4gICAgfVxuICAgIHN0YWNrLnBvcCgpO1xuICAgIHJlcGxhY2VtZW50U3RhY2sucG9wKCk7XG4gICAgcmV0dXJuIGNhbm9uaWNhbGl6ZWRPYmo7XG4gIH1cblxuICBpZiAob2JqICYmIG9iai50b0pTT04pIHtcbiAgICBvYmogPSBvYmoudG9KU09OKCk7XG4gIH1cblxuICBpZiAodHlwZW9mIG9iaiA9PT0gJ29iamVjdCcgJiYgb2JqICE9PSBudWxsKSB7XG4gICAgc3RhY2sucHVzaChvYmopO1xuICAgIGNhbm9uaWNhbGl6ZWRPYmogPSB7fTtcbiAgICByZXBsYWNlbWVudFN0YWNrLnB1c2goY2Fub25pY2FsaXplZE9iaik7XG4gICAgbGV0IHNvcnRlZEtleXMgPSBbXSxcbiAgICAgICAga2V5O1xuICAgIGZvciAoa2V5IGluIG9iaikge1xuICAgICAgLyogaXN0YW5idWwgaWdub3JlIGVsc2UgKi9cbiAgICAgIGlmIChPYmplY3QucHJvdG90eXBlLmhhc093blByb3BlcnR5LmNhbGwob2JqLCBrZXkpKSB7XG4gICAgICAgIHNvcnRlZEtleXMucHVzaChrZXkpO1xuICAgICAgfVxuICAgIH1cbiAgICBzb3J0ZWRLZXlzLnNvcnQoKTtcbiAgICBmb3IgKGkgPSAwOyBpIDwgc29ydGVkS2V5cy5sZW5ndGg7IGkgKz0gMSkge1xuICAgICAga2V5ID0gc29ydGVkS2V5c1tpXTtcbiAgICAgIGNhbm9uaWNhbGl6ZWRPYmpba2V5XSA9IGNhbm9uaWNhbGl6ZShvYmpba2V5XSwgc3RhY2ssIHJlcGxhY2VtZW50U3RhY2ssIHJlcGxhY2VyLCBrZXkpO1xuICAgIH1cbiAgICBzdGFjay5wb3AoKTtcbiAgICByZXBsYWNlbWVudFN0YWNrLnBvcCgpO1xuICB9IGVsc2Uge1xuICAgIGNhbm9uaWNhbGl6ZWRPYmogPSBvYmo7XG4gIH1cbiAgcmV0dXJuIGNhbm9uaWNhbGl6ZWRPYmo7XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7QUFBQTtBQUFBO0FBQUFBLEtBQUEsR0FBQUMsc0JBQUEsQ0FBQUMsT0FBQTtBQUFBO0FBQUE7QUFDQTtBQUFBO0FBQUFDLEtBQUEsR0FBQUQsT0FBQTtBQUFBO0FBQUE7QUFBZ0MsbUNBQUFELHVCQUFBRyxHQUFBLFdBQUFBLEdBQUEsSUFBQUEsR0FBQSxDQUFBQyxVQUFBLEdBQUFELEdBQUEsZ0JBQUFBLEdBQUE7QUFBQSxTQUFBRSxRQUFBQyxDQUFBLHNDQUFBRCxPQUFBLHdCQUFBRSxNQUFBLHVCQUFBQSxNQUFBLENBQUFDLFFBQUEsYUFBQUYsQ0FBQSxrQkFBQUEsQ0FBQSxnQkFBQUEsQ0FBQSxXQUFBQSxDQUFBLHlCQUFBQyxNQUFBLElBQUFELENBQUEsQ0FBQUcsV0FBQSxLQUFBRixNQUFBLElBQUFELENBQUEsS0FBQUMsTUFBQSxDQUFBRyxTQUFBLHFCQUFBSixDQUFBLEtBQUFELE9BQUEsQ0FBQUMsQ0FBQTtBQUFBO0FBRXpCLElBQU1LLFFBQVE7QUFBQTtBQUFBQyxPQUFBLENBQUFELFFBQUE7QUFBQTtBQUFHO0FBQUlFO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBLENBQUksQ0FBQyxDQUFDO0FBQ2xDO0FBQ0E7QUFDQUYsUUFBUSxDQUFDRyxlQUFlLEdBQUcsSUFBSTtBQUUvQkgsUUFBUSxDQUFDSSxRQUFRO0FBQUdDO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBO0FBQVE7QUFBQSxDQUFDRCxRQUFRO0FBQ3JDSixRQUFRLENBQUNNLFNBQVMsR0FBRyxVQUFTQyxLQUFLLEVBQUVDLE9BQU8sRUFBRTtFQUM1QztJQUFBO0lBQUE7SUFBT0Msb0JBQW9CLEdBQXVGRCxPQUFPLENBQWxIQyxvQkFBb0I7SUFBQTtJQUFBQyxxQkFBQTtJQUFBO0lBQXVGRixPQUFPLENBQTVGRyxpQkFBaUI7SUFBQTtJQUFBO0lBQWpCQSxpQkFBaUIsR0FBQUQscUJBQUEsY0FBRyxVQUFDRSxDQUFDLEVBQUVDLENBQUM7SUFBQTtJQUFBO01BQUE7UUFBQTtRQUFLLE9BQU9BLENBQUMsS0FBSyxXQUFXLEdBQUdKLG9CQUFvQixHQUFHSTtNQUFDO0lBQUEsSUFBQUgscUJBQUE7RUFFOUcsT0FBTyxPQUFPSCxLQUFLLEtBQUssUUFBUSxHQUFHQSxLQUFLLEdBQUdPLElBQUksQ0FBQ0MsU0FBUyxDQUFDQyxZQUFZLENBQUNULEtBQUssRUFBRSxJQUFJLEVBQUUsSUFBSSxFQUFFSSxpQkFBaUIsQ0FBQyxFQUFFQSxpQkFBaUIsRUFBRSxJQUFJLENBQUM7QUFDeEksQ0FBQztBQUNEWCxRQUFRLENBQUNpQixNQUFNLEdBQUcsVUFBU0MsSUFBSSxFQUFFQyxLQUFLLEVBQUVYLE9BQU8sRUFBRTtFQUMvQyxPQUFPTjtJQUFBQTtJQUFBQTtJQUFBQTtJQUFBQTtJQUFBQTtJQUFBQTtJQUFBQTtJQUFBQSxDQUFJLENBQUNILFNBQVMsQ0FBQ2tCLE1BQU0sQ0FBQ0csSUFBSSxDQUFDcEIsUUFBUSxFQUFFa0IsSUFBSSxDQUFDRyxPQUFPLENBQUMsWUFBWSxFQUFFLElBQUksQ0FBQyxFQUFFRixLQUFLLENBQUNFLE9BQU8sQ0FBQyxZQUFZLEVBQUUsSUFBSSxDQUFDLEVBQUViLE9BQU87RUFBQztBQUMzSCxDQUFDO0FBRU0sU0FBU2MsUUFBUUEsQ0FBQ0MsTUFBTSxFQUFFQyxNQUFNLEVBQUVoQixPQUFPLEVBQUU7RUFBRSxPQUFPUixRQUFRLENBQUN5QixJQUFJLENBQUNGLE1BQU0sRUFBRUMsTUFBTSxFQUFFaEIsT0FBTyxDQUFDO0FBQUU7O0FBRW5HO0FBQ0E7QUFDTyxTQUFTUSxZQUFZQSxDQUFDeEIsR0FBRyxFQUFFa0MsS0FBSyxFQUFFQyxnQkFBZ0IsRUFBRUMsUUFBUSxFQUFFQyxHQUFHLEVBQUU7RUFDeEVILEtBQUssR0FBR0EsS0FBSyxJQUFJLEVBQUU7RUFDbkJDLGdCQUFnQixHQUFHQSxnQkFBZ0IsSUFBSSxFQUFFO0VBRXpDLElBQUlDLFFBQVEsRUFBRTtJQUNacEMsR0FBRyxHQUFHb0MsUUFBUSxDQUFDQyxHQUFHLEVBQUVyQyxHQUFHLENBQUM7RUFDMUI7RUFFQSxJQUFJc0MsQ0FBQztFQUVMLEtBQUtBLENBQUMsR0FBRyxDQUFDLEVBQUVBLENBQUMsR0FBR0osS0FBSyxDQUFDSyxNQUFNLEVBQUVELENBQUMsSUFBSSxDQUFDLEVBQUU7SUFDcEMsSUFBSUosS0FBSyxDQUFDSSxDQUFDLENBQUMsS0FBS3RDLEdBQUcsRUFBRTtNQUNwQixPQUFPbUMsZ0JBQWdCLENBQUNHLENBQUMsQ0FBQztJQUM1QjtFQUNGO0VBRUEsSUFBSUUsZ0JBQWdCO0VBRXBCLElBQUksZ0JBQWdCLEtBQUtDLE1BQU0sQ0FBQ2xDLFNBQVMsQ0FBQ21DLFFBQVEsQ0FBQ2QsSUFBSSxDQUFDNUIsR0FBRyxDQUFDLEVBQUU7SUFDNURrQyxLQUFLLENBQUNTLElBQUksQ0FBQzNDLEdBQUcsQ0FBQztJQUNmd0MsZ0JBQWdCLEdBQUcsSUFBSUksS0FBSyxDQUFDNUMsR0FBRyxDQUFDdUMsTUFBTSxDQUFDO0lBQ3hDSixnQkFBZ0IsQ0FBQ1EsSUFBSSxDQUFDSCxnQkFBZ0IsQ0FBQztJQUN2QyxLQUFLRixDQUFDLEdBQUcsQ0FBQyxFQUFFQSxDQUFDLEdBQUd0QyxHQUFHLENBQUN1QyxNQUFNLEVBQUVELENBQUMsSUFBSSxDQUFDLEVBQUU7TUFDbENFLGdCQUFnQixDQUFDRixDQUFDLENBQUMsR0FBR2QsWUFBWSxDQUFDeEIsR0FBRyxDQUFDc0MsQ0FBQyxDQUFDLEVBQUVKLEtBQUssRUFBRUMsZ0JBQWdCLEVBQUVDLFFBQVEsRUFBRUMsR0FBRyxDQUFDO0lBQ3BGO0lBQ0FILEtBQUssQ0FBQ1csR0FBRyxDQUFDLENBQUM7SUFDWFYsZ0JBQWdCLENBQUNVLEdBQUcsQ0FBQyxDQUFDO0lBQ3RCLE9BQU9MLGdCQUFnQjtFQUN6QjtFQUVBLElBQUl4QyxHQUFHLElBQUlBLEdBQUcsQ0FBQzhDLE1BQU0sRUFBRTtJQUNyQjlDLEdBQUcsR0FBR0EsR0FBRyxDQUFDOEMsTUFBTSxDQUFDLENBQUM7RUFDcEI7RUFFQTtFQUFJO0VBQUE1QyxPQUFBO0VBQUE7RUFBT0YsR0FBRyxNQUFLLFFBQVEsSUFBSUEsR0FBRyxLQUFLLElBQUksRUFBRTtJQUMzQ2tDLEtBQUssQ0FBQ1MsSUFBSSxDQUFDM0MsR0FBRyxDQUFDO0lBQ2Z3QyxnQkFBZ0IsR0FBRyxDQUFDLENBQUM7SUFDckJMLGdCQUFnQixDQUFDUSxJQUFJLENBQUNILGdCQUFnQixDQUFDO0lBQ3ZDLElBQUlPLFVBQVUsR0FBRyxFQUFFO01BQ2ZWLElBQUc7SUFDUCxLQUFLQSxJQUFHLElBQUlyQyxHQUFHLEVBQUU7TUFDZjtNQUNBLElBQUl5QyxNQUFNLENBQUNsQyxTQUFTLENBQUN5QyxjQUFjLENBQUNwQixJQUFJLENBQUM1QixHQUFHLEVBQUVxQyxJQUFHLENBQUMsRUFBRTtRQUNsRFUsVUFBVSxDQUFDSixJQUFJLENBQUNOLElBQUcsQ0FBQztNQUN0QjtJQUNGO0lBQ0FVLFVBQVUsQ0FBQ0UsSUFBSSxDQUFDLENBQUM7SUFDakIsS0FBS1gsQ0FBQyxHQUFHLENBQUMsRUFBRUEsQ0FBQyxHQUFHUyxVQUFVLENBQUNSLE1BQU0sRUFBRUQsQ0FBQyxJQUFJLENBQUMsRUFBRTtNQUN6Q0QsSUFBRyxHQUFHVSxVQUFVLENBQUNULENBQUMsQ0FBQztNQUNuQkUsZ0JBQWdCLENBQUNILElBQUcsQ0FBQyxHQUFHYixZQUFZLENBQUN4QixHQUFHLENBQUNxQyxJQUFHLENBQUMsRUFBRUgsS0FBSyxFQUFFQyxnQkFBZ0IsRUFBRUMsUUFBUSxFQUFFQyxJQUFHLENBQUM7SUFDeEY7SUFDQUgsS0FBSyxDQUFDVyxHQUFHLENBQUMsQ0FBQztJQUNYVixnQkFBZ0IsQ0FBQ1UsR0FBRyxDQUFDLENBQUM7RUFDeEIsQ0FBQyxNQUFNO0lBQ0xMLGdCQUFnQixHQUFHeEMsR0FBRztFQUN4QjtFQUNBLE9BQU93QyxnQkFBZ0I7QUFDekIiLCJpZ25vcmVMaXN0IjpbXX0=
+
+
+/***/ }),
+
+/***/ 5129:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.diffLines = diffLines;
+exports.diffTrimmedLines = diffTrimmedLines;
+exports.lineDiff = void 0;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_base = _interopRequireDefault(__nccwpck_require__(7106))
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_params = __nccwpck_require__(4400)
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*istanbul ignore end*/
+var lineDiff =
+/*istanbul ignore start*/
+exports.lineDiff =
+/*istanbul ignore end*/
+new
+/*istanbul ignore start*/
+_base
+/*istanbul ignore end*/
+[
+/*istanbul ignore start*/
+"default"
+/*istanbul ignore end*/
+]();
+lineDiff.tokenize = function (value, options) {
+  if (options.stripTrailingCr) {
+    // remove one \r before \n to match GNU diff's --strip-trailing-cr behavior
+    value = value.replace(/\r\n/g, '\n');
+  }
+  var retLines = [],
+    linesAndNewlines = value.split(/(\n|\r\n)/);
+
+  // Ignore the final empty token that occurs if the string ends with a new line
+  if (!linesAndNewlines[linesAndNewlines.length - 1]) {
+    linesAndNewlines.pop();
+  }
+
+  // Merge the content and line separators into single tokens
+  for (var i = 0; i < linesAndNewlines.length; i++) {
+    var line = linesAndNewlines[i];
+    if (i % 2 && !options.newlineIsToken) {
+      retLines[retLines.length - 1] += line;
+    } else {
+      retLines.push(line);
+    }
+  }
+  return retLines;
+};
+lineDiff.equals = function (left, right, options) {
+  // If we're ignoring whitespace, we need to normalise lines by stripping
+  // whitespace before checking equality. (This has an annoying interaction
+  // with newlineIsToken that requires special handling: if newlines get their
+  // own token, then we DON'T want to trim the *newline* tokens down to empty
+  // strings, since this would cause us to treat whitespace-only line content
+  // as equal to a separator between lines, which would be weird and
+  // inconsistent with the documented behavior of the options.)
+  if (options.ignoreWhitespace) {
+    if (!options.newlineIsToken || !left.includes('\n')) {
+      left = left.trim();
+    }
+    if (!options.newlineIsToken || !right.includes('\n')) {
+      right = right.trim();
+    }
+  } else if (options.ignoreNewlineAtEof && !options.newlineIsToken) {
+    if (left.endsWith('\n')) {
+      left = left.slice(0, -1);
+    }
+    if (right.endsWith('\n')) {
+      right = right.slice(0, -1);
+    }
+  }
+  return (
+    /*istanbul ignore start*/
+    _base
+    /*istanbul ignore end*/
+    [
+    /*istanbul ignore start*/
+    "default"
+    /*istanbul ignore end*/
+    ].prototype.equals.call(this, left, right, options)
+  );
+};
+function diffLines(oldStr, newStr, callback) {
+  return lineDiff.diff(oldStr, newStr, callback);
+}
+
+// Kept for backwards compatibility. This is a rather arbitrary wrapper method
+// that just calls `diffLines` with `ignoreWhitespace: true`. It's confusing to
+// have two ways to do exactly the same thing in the API, so we no longer
+// document this one (library users should explicitly use `diffLines` with
+// `ignoreWhitespace: true` instead) but we keep it around to maintain
+// compatibility with code that used old versions.
+function diffTrimmedLines(oldStr, newStr, callback) {
+  var options =
+  /*istanbul ignore start*/
+  (0,
+  /*istanbul ignore end*/
+  /*istanbul ignore start*/
+  _params
+  /*istanbul ignore end*/
+  .
+  /*istanbul ignore start*/
+  generateOptions)
+  /*istanbul ignore end*/
+  (callback, {
+    ignoreWhitespace: true
+  });
+  return lineDiff.diff(oldStr, newStr, options);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYmFzZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwiX3BhcmFtcyIsIm9iaiIsIl9fZXNNb2R1bGUiLCJsaW5lRGlmZiIsImV4cG9ydHMiLCJEaWZmIiwidG9rZW5pemUiLCJ2YWx1ZSIsIm9wdGlvbnMiLCJzdHJpcFRyYWlsaW5nQ3IiLCJyZXBsYWNlIiwicmV0TGluZXMiLCJsaW5lc0FuZE5ld2xpbmVzIiwic3BsaXQiLCJsZW5ndGgiLCJwb3AiLCJpIiwibGluZSIsIm5ld2xpbmVJc1Rva2VuIiwicHVzaCIsImVxdWFscyIsImxlZnQiLCJyaWdodCIsImlnbm9yZVdoaXRlc3BhY2UiLCJpbmNsdWRlcyIsInRyaW0iLCJpZ25vcmVOZXdsaW5lQXRFb2YiLCJlbmRzV2l0aCIsInNsaWNlIiwicHJvdG90eXBlIiwiY2FsbCIsImRpZmZMaW5lcyIsIm9sZFN0ciIsIm5ld1N0ciIsImNhbGxiYWNrIiwiZGlmZiIsImRpZmZUcmltbWVkTGluZXMiLCJnZW5lcmF0ZU9wdGlvbnMiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvZGlmZi9saW5lLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBEaWZmIGZyb20gJy4vYmFzZSc7XG5pbXBvcnQge2dlbmVyYXRlT3B0aW9uc30gZnJvbSAnLi4vdXRpbC9wYXJhbXMnO1xuXG5leHBvcnQgY29uc3QgbGluZURpZmYgPSBuZXcgRGlmZigpO1xubGluZURpZmYudG9rZW5pemUgPSBmdW5jdGlvbih2YWx1ZSwgb3B0aW9ucykge1xuICBpZihvcHRpb25zLnN0cmlwVHJhaWxpbmdDcikge1xuICAgIC8vIHJlbW92ZSBvbmUgXFxyIGJlZm9yZSBcXG4gdG8gbWF0Y2ggR05VIGRpZmYncyAtLXN0cmlwLXRyYWlsaW5nLWNyIGJlaGF2aW9yXG4gICAgdmFsdWUgPSB2YWx1ZS5yZXBsYWNlKC9cXHJcXG4vZywgJ1xcbicpO1xuICB9XG5cbiAgbGV0IHJldExpbmVzID0gW10sXG4gICAgICBsaW5lc0FuZE5ld2xpbmVzID0gdmFsdWUuc3BsaXQoLyhcXG58XFxyXFxuKS8pO1xuXG4gIC8vIElnbm9yZSB0aGUgZmluYWwgZW1wdHkgdG9rZW4gdGhhdCBvY2N1cnMgaWYgdGhlIHN0cmluZyBlbmRzIHdpdGggYSBuZXcgbGluZVxuICBpZiAoIWxpbmVzQW5kTmV3bGluZXNbbGluZXNBbmROZXdsaW5lcy5sZW5ndGggLSAxXSkge1xuICAgIGxpbmVzQW5kTmV3bGluZXMucG9wKCk7XG4gIH1cblxuICAvLyBNZXJnZSB0aGUgY29udGVudCBhbmQgbGluZSBzZXBhcmF0b3JzIGludG8gc2luZ2xlIHRva2Vuc1xuICBmb3IgKGxldCBpID0gMDsgaSA8IGxpbmVzQW5kTmV3bGluZXMubGVuZ3RoOyBpKyspIHtcbiAgICBsZXQgbGluZSA9IGxpbmVzQW5kTmV3bGluZXNbaV07XG5cbiAgICBpZiAoaSAlIDIgJiYgIW9wdGlvbnMubmV3bGluZUlzVG9rZW4pIHtcbiAgICAgIHJldExpbmVzW3JldExpbmVzLmxlbmd0aCAtIDFdICs9IGxpbmU7XG4gICAgfSBlbHNlIHtcbiAgICAgIHJldExpbmVzLnB1c2gobGluZSk7XG4gICAgfVxuICB9XG5cbiAgcmV0dXJuIHJldExpbmVzO1xufTtcblxubGluZURpZmYuZXF1YWxzID0gZnVuY3Rpb24obGVmdCwgcmlnaHQsIG9wdGlvbnMpIHtcbiAgLy8gSWYgd2UncmUgaWdub3Jpbmcgd2hpdGVzcGFjZSwgd2UgbmVlZCB0byBub3JtYWxpc2UgbGluZXMgYnkgc3RyaXBwaW5nXG4gIC8vIHdoaXRlc3BhY2UgYmVmb3JlIGNoZWNraW5nIGVxdWFsaXR5LiAoVGhpcyBoYXMgYW4gYW5ub3lpbmcgaW50ZXJhY3Rpb25cbiAgLy8gd2l0aCBuZXdsaW5lSXNUb2tlbiB0aGF0IHJlcXVpcmVzIHNwZWNpYWwgaGFuZGxpbmc6IGlmIG5ld2xpbmVzIGdldCB0aGVpclxuICAvLyBvd24gdG9rZW4sIHRoZW4gd2UgRE9OJ1Qgd2FudCB0byB0cmltIHRoZSAqbmV3bGluZSogdG9rZW5zIGRvd24gdG8gZW1wdHlcbiAgLy8gc3RyaW5ncywgc2luY2UgdGhpcyB3b3VsZCBjYXVzZSB1cyB0byB0cmVhdCB3aGl0ZXNwYWNlLW9ubHkgbGluZSBjb250ZW50XG4gIC8vIGFzIGVxdWFsIHRvIGEgc2VwYXJhdG9yIGJldHdlZW4gbGluZXMsIHdoaWNoIHdvdWxkIGJlIHdlaXJkIGFuZFxuICAvLyBpbmNvbnNpc3RlbnQgd2l0aCB0aGUgZG9jdW1lbnRlZCBiZWhhdmlvciBvZiB0aGUgb3B0aW9ucy4pXG4gIGlmIChvcHRpb25zLmlnbm9yZVdoaXRlc3BhY2UpIHtcbiAgICBpZiAoIW9wdGlvbnMubmV3bGluZUlzVG9rZW4gfHwgIWxlZnQuaW5jbHVkZXMoJ1xcbicpKSB7XG4gICAgICBsZWZ0ID0gbGVmdC50cmltKCk7XG4gICAgfVxuICAgIGlmICghb3B0aW9ucy5uZXdsaW5lSXNUb2tlbiB8fCAhcmlnaHQuaW5jbHVkZXMoJ1xcbicpKSB7XG4gICAgICByaWdodCA9IHJpZ2h0LnRyaW0oKTtcbiAgICB9XG4gIH0gZWxzZSBpZiAob3B0aW9ucy5pZ25vcmVOZXdsaW5lQXRFb2YgJiYgIW9wdGlvbnMubmV3bGluZUlzVG9rZW4pIHtcbiAgICBpZiAobGVmdC5lbmRzV2l0aCgnXFxuJykpIHtcbiAgICAgIGxlZnQgPSBsZWZ0LnNsaWNlKDAsIC0xKTtcbiAgICB9XG4gICAgaWYgKHJpZ2h0LmVuZHNXaXRoKCdcXG4nKSkge1xuICAgICAgcmlnaHQgPSByaWdodC5zbGljZSgwLCAtMSk7XG4gICAgfVxuICB9XG4gIHJldHVybiBEaWZmLnByb3RvdHlwZS5lcXVhbHMuY2FsbCh0aGlzLCBsZWZ0LCByaWdodCwgb3B0aW9ucyk7XG59O1xuXG5leHBvcnQgZnVuY3Rpb24gZGlmZkxpbmVzKG9sZFN0ciwgbmV3U3RyLCBjYWxsYmFjaykgeyByZXR1cm4gbGluZURpZmYuZGlmZihvbGRTdHIsIG5ld1N0ciwgY2FsbGJhY2spOyB9XG5cbi8vIEtlcHQgZm9yIGJhY2t3YXJkcyBjb21wYXRpYmlsaXR5LiBUaGlzIGlzIGEgcmF0aGVyIGFyYml0cmFyeSB3cmFwcGVyIG1ldGhvZFxuLy8gdGhhdCBqdXN0IGNhbGxzIGBkaWZmTGluZXNgIHdpdGggYGlnbm9yZVdoaXRlc3BhY2U6IHRydWVgLiBJdCdzIGNvbmZ1c2luZyB0b1xuLy8gaGF2ZSB0d28gd2F5cyB0byBkbyBleGFjdGx5IHRoZSBzYW1lIHRoaW5nIGluIHRoZSBBUEksIHNvIHdlIG5vIGxvbmdlclxuLy8gZG9jdW1lbnQgdGhpcyBvbmUgKGxpYnJhcnkgdXNlcnMgc2hvdWxkIGV4cGxpY2l0bHkgdXNlIGBkaWZmTGluZXNgIHdpdGhcbi8vIGBpZ25vcmVXaGl0ZXNwYWNlOiB0cnVlYCBpbnN0ZWFkKSBidXQgd2Uga2VlcCBpdCBhcm91bmQgdG8gbWFpbnRhaW5cbi8vIGNvbXBhdGliaWxpdHkgd2l0aCBjb2RlIHRoYXQgdXNlZCBvbGQgdmVyc2lvbnMuXG5leHBvcnQgZnVuY3Rpb24gZGlmZlRyaW1tZWRMaW5lcyhvbGRTdHIsIG5ld1N0ciwgY2FsbGJhY2spIHtcbiAgbGV0IG9wdGlvbnMgPSBnZW5lcmF0ZU9wdGlvbnMoY2FsbGJhY2ssIHtpZ25vcmVXaGl0ZXNwYWNlOiB0cnVlfSk7XG4gIHJldHVybiBsaW5lRGlmZi5kaWZmKG9sZFN0ciwgbmV3U3RyLCBvcHRpb25zKTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7OztBQUFBO0FBQUE7QUFBQUEsS0FBQSxHQUFBQyxzQkFBQSxDQUFBQyxPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQUMsT0FBQSxHQUFBRCxPQUFBO0FBQUE7QUFBQTtBQUErQyxtQ0FBQUQsdUJBQUFHLEdBQUEsV0FBQUEsR0FBQSxJQUFBQSxHQUFBLENBQUFDLFVBQUEsR0FBQUQsR0FBQSxnQkFBQUEsR0FBQTtBQUFBO0FBRXhDLElBQU1FLFFBQVE7QUFBQTtBQUFBQyxPQUFBLENBQUFELFFBQUE7QUFBQTtBQUFHO0FBQUlFO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBO0FBQUFBLENBQUksQ0FBQyxDQUFDO0FBQ2xDRixRQUFRLENBQUNHLFFBQVEsR0FBRyxVQUFTQyxLQUFLLEVBQUVDLE9BQU8sRUFBRTtFQUMzQyxJQUFHQSxPQUFPLENBQUNDLGVBQWUsRUFBRTtJQUMxQjtJQUNBRixLQUFLLEdBQUdBLEtBQUssQ0FBQ0csT0FBTyxDQUFDLE9BQU8sRUFBRSxJQUFJLENBQUM7RUFDdEM7RUFFQSxJQUFJQyxRQUFRLEdBQUcsRUFBRTtJQUNiQyxnQkFBZ0IsR0FBR0wsS0FBSyxDQUFDTSxLQUFLLENBQUMsV0FBVyxDQUFDOztFQUUvQztFQUNBLElBQUksQ0FBQ0QsZ0JBQWdCLENBQUNBLGdCQUFnQixDQUFDRSxNQUFNLEdBQUcsQ0FBQyxDQUFDLEVBQUU7SUFDbERGLGdCQUFnQixDQUFDRyxHQUFHLENBQUMsQ0FBQztFQUN4Qjs7RUFFQTtFQUNBLEtBQUssSUFBSUMsQ0FBQyxHQUFHLENBQUMsRUFBRUEsQ0FBQyxHQUFHSixnQkFBZ0IsQ0FBQ0UsTUFBTSxFQUFFRSxDQUFDLEVBQUUsRUFBRTtJQUNoRCxJQUFJQyxJQUFJLEdBQUdMLGdCQUFnQixDQUFDSSxDQUFDLENBQUM7SUFFOUIsSUFBSUEsQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDUixPQUFPLENBQUNVLGNBQWMsRUFBRTtNQUNwQ1AsUUFBUSxDQUFDQSxRQUFRLENBQUNHLE1BQU0sR0FBRyxDQUFDLENBQUMsSUFBSUcsSUFBSTtJQUN2QyxDQUFDLE1BQU07TUFDTE4sUUFBUSxDQUFDUSxJQUFJLENBQUNGLElBQUksQ0FBQztJQUNyQjtFQUNGO0VBRUEsT0FBT04sUUFBUTtBQUNqQixDQUFDO0FBRURSLFFBQVEsQ0FBQ2lCLE1BQU0sR0FBRyxVQUFTQyxJQUFJLEVBQUVDLEtBQUssRUFBRWQsT0FBTyxFQUFFO0VBQy9DO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0EsSUFBSUEsT0FBTyxDQUFDZSxnQkFBZ0IsRUFBRTtJQUM1QixJQUFJLENBQUNmLE9BQU8sQ0FBQ1UsY0FBYyxJQUFJLENBQUNHLElBQUksQ0FBQ0csUUFBUSxDQUFDLElBQUksQ0FBQyxFQUFFO01BQ25ESCxJQUFJLEdBQUdBLElBQUksQ0FBQ0ksSUFBSSxDQUFDLENBQUM7SUFDcEI7SUFDQSxJQUFJLENBQUNqQixPQUFPLENBQUNVLGNBQWMsSUFBSSxDQUFDSSxLQUFLLENBQUNFLFFBQVEsQ0FBQyxJQUFJLENBQUMsRUFBRTtNQUNwREYsS0FBSyxHQUFHQSxLQUFLLENBQUNHLElBQUksQ0FBQyxDQUFDO0lBQ3RCO0VBQ0YsQ0FBQyxNQUFNLElBQUlqQixPQUFPLENBQUNrQixrQkFBa0IsSUFBSSxDQUFDbEIsT0FBTyxDQUFDVSxjQUFjLEVBQUU7SUFDaEUsSUFBSUcsSUFBSSxDQUFDTSxRQUFRLENBQUMsSUFBSSxDQUFDLEVBQUU7TUFDdkJOLElBQUksR0FBR0EsSUFBSSxDQUFDTyxLQUFLLENBQUMsQ0FBQyxFQUFFLENBQUMsQ0FBQyxDQUFDO0lBQzFCO0lBQ0EsSUFBSU4sS0FBSyxDQUFDSyxRQUFRLENBQUMsSUFBSSxDQUFDLEVBQUU7TUFDeEJMLEtBQUssR0FBR0EsS0FBSyxDQUFDTSxLQUFLLENBQUMsQ0FBQyxFQUFFLENBQUMsQ0FBQyxDQUFDO0lBQzVCO0VBQ0Y7RUFDQSxPQUFPdkI7SUFBQUE7SUFBQUE7SUFBQUE7SUFBQUE7SUFBQUE7SUFBQUE7SUFBQUE7SUFBQUEsQ0FBSSxDQUFDd0IsU0FBUyxDQUFDVCxNQUFNLENBQUNVLElBQUksQ0FBQyxJQUFJLEVBQUVULElBQUksRUFBRUMsS0FBSyxFQUFFZCxPQUFPO0VBQUM7QUFDL0QsQ0FBQztBQUVNLFNBQVN1QixTQUFTQSxDQUFDQyxNQUFNLEVBQUVDLE1BQU0sRUFBRUMsUUFBUSxFQUFFO0VBQUUsT0FBTy9CLFFBQVEsQ0FBQ2dDLElBQUksQ0FBQ0gsTUFBTSxFQUFFQyxNQUFNLEVBQUVDLFFBQVEsQ0FBQztBQUFFOztBQUV0RztBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDTyxTQUFTRSxnQkFBZ0JBLENBQUNKLE1BQU0sRUFBRUMsTUFBTSxFQUFFQyxRQUFRLEVBQUU7RUFDekQsSUFBSTFCLE9BQU87RUFBRztFQUFBO0VBQUE7RUFBQTZCO0VBQUFBO0VBQUFBO0VBQUFBO0VBQUFBO0VBQUFBLGVBQWU7RUFBQTtFQUFBLENBQUNILFFBQVEsRUFBRTtJQUFDWCxnQkFBZ0IsRUFBRTtFQUFJLENBQUMsQ0FBQztFQUNqRSxPQUFPcEIsUUFBUSxDQUFDZ0MsSUFBSSxDQUFDSCxNQUFNLEVBQUVDLE1BQU0sRUFBRXpCLE9BQU8sQ0FBQztBQUMvQyIsImlnbm9yZUxpc3QiOltdfQ==
+
+
+/***/ }),
+
+/***/ 9114:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.diffSentences = diffSentences;
+exports.sentenceDiff = void 0;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_base = _interopRequireDefault(__nccwpck_require__(7106))
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*istanbul ignore end*/
+var sentenceDiff =
+/*istanbul ignore start*/
+exports.sentenceDiff =
+/*istanbul ignore end*/
+new
+/*istanbul ignore start*/
+_base
+/*istanbul ignore end*/
+[
+/*istanbul ignore start*/
+"default"
+/*istanbul ignore end*/
+]();
+sentenceDiff.tokenize = function (value) {
+  return value.split(/(\S.+?[.!?])(?=\s+|$)/);
+};
+function diffSentences(oldStr, newStr, callback) {
+  return sentenceDiff.diff(oldStr, newStr, callback);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYmFzZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwib2JqIiwiX19lc01vZHVsZSIsInNlbnRlbmNlRGlmZiIsImV4cG9ydHMiLCJEaWZmIiwidG9rZW5pemUiLCJ2YWx1ZSIsInNwbGl0IiwiZGlmZlNlbnRlbmNlcyIsIm9sZFN0ciIsIm5ld1N0ciIsImNhbGxiYWNrIiwiZGlmZiJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9kaWZmL3NlbnRlbmNlLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBEaWZmIGZyb20gJy4vYmFzZSc7XG5cblxuZXhwb3J0IGNvbnN0IHNlbnRlbmNlRGlmZiA9IG5ldyBEaWZmKCk7XG5zZW50ZW5jZURpZmYudG9rZW5pemUgPSBmdW5jdGlvbih2YWx1ZSkge1xuICByZXR1cm4gdmFsdWUuc3BsaXQoLyhcXFMuKz9bLiE/XSkoPz1cXHMrfCQpLyk7XG59O1xuXG5leHBvcnQgZnVuY3Rpb24gZGlmZlNlbnRlbmNlcyhvbGRTdHIsIG5ld1N0ciwgY2FsbGJhY2spIHsgcmV0dXJuIHNlbnRlbmNlRGlmZi5kaWZmKG9sZFN0ciwgbmV3U3RyLCBjYWxsYmFjayk7IH1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUE7QUFBQTtBQUFBQSxLQUFBLEdBQUFDLHNCQUFBLENBQUFDLE9BQUE7QUFBQTtBQUFBO0FBQTBCLG1DQUFBRCx1QkFBQUUsR0FBQSxXQUFBQSxHQUFBLElBQUFBLEdBQUEsQ0FBQUMsVUFBQSxHQUFBRCxHQUFBLGdCQUFBQSxHQUFBO0FBQUE7QUFHbkIsSUFBTUUsWUFBWTtBQUFBO0FBQUFDLE9BQUEsQ0FBQUQsWUFBQTtBQUFBO0FBQUc7QUFBSUU7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUEsQ0FBSSxDQUFDLENBQUM7QUFDdENGLFlBQVksQ0FBQ0csUUFBUSxHQUFHLFVBQVNDLEtBQUssRUFBRTtFQUN0QyxPQUFPQSxLQUFLLENBQUNDLEtBQUssQ0FBQyx1QkFBdUIsQ0FBQztBQUM3QyxDQUFDO0FBRU0sU0FBU0MsYUFBYUEsQ0FBQ0MsTUFBTSxFQUFFQyxNQUFNLEVBQUVDLFFBQVEsRUFBRTtFQUFFLE9BQU9ULFlBQVksQ0FBQ1UsSUFBSSxDQUFDSCxNQUFNLEVBQUVDLE1BQU0sRUFBRUMsUUFBUSxDQUFDO0FBQUUiLCJpZ25vcmVMaXN0IjpbXX0=
+
+
+/***/ }),
+
+/***/ 1867:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.diffWords = diffWords;
+exports.diffWordsWithSpace = diffWordsWithSpace;
+exports.wordWithSpaceDiff = exports.wordDiff = void 0;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_base = _interopRequireDefault(__nccwpck_require__(7106))
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_string = __nccwpck_require__(8831)
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*istanbul ignore end*/
+// Based on https://en.wikipedia.org/wiki/Latin_script_in_Unicode
+//
+// Ranges and exceptions:
+// Latin-1 Supplement, 0080–00FF
+//  - U+00D7  × Multiplication sign
+//  - U+00F7  ÷ Division sign
+// Latin Extended-A, 0100–017F
+// Latin Extended-B, 0180–024F
+// IPA Extensions, 0250–02AF
+// Spacing Modifier Letters, 02B0–02FF
+//  - U+02C7  ˇ &#711;  Caron
+//  - U+02D8  ˘ &#728;  Breve
+//  - U+02D9  ˙ &#729;  Dot Above
+//  - U+02DA  ˚ &#730;  Ring Above
+//  - U+02DB  ˛ &#731;  Ogonek
+//  - U+02DC  ˜ &#732;  Small Tilde
+//  - U+02DD  ˝ &#733;  Double Acute Accent
+// Latin Extended Additional, 1E00–1EFF
+var extendedWordChars = "a-zA-Z0-9_\\u{C0}-\\u{FF}\\u{D8}-\\u{F6}\\u{F8}-\\u{2C6}\\u{2C8}-\\u{2D7}\\u{2DE}-\\u{2FF}\\u{1E00}-\\u{1EFF}";
+
+// Each token is one of the following:
+// - A punctuation mark plus the surrounding whitespace
+// - A word plus the surrounding whitespace
+// - Pure whitespace (but only in the special case where this the entire text
+//   is just whitespace)
+//
+// We have to include surrounding whitespace in the tokens because the two
+// alternative approaches produce horribly broken results:
+// * If we just discard the whitespace, we can't fully reproduce the original
+//   text from the sequence of tokens and any attempt to render the diff will
+//   get the whitespace wrong.
+// * If we have separate tokens for whitespace, then in a typical text every
+//   second token will be a single space character. But this often results in
+//   the optimal diff between two texts being a perverse one that preserves
+//   the spaces between words but deletes and reinserts actual common words.
+//   See https://github.com/kpdecker/jsdiff/issues/160#issuecomment-1866099640
+//   for an example.
+//
+// Keeping the surrounding whitespace of course has implications for .equals
+// and .join, not just .tokenize.
+
+// This regex does NOT fully implement the tokenization rules described above.
+// Instead, it gives runs of whitespace their own "token". The tokenize method
+// then handles stitching whitespace tokens onto adjacent word or punctuation
+// tokens.
+var tokenizeIncludingWhitespace = new RegExp(
+/*istanbul ignore start*/
+"[".concat(
+/*istanbul ignore end*/
+extendedWordChars, "]+|\\s+|[^").concat(extendedWordChars, "]"), 'ug');
+var wordDiff =
+/*istanbul ignore start*/
+exports.wordDiff =
+/*istanbul ignore end*/
+new
+/*istanbul ignore start*/
+_base
+/*istanbul ignore end*/
+[
+/*istanbul ignore start*/
+"default"
+/*istanbul ignore end*/
+]();
+wordDiff.equals = function (left, right, options) {
+  if (options.ignoreCase) {
+    left = left.toLowerCase();
+    right = right.toLowerCase();
+  }
+  return left.trim() === right.trim();
+};
+wordDiff.tokenize = function (value) {
+  /*istanbul ignore start*/
+  var
+  /*istanbul ignore end*/
+  options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var parts;
+  if (options.intlSegmenter) {
+    if (options.intlSegmenter.resolvedOptions().granularity != 'word') {
+      throw new Error('The segmenter passed must have a granularity of "word"');
+    }
+    parts = Array.from(options.intlSegmenter.segment(value), function (segment)
+    /*istanbul ignore start*/
+    {
+      return (
+        /*istanbul ignore end*/
+        segment.segment
+      );
+    });
+  } else {
+    parts = value.match(tokenizeIncludingWhitespace) || [];
+  }
+  var tokens = [];
+  var prevPart = null;
+  parts.forEach(function (part) {
+    if (/\s/.test(part)) {
+      if (prevPart == null) {
+        tokens.push(part);
+      } else {
+        tokens.push(tokens.pop() + part);
+      }
+    } else if (/\s/.test(prevPart)) {
+      if (tokens[tokens.length - 1] == prevPart) {
+        tokens.push(tokens.pop() + part);
+      } else {
+        tokens.push(prevPart + part);
+      }
+    } else {
+      tokens.push(part);
+    }
+    prevPart = part;
+  });
+  return tokens;
+};
+wordDiff.join = function (tokens) {
+  // Tokens being joined here will always have appeared consecutively in the
+  // same text, so we can simply strip off the leading whitespace from all the
+  // tokens except the first (and except any whitespace-only tokens - but such
+  // a token will always be the first and only token anyway) and then join them
+  // and the whitespace around words and punctuation will end up correct.
+  return tokens.map(function (token, i) {
+    if (i == 0) {
+      return token;
+    } else {
+      return token.replace(/^\s+/, '');
+    }
+  }).join('');
+};
+wordDiff.postProcess = function (changes, options) {
+  if (!changes || options.oneChangePerToken) {
+    return changes;
+  }
+  var lastKeep = null;
+  // Change objects representing any insertion or deletion since the last
+  // "keep" change object. There can be at most one of each.
+  var insertion = null;
+  var deletion = null;
+  changes.forEach(function (change) {
+    if (change.added) {
+      insertion = change;
+    } else if (change.removed) {
+      deletion = change;
+    } else {
+      if (insertion || deletion) {
+        // May be false at start of text
+        dedupeWhitespaceInChangeObjects(lastKeep, deletion, insertion, change);
+      }
+      lastKeep = change;
+      insertion = null;
+      deletion = null;
+    }
+  });
+  if (insertion || deletion) {
+    dedupeWhitespaceInChangeObjects(lastKeep, deletion, insertion, null);
+  }
+  return changes;
+};
+function diffWords(oldStr, newStr, options) {
+  // This option has never been documented and never will be (it's clearer to
+  // just call `diffWordsWithSpace` directly if you need that behavior), but
+  // has existed in jsdiff for a long time, so we retain support for it here
+  // for the sake of backwards compatibility.
+  if (
+  /*istanbul ignore start*/
+  (
+  /*istanbul ignore end*/
+  options === null || options === void 0 ? void 0 : options.ignoreWhitespace) != null && !options.ignoreWhitespace) {
+    return diffWordsWithSpace(oldStr, newStr, options);
+  }
+  return wordDiff.diff(oldStr, newStr, options);
+}
+function dedupeWhitespaceInChangeObjects(startKeep, deletion, insertion, endKeep) {
+  // Before returning, we tidy up the leading and trailing whitespace of the
+  // change objects to eliminate cases where trailing whitespace in one object
+  // is repeated as leading whitespace in the next.
+  // Below are examples of the outcomes we want here to explain the code.
+  // I=insert, K=keep, D=delete
+  // 1. diffing 'foo bar baz' vs 'foo baz'
+  //    Prior to cleanup, we have K:'foo ' D:' bar ' K:' baz'
+  //    After cleanup, we want:   K:'foo ' D:'bar ' K:'baz'
+  //
+  // 2. Diffing 'foo bar baz' vs 'foo qux baz'
+  //    Prior to cleanup, we have K:'foo ' D:' bar ' I:' qux ' K:' baz'
+  //    After cleanup, we want K:'foo ' D:'bar' I:'qux' K:' baz'
+  //
+  // 3. Diffing 'foo\nbar baz' vs 'foo baz'
+  //    Prior to cleanup, we have K:'foo ' D:'\nbar ' K:' baz'
+  //    After cleanup, we want K'foo' D:'\nbar' K:' baz'
+  //
+  // 4. Diffing 'foo baz' vs 'foo\nbar baz'
+  //    Prior to cleanup, we have K:'foo\n' I:'\nbar ' K:' baz'
+  //    After cleanup, we ideally want K'foo' I:'\nbar' K:' baz'
+  //    but don't actually manage this currently (the pre-cleanup change
+  //    objects don't contain enough information to make it possible).
+  //
+  // 5. Diffing 'foo   bar baz' vs 'foo  baz'
+  //    Prior to cleanup, we have K:'foo  ' D:'   bar ' K:'  baz'
+  //    After cleanup, we want K:'foo  ' D:' bar ' K:'baz'
+  //
+  // Our handling is unavoidably imperfect in the case where there's a single
+  // indel between keeps and the whitespace has changed. For instance, consider
+  // diffing 'foo\tbar\nbaz' vs 'foo baz'. Unless we create an extra change
+  // object to represent the insertion of the space character (which isn't even
+  // a token), we have no way to avoid losing information about the texts'
+  // original whitespace in the result we return. Still, we do our best to
+  // output something that will look sensible if we e.g. print it with
+  // insertions in green and deletions in red.
+
+  // Between two "keep" change objects (or before the first or after the last
+  // change object), we can have either:
+  // * A "delete" followed by an "insert"
+  // * Just an "insert"
+  // * Just a "delete"
+  // We handle the three cases separately.
+  if (deletion && insertion) {
+    var oldWsPrefix = deletion.value.match(/^\s*/)[0];
+    var oldWsSuffix = deletion.value.match(/\s*$/)[0];
+    var newWsPrefix = insertion.value.match(/^\s*/)[0];
+    var newWsSuffix = insertion.value.match(/\s*$/)[0];
+    if (startKeep) {
+      var commonWsPrefix =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _string
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      longestCommonPrefix)
+      /*istanbul ignore end*/
+      (oldWsPrefix, newWsPrefix);
+      startKeep.value =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _string
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      replaceSuffix)
+      /*istanbul ignore end*/
+      (startKeep.value, newWsPrefix, commonWsPrefix);
+      deletion.value =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _string
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      removePrefix)
+      /*istanbul ignore end*/
+      (deletion.value, commonWsPrefix);
+      insertion.value =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _string
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      removePrefix)
+      /*istanbul ignore end*/
+      (insertion.value, commonWsPrefix);
+    }
+    if (endKeep) {
+      var commonWsSuffix =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _string
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      longestCommonSuffix)
+      /*istanbul ignore end*/
+      (oldWsSuffix, newWsSuffix);
+      endKeep.value =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _string
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      replacePrefix)
+      /*istanbul ignore end*/
+      (endKeep.value, newWsSuffix, commonWsSuffix);
+      deletion.value =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _string
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      removeSuffix)
+      /*istanbul ignore end*/
+      (deletion.value, commonWsSuffix);
+      insertion.value =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _string
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      removeSuffix)
+      /*istanbul ignore end*/
+      (insertion.value, commonWsSuffix);
+    }
+  } else if (insertion) {
+    // The whitespaces all reflect what was in the new text rather than
+    // the old, so we essentially have no information about whitespace
+    // insertion or deletion. We just want to dedupe the whitespace.
+    // We do that by having each change object keep its trailing
+    // whitespace and deleting duplicate leading whitespace where
+    // present.
+    if (startKeep) {
+      insertion.value = insertion.value.replace(/^\s*/, '');
+    }
+    if (endKeep) {
+      endKeep.value = endKeep.value.replace(/^\s*/, '');
+    }
+    // otherwise we've got a deletion and no insertion
+  } else if (startKeep && endKeep) {
+    var newWsFull = endKeep.value.match(/^\s*/)[0],
+      delWsStart = deletion.value.match(/^\s*/)[0],
+      delWsEnd = deletion.value.match(/\s*$/)[0];
+
+    // Any whitespace that comes straight after startKeep in both the old and
+    // new texts, assign to startKeep and remove from the deletion.
+    var newWsStart =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    longestCommonPrefix)
+    /*istanbul ignore end*/
+    (newWsFull, delWsStart);
+    deletion.value =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    removePrefix)
+    /*istanbul ignore end*/
+    (deletion.value, newWsStart);
+
+    // Any whitespace that comes straight before endKeep in both the old and
+    // new texts, and hasn't already been assigned to startKeep, assign to
+    // endKeep and remove from the deletion.
+    var newWsEnd =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    longestCommonSuffix)
+    /*istanbul ignore end*/
+    (
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    removePrefix)
+    /*istanbul ignore end*/
+    (newWsFull, newWsStart), delWsEnd);
+    deletion.value =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    removeSuffix)
+    /*istanbul ignore end*/
+    (deletion.value, newWsEnd);
+    endKeep.value =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    replacePrefix)
+    /*istanbul ignore end*/
+    (endKeep.value, newWsFull, newWsEnd);
+
+    // If there's any whitespace from the new text that HASN'T already been
+    // assigned, assign it to the start:
+    startKeep.value =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    replaceSuffix)
+    /*istanbul ignore end*/
+    (startKeep.value, newWsFull, newWsFull.slice(0, newWsFull.length - newWsEnd.length));
+  } else if (endKeep) {
+    // We are at the start of the text. Preserve all the whitespace on
+    // endKeep, and just remove whitespace from the end of deletion to the
+    // extent that it overlaps with the start of endKeep.
+    var endKeepWsPrefix = endKeep.value.match(/^\s*/)[0];
+    var deletionWsSuffix = deletion.value.match(/\s*$/)[0];
+    var overlap =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    maximumOverlap)
+    /*istanbul ignore end*/
+    (deletionWsSuffix, endKeepWsPrefix);
+    deletion.value =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    removeSuffix)
+    /*istanbul ignore end*/
+    (deletion.value, overlap);
+  } else if (startKeep) {
+    // We are at the END of the text. Preserve all the whitespace on
+    // startKeep, and just remove whitespace from the start of deletion to
+    // the extent that it overlaps with the end of startKeep.
+    var startKeepWsSuffix = startKeep.value.match(/\s*$/)[0];
+    var deletionWsPrefix = deletion.value.match(/^\s*/)[0];
+    var _overlap =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    maximumOverlap)
+    /*istanbul ignore end*/
+    (startKeepWsSuffix, deletionWsPrefix);
+    deletion.value =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    removePrefix)
+    /*istanbul ignore end*/
+    (deletion.value, _overlap);
+  }
+}
+var wordWithSpaceDiff =
+/*istanbul ignore start*/
+exports.wordWithSpaceDiff =
+/*istanbul ignore end*/
+new
+/*istanbul ignore start*/
+_base
+/*istanbul ignore end*/
+[
+/*istanbul ignore start*/
+"default"
+/*istanbul ignore end*/
+]();
+wordWithSpaceDiff.tokenize = function (value) {
+  // Slightly different to the tokenizeIncludingWhitespace regex used above in
+  // that this one treats each individual newline as a distinct tokens, rather
+  // than merging them into other surrounding whitespace. This was requested
+  // in https://github.com/kpdecker/jsdiff/issues/180 &
+  //    https://github.com/kpdecker/jsdiff/issues/211
+  var regex = new RegExp(
+  /*istanbul ignore start*/
+  "(\\r?\\n)|[".concat(
+  /*istanbul ignore end*/
+  extendedWordChars, "]+|[^\\S\\n\\r]+|[^").concat(extendedWordChars, "]"), 'ug');
+  return value.match(regex) || [];
+};
+function diffWordsWithSpace(oldStr, newStr, options) {
+  return wordWithSpaceDiff.diff(oldStr, newStr, options);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYmFzZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwiX3N0cmluZyIsIm9iaiIsIl9fZXNNb2R1bGUiLCJleHRlbmRlZFdvcmRDaGFycyIsInRva2VuaXplSW5jbHVkaW5nV2hpdGVzcGFjZSIsIlJlZ0V4cCIsImNvbmNhdCIsIndvcmREaWZmIiwiZXhwb3J0cyIsIkRpZmYiLCJlcXVhbHMiLCJsZWZ0IiwicmlnaHQiLCJvcHRpb25zIiwiaWdub3JlQ2FzZSIsInRvTG93ZXJDYXNlIiwidHJpbSIsInRva2VuaXplIiwidmFsdWUiLCJhcmd1bWVudHMiLCJsZW5ndGgiLCJ1bmRlZmluZWQiLCJwYXJ0cyIsImludGxTZWdtZW50ZXIiLCJyZXNvbHZlZE9wdGlvbnMiLCJncmFudWxhcml0eSIsIkVycm9yIiwiQXJyYXkiLCJmcm9tIiwic2VnbWVudCIsIm1hdGNoIiwidG9rZW5zIiwicHJldlBhcnQiLCJmb3JFYWNoIiwicGFydCIsInRlc3QiLCJwdXNoIiwicG9wIiwiam9pbiIsIm1hcCIsInRva2VuIiwiaSIsInJlcGxhY2UiLCJwb3N0UHJvY2VzcyIsImNoYW5nZXMiLCJvbmVDaGFuZ2VQZXJUb2tlbiIsImxhc3RLZWVwIiwiaW5zZXJ0aW9uIiwiZGVsZXRpb24iLCJjaGFuZ2UiLCJhZGRlZCIsInJlbW92ZWQiLCJkZWR1cGVXaGl0ZXNwYWNlSW5DaGFuZ2VPYmplY3RzIiwiZGlmZldvcmRzIiwib2xkU3RyIiwibmV3U3RyIiwiaWdub3JlV2hpdGVzcGFjZSIsImRpZmZXb3Jkc1dpdGhTcGFjZSIsImRpZmYiLCJzdGFydEtlZXAiLCJlbmRLZWVwIiwib2xkV3NQcmVmaXgiLCJvbGRXc1N1ZmZpeCIsIm5ld1dzUHJlZml4IiwibmV3V3NTdWZmaXgiLCJjb21tb25Xc1ByZWZpeCIsImxvbmdlc3RDb21tb25QcmVmaXgiLCJyZXBsYWNlU3VmZml4IiwicmVtb3ZlUHJlZml4IiwiY29tbW9uV3NTdWZmaXgiLCJsb25nZXN0Q29tbW9uU3VmZml4IiwicmVwbGFjZVByZWZpeCIsInJlbW92ZVN1ZmZpeCIsIm5ld1dzRnVsbCIsImRlbFdzU3RhcnQiLCJkZWxXc0VuZCIsIm5ld1dzU3RhcnQiLCJuZXdXc0VuZCIsInNsaWNlIiwiZW5kS2VlcFdzUHJlZml4IiwiZGVsZXRpb25Xc1N1ZmZpeCIsIm92ZXJsYXAiLCJtYXhpbXVtT3ZlcmxhcCIsInN0YXJ0S2VlcFdzU3VmZml4IiwiZGVsZXRpb25Xc1ByZWZpeCIsIndvcmRXaXRoU3BhY2VEaWZmIiwicmVnZXgiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvZGlmZi93b3JkLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBEaWZmIGZyb20gJy4vYmFzZSc7XG5pbXBvcnQgeyBsb25nZXN0Q29tbW9uUHJlZml4LCBsb25nZXN0Q29tbW9uU3VmZml4LCByZXBsYWNlUHJlZml4LCByZXBsYWNlU3VmZml4LCByZW1vdmVQcmVmaXgsIHJlbW92ZVN1ZmZpeCwgbWF4aW11bU92ZXJsYXAgfSBmcm9tICcuLi91dGlsL3N0cmluZyc7XG5cbi8vIEJhc2VkIG9uIGh0dHBzOi8vZW4ud2lraXBlZGlhLm9yZy93aWtpL0xhdGluX3NjcmlwdF9pbl9Vbmljb2RlXG4vL1xuLy8gUmFuZ2VzIGFuZCBleGNlcHRpb25zOlxuLy8gTGF0aW4tMSBTdXBwbGVtZW50LCAwMDgw4oCTMDBGRlxuLy8gIC0gVSswMEQ3ICDDlyBNdWx0aXBsaWNhdGlvbiBzaWduXG4vLyAgLSBVKzAwRjcgIMO3IERpdmlzaW9uIHNpZ25cbi8vIExhdGluIEV4dGVuZGVkLUEsIDAxMDDigJMwMTdGXG4vLyBMYXRpbiBFeHRlbmRlZC1CLCAwMTgw4oCTMDI0RlxuLy8gSVBBIEV4dGVuc2lvbnMsIDAyNTDigJMwMkFGXG4vLyBTcGFjaW5nIE1vZGlmaWVyIExldHRlcnMsIDAyQjDigJMwMkZGXG4vLyAgLSBVKzAyQzcgIMuHICYjNzExOyAgQ2Fyb25cbi8vICAtIFUrMDJEOCAgy5ggJiM3Mjg7ICBCcmV2ZVxuLy8gIC0gVSswMkQ5ICDLmSAmIzcyOTsgIERvdCBBYm92ZVxuLy8gIC0gVSswMkRBICDLmiAmIzczMDsgIFJpbmcgQWJvdmVcbi8vICAtIFUrMDJEQiAgy5sgJiM3MzE7ICBPZ29uZWtcbi8vICAtIFUrMDJEQyAgy5wgJiM3MzI7ICBTbWFsbCBUaWxkZVxuLy8gIC0gVSswMkREICDLnSAmIzczMzsgIERvdWJsZSBBY3V0ZSBBY2NlbnRcbi8vIExhdGluIEV4dGVuZGVkIEFkZGl0aW9uYWwsIDFFMDDigJMxRUZGXG5jb25zdCBleHRlbmRlZFdvcmRDaGFycyA9ICdhLXpBLVowLTlfXFxcXHV7QzB9LVxcXFx1e0ZGfVxcXFx1e0Q4fS1cXFxcdXtGNn1cXFxcdXtGOH0tXFxcXHV7MkM2fVxcXFx1ezJDOH0tXFxcXHV7MkQ3fVxcXFx1ezJERX0tXFxcXHV7MkZGfVxcXFx1ezFFMDB9LVxcXFx1ezFFRkZ9JztcblxuLy8gRWFjaCB0b2tlbiBpcyBvbmUgb2YgdGhlIGZvbGxvd2luZzpcbi8vIC0gQSBwdW5jdHVhdGlvbiBtYXJrIHBsdXMgdGhlIHN1cnJvdW5kaW5nIHdoaXRlc3BhY2Vcbi8vIC0gQSB3b3JkIHBsdXMgdGhlIHN1cnJvdW5kaW5nIHdoaXRlc3BhY2Vcbi8vIC0gUHVyZSB3aGl0ZXNwYWNlIChidXQgb25seSBpbiB0aGUgc3BlY2lhbCBjYXNlIHdoZXJlIHRoaXMgdGhlIGVudGlyZSB0ZXh0XG4vLyAgIGlzIGp1c3Qgd2hpdGVzcGFjZSlcbi8vXG4vLyBXZSBoYXZlIHRvIGluY2x1ZGUgc3Vycm91bmRpbmcgd2hpdGVzcGFjZSBpbiB0aGUgdG9rZW5zIGJlY2F1c2UgdGhlIHR3b1xuLy8gYWx0ZXJuYXRpdmUgYXBwcm9hY2hlcyBwcm9kdWNlIGhvcnJpYmx5IGJyb2tlbiByZXN1bHRzOlxuLy8gKiBJZiB3ZSBqdXN0IGRpc2NhcmQgdGhlIHdoaXRlc3BhY2UsIHdlIGNhbid0IGZ1bGx5IHJlcHJvZHVjZSB0aGUgb3JpZ2luYWxcbi8vICAgdGV4dCBmcm9tIHRoZSBzZXF1ZW5jZSBvZiB0b2tlbnMgYW5kIGFueSBhdHRlbXB0IHRvIHJlbmRlciB0aGUgZGlmZiB3aWxsXG4vLyAgIGdldCB0aGUgd2hpdGVzcGFjZSB3cm9uZy5cbi8vICogSWYgd2UgaGF2ZSBzZXBhcmF0ZSB0b2tlbnMgZm9yIHdoaXRlc3BhY2UsIHRoZW4gaW4gYSB0eXBpY2FsIHRleHQgZXZlcnlcbi8vICAgc2Vjb25kIHRva2VuIHdpbGwgYmUgYSBzaW5nbGUgc3BhY2UgY2hhcmFjdGVyLiBCdXQgdGhpcyBvZnRlbiByZXN1bHRzIGluXG4vLyAgIHRoZSBvcHRpbWFsIGRpZmYgYmV0d2VlbiB0d28gdGV4dHMgYmVpbmcgYSBwZXJ2ZXJzZSBvbmUgdGhhdCBwcmVzZXJ2ZXNcbi8vICAgdGhlIHNwYWNlcyBiZXR3ZWVuIHdvcmRzIGJ1dCBkZWxldGVzIGFuZCByZWluc2VydHMgYWN0dWFsIGNvbW1vbiB3b3Jkcy5cbi8vICAgU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9rcGRlY2tlci9qc2RpZmYvaXNzdWVzLzE2MCNpc3N1ZWNvbW1lbnQtMTg2NjA5OTY0MFxuLy8gICBmb3IgYW4gZXhhbXBsZS5cbi8vXG4vLyBLZWVwaW5nIHRoZSBzdXJyb3VuZGluZyB3aGl0ZXNwYWNlIG9mIGNvdXJzZSBoYXMgaW1wbGljYXRpb25zIGZvciAuZXF1YWxzXG4vLyBhbmQgLmpvaW4sIG5vdCBqdXN0IC50b2tlbml6ZS5cblxuLy8gVGhpcyByZWdleCBkb2VzIE5PVCBmdWxseSBpbXBsZW1lbnQgdGhlIHRva2VuaXphdGlvbiBydWxlcyBkZXNjcmliZWQgYWJvdmUuXG4vLyBJbnN0ZWFkLCBpdCBnaXZlcyBydW5zIG9mIHdoaXRlc3BhY2UgdGhlaXIgb3duIFwidG9rZW5cIi4gVGhlIHRva2VuaXplIG1ldGhvZFxuLy8gdGhlbiBoYW5kbGVzIHN0aXRjaGluZyB3aGl0ZXNwYWNlIHRva2VucyBvbnRvIGFkamFjZW50IHdvcmQgb3IgcHVuY3R1YXRpb25cbi8vIHRva2Vucy5cbmNvbnN0IHRva2VuaXplSW5jbHVkaW5nV2hpdGVzcGFjZSA9IG5ldyBSZWdFeHAoYFske2V4dGVuZGVkV29yZENoYXJzfV0rfFxcXFxzK3xbXiR7ZXh0ZW5kZWRXb3JkQ2hhcnN9XWAsICd1ZycpO1xuXG5leHBvcnQgY29uc3Qgd29yZERpZmYgPSBuZXcgRGlmZigpO1xud29yZERpZmYuZXF1YWxzID0gZnVuY3Rpb24obGVmdCwgcmlnaHQsIG9wdGlvbnMpIHtcbiAgaWYgKG9wdGlvbnMuaWdub3JlQ2FzZSkge1xuICAgIGxlZnQgPSBsZWZ0LnRvTG93ZXJDYXNlKCk7XG4gICAgcmlnaHQgPSByaWdodC50b0xvd2VyQ2FzZSgpO1xuICB9XG5cbiAgcmV0dXJuIGxlZnQudHJpbSgpID09PSByaWdodC50cmltKCk7XG59O1xuXG53b3JkRGlmZi50b2tlbml6ZSA9IGZ1bmN0aW9uKHZhbHVlLCBvcHRpb25zID0ge30pIHtcbiAgbGV0IHBhcnRzO1xuICBpZiAob3B0aW9ucy5pbnRsU2VnbWVudGVyKSB7XG4gICAgaWYgKG9wdGlvbnMuaW50bFNlZ21lbnRlci5yZXNvbHZlZE9wdGlvbnMoKS5ncmFudWxhcml0eSAhPSAnd29yZCcpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignVGhlIHNlZ21lbnRlciBwYXNzZWQgbXVzdCBoYXZlIGEgZ3JhbnVsYXJpdHkgb2YgXCJ3b3JkXCInKTtcbiAgICB9XG4gICAgcGFydHMgPSBBcnJheS5mcm9tKG9wdGlvbnMuaW50bFNlZ21lbnRlci5zZWdtZW50KHZhbHVlKSwgc2VnbWVudCA9PiBzZWdtZW50LnNlZ21lbnQpO1xuICB9IGVsc2Uge1xuICAgIHBhcnRzID0gdmFsdWUubWF0Y2godG9rZW5pemVJbmNsdWRpbmdXaGl0ZXNwYWNlKSB8fCBbXTtcbiAgfVxuICBjb25zdCB0b2tlbnMgPSBbXTtcbiAgbGV0IHByZXZQYXJ0ID0gbnVsbDtcbiAgcGFydHMuZm9yRWFjaChwYXJ0ID0+IHtcbiAgICBpZiAoKC9cXHMvKS50ZXN0KHBhcnQpKSB7XG4gICAgICBpZiAocHJldlBhcnQgPT0gbnVsbCkge1xuICAgICAgICB0b2tlbnMucHVzaChwYXJ0KTtcbiAgICAgIH0gZWxzZSB7XG4gICAgICAgIHRva2Vucy5wdXNoKHRva2Vucy5wb3AoKSArIHBhcnQpO1xuICAgICAgfVxuICAgIH0gZWxzZSBpZiAoKC9cXHMvKS50ZXN0KHByZXZQYXJ0KSkge1xuICAgICAgaWYgKHRva2Vuc1t0b2tlbnMubGVuZ3RoIC0gMV0gPT0gcHJldlBhcnQpIHtcbiAgICAgICAgdG9rZW5zLnB1c2godG9rZW5zLnBvcCgpICsgcGFydCk7XG4gICAgICB9IGVsc2Uge1xuICAgICAgICB0b2tlbnMucHVzaChwcmV2UGFydCArIHBhcnQpO1xuICAgICAgfVxuICAgIH0gZWxzZSB7XG4gICAgICB0b2tlbnMucHVzaChwYXJ0KTtcbiAgICB9XG5cbiAgICBwcmV2UGFydCA9IHBhcnQ7XG4gIH0pO1xuICByZXR1cm4gdG9rZW5zO1xufTtcblxud29yZERpZmYuam9pbiA9IGZ1bmN0aW9uKHRva2Vucykge1xuICAvLyBUb2tlbnMgYmVpbmcgam9pbmVkIGhlcmUgd2lsbCBhbHdheXMgaGF2ZSBhcHBlYXJlZCBjb25zZWN1dGl2ZWx5IGluIHRoZVxuICAvLyBzYW1lIHRleHQsIHNvIHdlIGNhbiBzaW1wbHkgc3RyaXAgb2ZmIHRoZSBsZWFkaW5nIHdoaXRlc3BhY2UgZnJvbSBhbGwgdGhlXG4gIC8vIHRva2VucyBleGNlcHQgdGhlIGZpcnN0IChhbmQgZXhjZXB0IGFueSB3aGl0ZXNwYWNlLW9ubHkgdG9rZW5zIC0gYnV0IHN1Y2hcbiAgLy8gYSB0b2tlbiB3aWxsIGFsd2F5cyBiZSB0aGUgZmlyc3QgYW5kIG9ubHkgdG9rZW4gYW55d2F5KSBhbmQgdGhlbiBqb2luIHRoZW1cbiAgLy8gYW5kIHRoZSB3aGl0ZXNwYWNlIGFyb3VuZCB3b3JkcyBhbmQgcHVuY3R1YXRpb24gd2lsbCBlbmQgdXAgY29ycmVjdC5cbiAgcmV0dXJuIHRva2Vucy5tYXAoKHRva2VuLCBpKSA9PiB7XG4gICAgaWYgKGkgPT0gMCkge1xuICAgICAgcmV0dXJuIHRva2VuO1xuICAgIH0gZWxzZSB7XG4gICAgICByZXR1cm4gdG9rZW4ucmVwbGFjZSgoL15cXHMrLyksICcnKTtcbiAgICB9XG4gIH0pLmpvaW4oJycpO1xufTtcblxud29yZERpZmYucG9zdFByb2Nlc3MgPSBmdW5jdGlvbihjaGFuZ2VzLCBvcHRpb25zKSB7XG4gIGlmICghY2hhbmdlcyB8fCBvcHRpb25zLm9uZUNoYW5nZVBlclRva2VuKSB7XG4gICAgcmV0dXJuIGNoYW5nZXM7XG4gIH1cblxuICBsZXQgbGFzdEtlZXAgPSBudWxsO1xuICAvLyBDaGFuZ2Ugb2JqZWN0cyByZXByZXNlbnRpbmcgYW55IGluc2VydGlvbiBvciBkZWxldGlvbiBzaW5jZSB0aGUgbGFzdFxuICAvLyBcImtlZXBcIiBjaGFuZ2Ugb2JqZWN0LiBUaGVyZSBjYW4gYmUgYXQgbW9zdCBvbmUgb2YgZWFjaC5cbiAgbGV0IGluc2VydGlvbiA9IG51bGw7XG4gIGxldCBkZWxldGlvbiA9IG51bGw7XG4gIGNoYW5nZXMuZm9yRWFjaChjaGFuZ2UgPT4ge1xuICAgIGlmIChjaGFuZ2UuYWRkZWQpIHtcbiAgICAgIGluc2VydGlvbiA9IGNoYW5nZTtcbiAgICB9IGVsc2UgaWYgKGNoYW5nZS5yZW1vdmVkKSB7XG4gICAgICBkZWxldGlvbiA9IGNoYW5nZTtcbiAgICB9IGVsc2Uge1xuICAgICAgaWYgKGluc2VydGlvbiB8fCBkZWxldGlvbikgeyAvLyBNYXkgYmUgZmFsc2UgYXQgc3RhcnQgb2YgdGV4dFxuICAgICAgICBkZWR1cGVXaGl0ZXNwYWNlSW5DaGFuZ2VPYmplY3RzKGxhc3RLZWVwLCBkZWxldGlvbiwgaW5zZXJ0aW9uLCBjaGFuZ2UpO1xuICAgICAgfVxuICAgICAgbGFzdEtlZXAgPSBjaGFuZ2U7XG4gICAgICBpbnNlcnRpb24gPSBudWxsO1xuICAgICAgZGVsZXRpb24gPSBudWxsO1xuICAgIH1cbiAgfSk7XG4gIGlmIChpbnNlcnRpb24gfHwgZGVsZXRpb24pIHtcbiAgICBkZWR1cGVXaGl0ZXNwYWNlSW5DaGFuZ2VPYmplY3RzKGxhc3RLZWVwLCBkZWxldGlvbiwgaW5zZXJ0aW9uLCBudWxsKTtcbiAgfVxuICByZXR1cm4gY2hhbmdlcztcbn07XG5cbmV4cG9ydCBmdW5jdGlvbiBkaWZmV29yZHMob2xkU3RyLCBuZXdTdHIsIG9wdGlvbnMpIHtcbiAgLy8gVGhpcyBvcHRpb24gaGFzIG5ldmVyIGJlZW4gZG9jdW1lbnRlZCBhbmQgbmV2ZXIgd2lsbCBiZSAoaXQncyBjbGVhcmVyIHRvXG4gIC8vIGp1c3QgY2FsbCBgZGlmZldvcmRzV2l0aFNwYWNlYCBkaXJlY3RseSBpZiB5b3UgbmVlZCB0aGF0IGJlaGF2aW9yKSwgYnV0XG4gIC8vIGhhcyBleGlzdGVkIGluIGpzZGlmZiBmb3IgYSBsb25nIHRpbWUsIHNvIHdlIHJldGFpbiBzdXBwb3J0IGZvciBpdCBoZXJlXG4gIC8vIGZvciB0aGUgc2FrZSBvZiBiYWNrd2FyZHMgY29tcGF0aWJpbGl0eS5cbiAgaWYgKG9wdGlvbnM/Lmlnbm9yZVdoaXRlc3BhY2UgIT0gbnVsbCAmJiAhb3B0aW9ucy5pZ25vcmVXaGl0ZXNwYWNlKSB7XG4gICAgcmV0dXJuIGRpZmZXb3Jkc1dpdGhTcGFjZShvbGRTdHIsIG5ld1N0ciwgb3B0aW9ucyk7XG4gIH1cblxuICByZXR1cm4gd29yZERpZmYuZGlmZihvbGRTdHIsIG5ld1N0ciwgb3B0aW9ucyk7XG59XG5cbmZ1bmN0aW9uIGRlZHVwZVdoaXRlc3BhY2VJbkNoYW5nZU9iamVjdHMoc3RhcnRLZWVwLCBkZWxldGlvbiwgaW5zZXJ0aW9uLCBlbmRLZWVwKSB7XG4gIC8vIEJlZm9yZSByZXR1cm5pbmcsIHdlIHRpZHkgdXAgdGhlIGxlYWRpbmcgYW5kIHRyYWlsaW5nIHdoaXRlc3BhY2Ugb2YgdGhlXG4gIC8vIGNoYW5nZSBvYmplY3RzIHRvIGVsaW1pbmF0ZSBjYXNlcyB3aGVyZSB0cmFpbGluZyB3aGl0ZXNwYWNlIGluIG9uZSBvYmplY3RcbiAgLy8gaXMgcmVwZWF0ZWQgYXMgbGVhZGluZyB3aGl0ZXNwYWNlIGluIHRoZSBuZXh0LlxuICAvLyBCZWxvdyBhcmUgZXhhbXBsZXMgb2YgdGhlIG91dGNvbWVzIHdlIHdhbnQgaGVyZSB0byBleHBsYWluIHRoZSBjb2RlLlxuICAvLyBJPWluc2VydCwgSz1rZWVwLCBEPWRlbGV0ZVxuICAvLyAxLiBkaWZmaW5nICdmb28gYmFyIGJheicgdnMgJ2ZvbyBiYXonXG4gIC8vICAgIFByaW9yIHRvIGNsZWFudXAsIHdlIGhhdmUgSzonZm9vICcgRDonIGJhciAnIEs6JyBiYXonXG4gIC8vICAgIEFmdGVyIGNsZWFudXAsIHdlIHdhbnQ6ICAgSzonZm9vICcgRDonYmFyICcgSzonYmF6J1xuICAvL1xuICAvLyAyLiBEaWZmaW5nICdmb28gYmFyIGJheicgdnMgJ2ZvbyBxdXggYmF6J1xuICAvLyAgICBQcmlvciB0byBjbGVhbnVwLCB3ZSBoYXZlIEs6J2ZvbyAnIEQ6JyBiYXIgJyBJOicgcXV4ICcgSzonIGJheidcbiAgLy8gICAgQWZ0ZXIgY2xlYW51cCwgd2Ugd2FudCBLOidmb28gJyBEOidiYXInIEk6J3F1eCcgSzonIGJheidcbiAgLy9cbiAgLy8gMy4gRGlmZmluZyAnZm9vXFxuYmFyIGJheicgdnMgJ2ZvbyBiYXonXG4gIC8vICAgIFByaW9yIHRvIGNsZWFudXAsIHdlIGhhdmUgSzonZm9vICcgRDonXFxuYmFyICcgSzonIGJheidcbiAgLy8gICAgQWZ0ZXIgY2xlYW51cCwgd2Ugd2FudCBLJ2ZvbycgRDonXFxuYmFyJyBLOicgYmF6J1xuICAvL1xuICAvLyA0LiBEaWZmaW5nICdmb28gYmF6JyB2cyAnZm9vXFxuYmFyIGJheidcbiAgLy8gICAgUHJpb3IgdG8gY2xlYW51cCwgd2UgaGF2ZSBLOidmb29cXG4nIEk6J1xcbmJhciAnIEs6JyBiYXonXG4gIC8vICAgIEFmdGVyIGNsZWFudXAsIHdlIGlkZWFsbHkgd2FudCBLJ2ZvbycgSTonXFxuYmFyJyBLOicgYmF6J1xuICAvLyAgICBidXQgZG9uJ3QgYWN0dWFsbHkgbWFuYWdlIHRoaXMgY3VycmVudGx5ICh0aGUgcHJlLWNsZWFudXAgY2hhbmdlXG4gIC8vICAgIG9iamVjdHMgZG9uJ3QgY29udGFpbiBlbm91Z2ggaW5mb3JtYXRpb24gdG8gbWFrZSBpdCBwb3NzaWJsZSkuXG4gIC8vXG4gIC8vIDUuIERpZmZpbmcgJ2ZvbyAgIGJhciBiYXonIHZzICdmb28gIGJheidcbiAgLy8gICAgUHJpb3IgdG8gY2xlYW51cCwgd2UgaGF2ZSBLOidmb28gICcgRDonICAgYmFyICcgSzonICBiYXonXG4gIC8vICAgIEFmdGVyIGNsZWFudXAsIHdlIHdhbnQgSzonZm9vICAnIEQ6JyBiYXIgJyBLOidiYXonXG4gIC8vXG4gIC8vIE91ciBoYW5kbGluZyBpcyB1bmF2b2lkYWJseSBpbXBlcmZlY3QgaW4gdGhlIGNhc2Ugd2hlcmUgdGhlcmUncyBhIHNpbmdsZVxuICAvLyBpbmRlbCBiZXR3ZWVuIGtlZXBzIGFuZCB0aGUgd2hpdGVzcGFjZSBoYXMgY2hhbmdlZC4gRm9yIGluc3RhbmNlLCBjb25zaWRlclxuICAvLyBkaWZmaW5nICdmb29cXHRiYXJcXG5iYXonIHZzICdmb28gYmF6Jy4gVW5sZXNzIHdlIGNyZWF0ZSBhbiBleHRyYSBjaGFuZ2VcbiAgLy8gb2JqZWN0IHRvIHJlcHJlc2VudCB0aGUgaW5zZXJ0aW9uIG9mIHRoZSBzcGFjZSBjaGFyYWN0ZXIgKHdoaWNoIGlzbid0IGV2ZW5cbiAgLy8gYSB0b2tlbiksIHdlIGhhdmUgbm8gd2F5IHRvIGF2b2lkIGxvc2luZyBpbmZvcm1hdGlvbiBhYm91dCB0aGUgdGV4dHMnXG4gIC8vIG9yaWdpbmFsIHdoaXRlc3BhY2UgaW4gdGhlIHJlc3VsdCB3ZSByZXR1cm4uIFN0aWxsLCB3ZSBkbyBvdXIgYmVzdCB0b1xuICAvLyBvdXRwdXQgc29tZXRoaW5nIHRoYXQgd2lsbCBsb29rIHNlbnNpYmxlIGlmIHdlIGUuZy4gcHJpbnQgaXQgd2l0aFxuICAvLyBpbnNlcnRpb25zIGluIGdyZWVuIGFuZCBkZWxldGlvbnMgaW4gcmVkLlxuXG4gIC8vIEJldHdlZW4gdHdvIFwia2VlcFwiIGNoYW5nZSBvYmplY3RzIChvciBiZWZvcmUgdGhlIGZpcnN0IG9yIGFmdGVyIHRoZSBsYXN0XG4gIC8vIGNoYW5nZSBvYmplY3QpLCB3ZSBjYW4gaGF2ZSBlaXRoZXI6XG4gIC8vICogQSBcImRlbGV0ZVwiIGZvbGxvd2VkIGJ5IGFuIFwiaW5zZXJ0XCJcbiAgLy8gKiBKdXN0IGFuIFwiaW5zZXJ0XCJcbiAgLy8gKiBKdXN0IGEgXCJkZWxldGVcIlxuICAvLyBXZSBoYW5kbGUgdGhlIHRocmVlIGNhc2VzIHNlcGFyYXRlbHkuXG4gIGlmIChkZWxldGlvbiAmJiBpbnNlcnRpb24pIHtcbiAgICBjb25zdCBvbGRXc1ByZWZpeCA9IGRlbGV0aW9uLnZhbHVlLm1hdGNoKC9eXFxzKi8pWzBdO1xuICAgIGNvbnN0IG9sZFdzU3VmZml4ID0gZGVsZXRpb24udmFsdWUubWF0Y2goL1xccyokLylbMF07XG4gICAgY29uc3QgbmV3V3NQcmVmaXggPSBpbnNlcnRpb24udmFsdWUubWF0Y2goL15cXHMqLylbMF07XG4gICAgY29uc3QgbmV3V3NTdWZmaXggPSBpbnNlcnRpb24udmFsdWUubWF0Y2goL1xccyokLylbMF07XG5cbiAgICBpZiAoc3RhcnRLZWVwKSB7XG4gICAgICBjb25zdCBjb21tb25Xc1ByZWZpeCA9IGxvbmdlc3RDb21tb25QcmVmaXgob2xkV3NQcmVmaXgsIG5ld1dzUHJlZml4KTtcbiAgICAgIHN0YXJ0S2VlcC52YWx1ZSA9IHJlcGxhY2VTdWZmaXgoc3RhcnRLZWVwLnZhbHVlLCBuZXdXc1ByZWZpeCwgY29tbW9uV3NQcmVmaXgpO1xuICAgICAgZGVsZXRpb24udmFsdWUgPSByZW1vdmVQcmVmaXgoZGVsZXRpb24udmFsdWUsIGNvbW1vbldzUHJlZml4KTtcbiAgICAgIGluc2VydGlvbi52YWx1ZSA9IHJlbW92ZVByZWZpeChpbnNlcnRpb24udmFsdWUsIGNvbW1vbldzUHJlZml4KTtcbiAgICB9XG4gICAgaWYgKGVuZEtlZXApIHtcbiAgICAgIGNvbnN0IGNvbW1vbldzU3VmZml4ID0gbG9uZ2VzdENvbW1vblN1ZmZpeChvbGRXc1N1ZmZpeCwgbmV3V3NTdWZmaXgpO1xuICAgICAgZW5kS2VlcC52YWx1ZSA9IHJlcGxhY2VQcmVmaXgoZW5kS2VlcC52YWx1ZSwgbmV3V3NTdWZmaXgsIGNvbW1vbldzU3VmZml4KTtcbiAgICAgIGRlbGV0aW9uLnZhbHVlID0gcmVtb3ZlU3VmZml4KGRlbGV0aW9uLnZhbHVlLCBjb21tb25Xc1N1ZmZpeCk7XG4gICAgICBpbnNlcnRpb24udmFsdWUgPSByZW1vdmVTdWZmaXgoaW5zZXJ0aW9uLnZhbHVlLCBjb21tb25Xc1N1ZmZpeCk7XG4gICAgfVxuICB9IGVsc2UgaWYgKGluc2VydGlvbikge1xuICAgIC8vIFRoZSB3aGl0ZXNwYWNlcyBhbGwgcmVmbGVjdCB3aGF0IHdhcyBpbiB0aGUgbmV3IHRleHQgcmF0aGVyIHRoYW5cbiAgICAvLyB0aGUgb2xkLCBzbyB3ZSBlc3NlbnRpYWxseSBoYXZlIG5vIGluZm9ybWF0aW9uIGFib3V0IHdoaXRlc3BhY2VcbiAgICAvLyBpbnNlcnRpb24gb3IgZGVsZXRpb24uIFdlIGp1c3Qgd2FudCB0byBkZWR1cGUgdGhlIHdoaXRlc3BhY2UuXG4gICAgLy8gV2UgZG8gdGhhdCBieSBoYXZpbmcgZWFjaCBjaGFuZ2Ugb2JqZWN0IGtlZXAgaXRzIHRyYWlsaW5nXG4gICAgLy8gd2hpdGVzcGFjZSBhbmQgZGVsZXRpbmcgZHVwbGljYXRlIGxlYWRpbmcgd2hpdGVzcGFjZSB3aGVyZVxuICAgIC8vIHByZXNlbnQuXG4gICAgaWYgKHN0YXJ0S2VlcCkge1xuICAgICAgaW5zZXJ0aW9uLnZhbHVlID0gaW5zZXJ0aW9uLnZhbHVlLnJlcGxhY2UoL15cXHMqLywgJycpO1xuICAgIH1cbiAgICBpZiAoZW5kS2VlcCkge1xuICAgICAgZW5kS2VlcC52YWx1ZSA9IGVuZEtlZXAudmFsdWUucmVwbGFjZSgvXlxccyovLCAnJyk7XG4gICAgfVxuICAvLyBvdGhlcndpc2Ugd2UndmUgZ290IGEgZGVsZXRpb24gYW5kIG5vIGluc2VydGlvblxuICB9IGVsc2UgaWYgKHN0YXJ0S2VlcCAmJiBlbmRLZWVwKSB7XG4gICAgY29uc3QgbmV3V3NGdWxsID0gZW5kS2VlcC52YWx1ZS5tYXRjaCgvXlxccyovKVswXSxcbiAgICAgICAgZGVsV3NTdGFydCA9IGRlbGV0aW9uLnZhbHVlLm1hdGNoKC9eXFxzKi8pWzBdLFxuICAgICAgICBkZWxXc0VuZCA9IGRlbGV0aW9uLnZhbHVlLm1hdGNoKC9cXHMqJC8pWzBdO1xuXG4gICAgLy8gQW55IHdoaXRlc3BhY2UgdGhhdCBjb21lcyBzdHJhaWdodCBhZnRlciBzdGFydEtlZXAgaW4gYm90aCB0aGUgb2xkIGFuZFxuICAgIC8vIG5ldyB0ZXh0cywgYXNzaWduIHRvIHN0YXJ0S2VlcCBhbmQgcmVtb3ZlIGZyb20gdGhlIGRlbGV0aW9uLlxuICAgIGNvbnN0IG5ld1dzU3RhcnQgPSBsb25nZXN0Q29tbW9uUHJlZml4KG5ld1dzRnVsbCwgZGVsV3NTdGFydCk7XG4gICAgZGVsZXRpb24udmFsdWUgPSByZW1vdmVQcmVmaXgoZGVsZXRpb24udmFsdWUsIG5ld1dzU3RhcnQpO1xuXG4gICAgLy8gQW55IHdoaXRlc3BhY2UgdGhhdCBjb21lcyBzdHJhaWdodCBiZWZvcmUgZW5kS2VlcCBpbiBib3RoIHRoZSBvbGQgYW5kXG4gICAgLy8gbmV3IHRleHRzLCBhbmQgaGFzbid0IGFscmVhZHkgYmVlbiBhc3NpZ25lZCB0byBzdGFydEtlZXAsIGFzc2lnbiB0b1xuICAgIC8vIGVuZEtlZXAgYW5kIHJlbW92ZSBmcm9tIHRoZSBkZWxldGlvbi5cbiAgICBjb25zdCBuZXdXc0VuZCA9IGxvbmdlc3RDb21tb25TdWZmaXgoXG4gICAgICByZW1vdmVQcmVmaXgobmV3V3NGdWxsLCBuZXdXc1N0YXJ0KSxcbiAgICAgIGRlbFdzRW5kXG4gICAgKTtcbiAgICBkZWxldGlvbi52YWx1ZSA9IHJlbW92ZVN1ZmZpeChkZWxldGlvbi52YWx1ZSwgbmV3V3NFbmQpO1xuICAgIGVuZEtlZXAudmFsdWUgPSByZXBsYWNlUHJlZml4KGVuZEtlZXAudmFsdWUsIG5ld1dzRnVsbCwgbmV3V3NFbmQpO1xuXG4gICAgLy8gSWYgdGhlcmUncyBhbnkgd2hpdGVzcGFjZSBmcm9tIHRoZSBuZXcgdGV4dCB0aGF0IEhBU04nVCBhbHJlYWR5IGJlZW5cbiAgICAvLyBhc3NpZ25lZCwgYXNzaWduIGl0IHRvIHRoZSBzdGFydDpcbiAgICBzdGFydEtlZXAudmFsdWUgPSByZXBsYWNlU3VmZml4KFxuICAgICAgc3RhcnRLZWVwLnZhbHVlLFxuICAgICAgbmV3V3NGdWxsLFxuICAgICAgbmV3V3NGdWxsLnNsaWNlKDAsIG5ld1dzRnVsbC5sZW5ndGggLSBuZXdXc0VuZC5sZW5ndGgpXG4gICAgKTtcbiAgfSBlbHNlIGlmIChlbmRLZWVwKSB7XG4gICAgLy8gV2UgYXJlIGF0IHRoZSBzdGFydCBvZiB0aGUgdGV4dC4gUHJlc2VydmUgYWxsIHRoZSB3aGl0ZXNwYWNlIG9uXG4gICAgLy8gZW5kS2VlcCwgYW5kIGp1c3QgcmVtb3ZlIHdoaXRlc3BhY2UgZnJvbSB0aGUgZW5kIG9mIGRlbGV0aW9uIHRvIHRoZVxuICAgIC8vIGV4dGVudCB0aGF0IGl0IG92ZXJsYXBzIHdpdGggdGhlIHN0YXJ0IG9mIGVuZEtlZXAuXG4gICAgY29uc3QgZW5kS2VlcFdzUHJlZml4ID0gZW5kS2VlcC52YWx1ZS5tYXRjaCgvXlxccyovKVswXTtcbiAgICBjb25zdCBkZWxldGlvbldzU3VmZml4ID0gZGVsZXRpb24udmFsdWUubWF0Y2goL1xccyokLylbMF07XG4gICAgY29uc3Qgb3ZlcmxhcCA9IG1heGltdW1PdmVybGFwKGRlbGV0aW9uV3NTdWZmaXgsIGVuZEtlZXBXc1ByZWZpeCk7XG4gICAgZGVsZXRpb24udmFsdWUgPSByZW1vdmVTdWZmaXgoZGVsZXRpb24udmFsdWUsIG92ZXJsYXApO1xuICB9IGVsc2UgaWYgKHN0YXJ0S2VlcCkge1xuICAgIC8vIFdlIGFyZSBhdCB0aGUgRU5EIG9mIHRoZSB0ZXh0LiBQcmVzZXJ2ZSBhbGwgdGhlIHdoaXRlc3BhY2Ugb25cbiAgICAvLyBzdGFydEtlZXAsIGFuZCBqdXN0IHJlbW92ZSB3aGl0ZXNwYWNlIGZyb20gdGhlIHN0YXJ0IG9mIGRlbGV0aW9uIHRvXG4gICAgLy8gdGhlIGV4dGVudCB0aGF0IGl0IG92ZXJsYXBzIHdpdGggdGhlIGVuZCBvZiBzdGFydEtlZXAuXG4gICAgY29uc3Qgc3RhcnRLZWVwV3NTdWZmaXggPSBzdGFydEtlZXAudmFsdWUubWF0Y2goL1xccyokLylbMF07XG4gICAgY29uc3QgZGVsZXRpb25Xc1ByZWZpeCA9IGRlbGV0aW9uLnZhbHVlLm1hdGNoKC9eXFxzKi8pWzBdO1xuICAgIGNvbnN0IG92ZXJsYXAgPSBtYXhpbXVtT3ZlcmxhcChzdGFydEtlZXBXc1N1ZmZpeCwgZGVsZXRpb25Xc1ByZWZpeCk7XG4gICAgZGVsZXRpb24udmFsdWUgPSByZW1vdmVQcmVmaXgoZGVsZXRpb24udmFsdWUsIG92ZXJsYXApO1xuICB9XG59XG5cblxuZXhwb3J0IGNvbnN0IHdvcmRXaXRoU3BhY2VEaWZmID0gbmV3IERpZmYoKTtcbndvcmRXaXRoU3BhY2VEaWZmLnRva2VuaXplID0gZnVuY3Rpb24odmFsdWUpIHtcbiAgLy8gU2xpZ2h0bHkgZGlmZmVyZW50IHRvIHRoZSB0b2tlbml6ZUluY2x1ZGluZ1doaXRlc3BhY2UgcmVnZXggdXNlZCBhYm92ZSBpblxuICAvLyB0aGF0IHRoaXMgb25lIHRyZWF0cyBlYWNoIGluZGl2aWR1YWwgbmV3bGluZSBhcyBhIGRpc3RpbmN0IHRva2VucywgcmF0aGVyXG4gIC8vIHRoYW4gbWVyZ2luZyB0aGVtIGludG8gb3RoZXIgc3Vycm91bmRpbmcgd2hpdGVzcGFjZS4gVGhpcyB3YXMgcmVxdWVzdGVkXG4gIC8vIGluIGh0dHBzOi8vZ2l0aHViLmNvbS9rcGRlY2tlci9qc2RpZmYvaXNzdWVzLzE4MCAmXG4gIC8vICAgIGh0dHBzOi8vZ2l0aHViLmNvbS9rcGRlY2tlci9qc2RpZmYvaXNzdWVzLzIxMVxuICBjb25zdCByZWdleCA9IG5ldyBSZWdFeHAoYChcXFxccj9cXFxcbil8WyR7ZXh0ZW5kZWRXb3JkQ2hhcnN9XSt8W15cXFxcU1xcXFxuXFxcXHJdK3xbXiR7ZXh0ZW5kZWRXb3JkQ2hhcnN9XWAsICd1ZycpO1xuICByZXR1cm4gdmFsdWUubWF0Y2gocmVnZXgpIHx8IFtdO1xufTtcbmV4cG9ydCBmdW5jdGlvbiBkaWZmV29yZHNXaXRoU3BhY2Uob2xkU3RyLCBuZXdTdHIsIG9wdGlvbnMpIHtcbiAgcmV0dXJuIHdvcmRXaXRoU3BhY2VEaWZmLmRpZmYob2xkU3RyLCBuZXdTdHIsIG9wdGlvbnMpO1xufVxuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7O0FBQUE7QUFBQTtBQUFBQSxLQUFBLEdBQUFDLHNCQUFBLENBQUFDLE9BQUE7QUFBQTtBQUFBO0FBQ0E7QUFBQTtBQUFBQyxPQUFBLEdBQUFELE9BQUE7QUFBQTtBQUFBO0FBQW9KLG1DQUFBRCx1QkFBQUcsR0FBQSxXQUFBQSxHQUFBLElBQUFBLEdBQUEsQ0FBQUMsVUFBQSxHQUFBRCxHQUFBLGdCQUFBQSxHQUFBO0FBQUE7QUFFcEo7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsSUFBTUUsaUJBQWlCLEdBQUcsK0dBQStHOztBQUV6STtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsSUFBTUMsMkJBQTJCLEdBQUcsSUFBSUMsTUFBTTtBQUFBO0FBQUEsSUFBQUMsTUFBQTtBQUFBO0FBQUtILGlCQUFpQixnQkFBQUcsTUFBQSxDQUFhSCxpQkFBaUIsUUFBSyxJQUFJLENBQUM7QUFFckcsSUFBTUksUUFBUTtBQUFBO0FBQUFDLE9BQUEsQ0FBQUQsUUFBQTtBQUFBO0FBQUc7QUFBSUU7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUE7QUFBQUEsQ0FBSSxDQUFDLENBQUM7QUFDbENGLFFBQVEsQ0FBQ0csTUFBTSxHQUFHLFVBQVNDLElBQUks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
+
+
+/***/ }),
+
+/***/ 2823:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+Object.defineProperty(exports, "Diff", ({
+  enumerable: true,
+  get: function get() {
+    return _base["default"];
+  }
+}));
+Object.defineProperty(exports, "applyPatch", ({
+  enumerable: true,
+  get: function get() {
+    return _apply.applyPatch;
+  }
+}));
+Object.defineProperty(exports, "applyPatches", ({
+  enumerable: true,
+  get: function get() {
+    return _apply.applyPatches;
+  }
+}));
+Object.defineProperty(exports, "canonicalize", ({
+  enumerable: true,
+  get: function get() {
+    return _json.canonicalize;
+  }
+}));
+Object.defineProperty(exports, "convertChangesToDMP", ({
+  enumerable: true,
+  get: function get() {
+    return _dmp.convertChangesToDMP;
+  }
+}));
+Object.defineProperty(exports, "convertChangesToXML", ({
+  enumerable: true,
+  get: function get() {
+    return _xml.convertChangesToXML;
+  }
+}));
+Object.defineProperty(exports, "createPatch", ({
+  enumerable: true,
+  get: function get() {
+    return _create.createPatch;
+  }
+}));
+Object.defineProperty(exports, "createTwoFilesPatch", ({
+  enumerable: true,
+  get: function get() {
+    return _create.createTwoFilesPatch;
+  }
+}));
+Object.defineProperty(exports, "diffArrays", ({
+  enumerable: true,
+  get: function get() {
+    return _array.diffArrays;
+  }
+}));
+Object.defineProperty(exports, "diffChars", ({
+  enumerable: true,
+  get: function get() {
+    return _character.diffChars;
+  }
+}));
+Object.defineProperty(exports, "diffCss", ({
+  enumerable: true,
+  get: function get() {
+    return _css.diffCss;
+  }
+}));
+Object.defineProperty(exports, "diffJson", ({
+  enumerable: true,
+  get: function get() {
+    return _json.diffJson;
+  }
+}));
+Object.defineProperty(exports, "diffLines", ({
+  enumerable: true,
+  get: function get() {
+    return _line.diffLines;
+  }
+}));
+Object.defineProperty(exports, "diffSentences", ({
+  enumerable: true,
+  get: function get() {
+    return _sentence.diffSentences;
+  }
+}));
+Object.defineProperty(exports, "diffTrimmedLines", ({
+  enumerable: true,
+  get: function get() {
+    return _line.diffTrimmedLines;
+  }
+}));
+Object.defineProperty(exports, "diffWords", ({
+  enumerable: true,
+  get: function get() {
+    return _word.diffWords;
+  }
+}));
+Object.defineProperty(exports, "diffWordsWithSpace", ({
+  enumerable: true,
+  get: function get() {
+    return _word.diffWordsWithSpace;
+  }
+}));
+Object.defineProperty(exports, "formatPatch", ({
+  enumerable: true,
+  get: function get() {
+    return _create.formatPatch;
+  }
+}));
+Object.defineProperty(exports, "merge", ({
+  enumerable: true,
+  get: function get() {
+    return _merge.merge;
+  }
+}));
+Object.defineProperty(exports, "parsePatch", ({
+  enumerable: true,
+  get: function get() {
+    return _parse.parsePatch;
+  }
+}));
+Object.defineProperty(exports, "reversePatch", ({
+  enumerable: true,
+  get: function get() {
+    return _reverse.reversePatch;
+  }
+}));
+Object.defineProperty(exports, "structuredPatch", ({
+  enumerable: true,
+  get: function get() {
+    return _create.structuredPatch;
+  }
+}));
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_base = _interopRequireDefault(__nccwpck_require__(7106))
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_character = __nccwpck_require__(6312)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_word = __nccwpck_require__(1867)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_line = __nccwpck_require__(5129)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_sentence = __nccwpck_require__(9114)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_css = __nccwpck_require__(8336)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_json = __nccwpck_require__(1553)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_array = __nccwpck_require__(9882)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_apply = __nccwpck_require__(2058)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_parse = __nccwpck_require__(6997)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_merge = __nccwpck_require__(6974)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_reverse = __nccwpck_require__(7560)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_create = __nccwpck_require__(3148)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_dmp = __nccwpck_require__(9766)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_xml = __nccwpck_require__(1110)
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*istanbul ignore end*/
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYmFzZSIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwiX2NoYXJhY3RlciIsIl93b3JkIiwiX2xpbmUiLCJfc2VudGVuY2UiLCJfY3NzIiwiX2pzb24iLCJfYXJyYXkiLCJfYXBwbHkiLCJfcGFyc2UiLCJfbWVyZ2UiLCJfcmV2ZXJzZSIsIl9jcmVhdGUiLCJfZG1wIiwiX3htbCIsIm9iaiIsIl9fZXNNb2R1bGUiXSwic291cmNlcyI6WyIuLi9zcmMvaW5kZXguanMiXSwic291cmNlc0NvbnRlbnQiOlsiLyogU2VlIExJQ0VOU0UgZmlsZSBmb3IgdGVybXMgb2YgdXNlICovXG5cbi8qXG4gKiBUZXh0IGRpZmYgaW1wbGVtZW50YXRpb24uXG4gKlxuICogVGhpcyBsaWJyYXJ5IHN1cHBvcnRzIHRoZSBmb2xsb3dpbmcgQVBJczpcbiAqIERpZmYuZGlmZkNoYXJzOiBDaGFyYWN0ZXIgYnkgY2hhcmFjdGVyIGRpZmZcbiAqIERpZmYuZGlmZldvcmRzOiBXb3JkIChhcyBkZWZpbmVkIGJ5IFxcYiByZWdleCkgZGlmZiB3aGljaCBpZ25vcmVzIHdoaXRlc3BhY2VcbiAqIERpZmYuZGlmZkxpbmVzOiBMaW5lIGJhc2VkIGRpZmZcbiAqXG4gKiBEaWZmLmRpZmZDc3M6IERpZmYgdGFyZ2V0ZWQgYXQgQ1NTIGNvbnRlbnRcbiAqXG4gKiBUaGVzZSBtZXRob2RzIGFyZSBiYXNlZCBvbiB0aGUgaW1wbGVtZW50YXRpb24gcHJvcG9zZWQgaW5cbiAqIFwiQW4gTyhORCkgRGlmZmVyZW5jZSBBbGdvcml0aG0gYW5kIGl0cyBWYXJpYXRpb25zXCIgKE15ZXJzLCAxOTg2KS5cbiAqIGh0dHA6Ly9jaXRlc2VlcnguaXN0LnBzdS5lZHUvdmlld2RvYy9zdW1tYXJ5P2RvaT0xMC4xLjEuNC42OTI3XG4gKi9cbmltcG9ydCBEaWZmIGZyb20gJy4vZGlmZi9iYXNlJztcbmltcG9ydCB7ZGlmZkNoYXJzfSBmcm9tICcuL2RpZmYvY2hhcmFjdGVyJztcbmltcG9ydCB7ZGlmZldvcmRzLCBkaWZmV29yZHNXaXRoU3BhY2V9IGZyb20gJy4vZGlmZi93b3JkJztcbmltcG9ydCB7ZGlmZkxpbmVzLCBkaWZmVHJpbW1lZExpbmVzfSBmcm9tICcuL2RpZmYvbGluZSc7XG5pbXBvcnQge2RpZmZTZW50ZW5jZXN9IGZyb20gJy4vZGlmZi9zZW50ZW5jZSc7XG5cbmltcG9ydCB7ZGlmZkNzc30gZnJvbSAnLi9kaWZmL2Nzcyc7XG5pbXBvcnQge2RpZmZKc29uLCBjYW5vbmljYWxpemV9IGZyb20gJy4vZGlmZi9qc29uJztcblxuaW1wb3J0IHtkaWZmQXJyYXlzfSBmcm9tICcuL2RpZmYvYXJyYXknO1xuXG5pbXBvcnQge2FwcGx5UGF0Y2gsIGFwcGx5UGF0Y2hlc30gZnJvbSAnLi9wYXRjaC9hcHBseSc7XG5pbXBvcnQge3BhcnNlUGF0Y2h9IGZyb20gJy4vcGF0Y2gvcGFyc2UnO1xuaW1wb3J0IHttZXJnZX0gZnJvbSAnLi9wYXRjaC9tZXJnZSc7XG5pbXBvcnQge3JldmVyc2VQYXRjaH0gZnJvbSAnLi9wYXRjaC9yZXZlcnNlJztcbmltcG9ydCB7c3RydWN0dXJlZFBhdGNoLCBjcmVhdGVUd29GaWxlc1BhdGNoLCBjcmVhdGVQYXRjaCwgZm9ybWF0UGF0Y2h9IGZyb20gJy4vcGF0Y2gvY3JlYXRlJztcblxuaW1wb3J0IHtjb252ZXJ0Q2hhbmdlc1RvRE1QfSBmcm9tICcuL2NvbnZlcnQvZG1wJztcbmltcG9ydCB7Y29udmVydENoYW5nZXNUb1hNTH0gZnJvbSAnLi9jb252ZXJ0L3htbCc7XG5cbmV4cG9ydCB7XG4gIERpZmYsXG5cbiAgZGlmZkNoYXJzLFxuICBkaWZmV29yZHMsXG4gIGRpZmZXb3Jkc1dpdGhTcGFjZSxcbiAgZGlmZkxpbmVzLFxuICBkaWZmVHJpbW1lZExpbmVzLFxuICBkaWZmU2VudGVuY2VzLFxuXG4gIGRpZmZDc3MsXG4gIGRpZmZKc29uLFxuXG4gIGRpZmZBcnJheXMsXG5cbiAgc3RydWN0dXJlZFBhdGNoLFxuICBjcmVhdGVUd29GaWxlc1BhdGNoLFxuICBjcmVhdGVQYXRjaCxcbiAgZm9ybWF0UGF0Y2gsXG4gIGFwcGx5UGF0Y2gsXG4gIGFwcGx5UGF0Y2hlcyxcbiAgcGFyc2VQYXRjaCxcbiAgbWVyZ2UsXG4gIHJldmVyc2VQYXRjaCxcbiAgY29udmVydENoYW5nZXNUb0RNUCxcbiAgY29udmVydENoYW5nZXNUb1hNTCxcbiAgY2Fub25pY2FsaXplXG59O1xuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBZ0JBO0FBQUE7QUFBQUEsS0FBQSxHQUFBQyxzQkFBQSxDQUFBQyxPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQUMsVUFBQSxHQUFBRCxPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQUUsS0FBQSxHQUFBRixPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQUcsS0FBQSxHQUFBSCxPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQUksU0FBQSxHQUFBSixPQUFBO0FBQUE7QUFBQTtBQUVBO0FBQUE7QUFBQUssSUFBQSxHQUFBTCxPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQU0sS0FBQSxHQUFBTixPQUFBO0FBQUE7QUFBQTtBQUVBO0FBQUE7QUFBQU8sTUFBQSxHQUFBUCxPQUFBO0FBQUE7QUFBQTtBQUVBO0FBQUE7QUFBQVEsTUFBQSxHQUFBUixPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQVMsTUFBQSxHQUFBVCxPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQVUsTUFBQSxHQUFBVixPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQVcsUUFBQSxHQUFBWCxPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQVksT0FBQSxHQUFBWixPQUFBO0FBQUE7QUFBQTtBQUVBO0FBQUE7QUFBQWEsSUFBQSxHQUFBYixPQUFBO0FBQUE7QUFBQTtBQUNBO0FBQUE7QUFBQWMsSUFBQSxHQUFBZCxPQUFBO0FBQUE7QUFBQTtBQUFrRCxtQ0FBQUQsdUJBQUFnQixHQUFBLFdBQUFBLEdBQUEsSUFBQUEsR0FBQSxDQUFBQyxVQUFBLEdBQUFELEdBQUEsZ0JBQUFBLEdBQUE7QUFBQSIsImlnbm9yZUxpc3QiOltdfQ==
+
+
+/***/ }),
+
+/***/ 2058:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.applyPatch = applyPatch;
+exports.applyPatches = applyPatches;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_string = __nccwpck_require__(8831)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_lineEndings = __nccwpck_require__(8959)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_parse = __nccwpck_require__(6997)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_distanceIterator = _interopRequireDefault(__nccwpck_require__(7572))
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*istanbul ignore end*/
+function applyPatch(source, uniDiff) {
+  /*istanbul ignore start*/
+  var
+  /*istanbul ignore end*/
+  options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  if (typeof uniDiff === 'string') {
+    uniDiff =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _parse
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    parsePatch)
+    /*istanbul ignore end*/
+    (uniDiff);
+  }
+  if (Array.isArray(uniDiff)) {
+    if (uniDiff.length > 1) {
+      throw new Error('applyPatch only works with a single input.');
+    }
+    uniDiff = uniDiff[0];
+  }
+  if (options.autoConvertLineEndings || options.autoConvertLineEndings == null) {
+    if (
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    hasOnlyWinLineEndings)
+    /*istanbul ignore end*/
+    (source) &&
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _lineEndings
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    isUnix)
+    /*istanbul ignore end*/
+    (uniDiff)) {
+      uniDiff =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _lineEndings
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      unixToWin)
+      /*istanbul ignore end*/
+      (uniDiff);
+    } else if (
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _string
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    hasOnlyUnixLineEndings)
+    /*istanbul ignore end*/
+    (source) &&
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _lineEndings
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    isWin)
+    /*istanbul ignore end*/
+    (uniDiff)) {
+      uniDiff =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _lineEndings
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      winToUnix)
+      /*istanbul ignore end*/
+      (uniDiff);
+    }
+  }
+
+  // Apply the diff to the input
+  var lines = source.split('\n'),
+    hunks = uniDiff.hunks,
+    compareLine = options.compareLine || function (lineNumber, line, operation, patchContent)
+    /*istanbul ignore start*/
+    {
+      return (
+        /*istanbul ignore end*/
+        line === patchContent
+      );
+    },
+    fuzzFactor = options.fuzzFactor || 0,
+    minLine = 0;
+  if (fuzzFactor < 0 || !Number.isInteger(fuzzFactor)) {
+    throw new Error('fuzzFactor must be a non-negative integer');
+  }
+
+  // Special case for empty patch.
+  if (!hunks.length) {
+    return source;
+  }
+
+  // Before anything else, handle EOFNL insertion/removal. If the patch tells us to make a change
+  // to the EOFNL that is redundant/impossible - i.e. to remove a newline that's not there, or add a
+  // newline that already exists - then we either return false and fail to apply the patch (if
+  // fuzzFactor is 0) or simply ignore the problem and do nothing (if fuzzFactor is >0).
+  // If we do need to remove/add a newline at EOF, this will always be in the final hunk:
+  var prevLine = '',
+    removeEOFNL = false,
+    addEOFNL = false;
+  for (var i = 0; i < hunks[hunks.length - 1].lines.length; i++) {
+    var line = hunks[hunks.length - 1].lines[i];
+    if (line[0] == '\\') {
+      if (prevLine[0] == '+') {
+        removeEOFNL = true;
+      } else if (prevLine[0] == '-') {
+        addEOFNL = true;
+      }
+    }
+    prevLine = line;
+  }
+  if (removeEOFNL) {
+    if (addEOFNL) {
+      // This means the final line gets changed but doesn't have a trailing newline in either the
+      // original or patched version. In that case, we do nothing if fuzzFactor > 0, and if
+      // fuzzFactor is 0, we simply validate that the source file has no trailing newline.
+      if (!fuzzFactor && lines[lines.length - 1] == '') {
+        return false;
+      }
+    } else if (lines[lines.length - 1] == '') {
+      lines.pop();
+    } else if (!fuzzFactor) {
+      return false;
+    }
+  } else if (addEOFNL) {
+    if (lines[lines.length - 1] != '') {
+      lines.push('');
+    } else if (!fuzzFactor) {
+      return false;
+    }
+  }
+
+  /**
+   * Checks if the hunk can be made to fit at the provided location with at most `maxErrors`
+   * insertions, substitutions, or deletions, while ensuring also that:
+   * - lines deleted in the hunk match exactly, and
+   * - wherever an insertion operation or block of insertion operations appears in the hunk, the
+   *   immediately preceding and following lines of context match exactly
+   *
+   * `toPos` should be set such that lines[toPos] is meant to match hunkLines[0].
+   *
+   * If the hunk can be applied, returns an object with properties `oldLineLastI` and
+   * `replacementLines`. Otherwise, returns null.
+   */
+  function applyHunk(hunkLines, toPos, maxErrors) {
+    /*istanbul ignore start*/
+    var
+    /*istanbul ignore end*/
+    hunkLinesI = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+    /*istanbul ignore start*/
+    var
+    /*istanbul ignore end*/
+    lastContextLineMatched = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
+    /*istanbul ignore start*/
+    var
+    /*istanbul ignore end*/
+    patchedLines = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [];
+    /*istanbul ignore start*/
+    var
+    /*istanbul ignore end*/
+    patchedLinesLength = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 0;
+    var nConsecutiveOldContextLines = 0;
+    var nextContextLineMustMatch = false;
+    for (; hunkLinesI < hunkLines.length; hunkLinesI++) {
+      var hunkLine = hunkLines[hunkLinesI],
+        operation = hunkLine.length > 0 ? hunkLine[0] : ' ',
+        content = hunkLine.length > 0 ? hunkLine.substr(1) : hunkLine;
+      if (operation === '-') {
+        if (compareLine(toPos + 1, lines[toPos], operation, content)) {
+          toPos++;
+          nConsecutiveOldContextLines = 0;
+        } else {
+          if (!maxErrors || lines[toPos] == null) {
+            return null;
+          }
+          patchedLines[patchedLinesLength] = lines[toPos];
+          return applyHunk(hunkLines, toPos + 1, maxErrors - 1, hunkLinesI, false, patchedLines, patchedLinesLength + 1);
+        }
+      }
+      if (operation === '+') {
+        if (!lastContextLineMatched) {
+          return null;
+        }
+        patchedLines[patchedLinesLength] = content;
+        patchedLinesLength++;
+        nConsecutiveOldContextLines = 0;
+        nextContextLineMustMatch = true;
+      }
+      if (operation === ' ') {
+        nConsecutiveOldContextLines++;
+        patchedLines[patchedLinesLength] = lines[toPos];
+        if (compareLine(toPos + 1, lines[toPos], operation, content)) {
+          patchedLinesLength++;
+          lastContextLineMatched = true;
+          nextContextLineMustMatch = false;
+          toPos++;
+        } else {
+          if (nextContextLineMustMatch || !maxErrors) {
+            return null;
+          }
+
+          // Consider 3 possibilities in sequence:
+          // 1. lines contains a *substitution* not included in the patch context, or
+          // 2. lines contains an *insertion* not included in the patch context, or
+          // 3. lines contains a *deletion* not included in the patch context
+          // The first two options are of course only possible if the line from lines is non-null -
+          // i.e. only option 3 is possible if we've overrun the end of the old file.
+          return lines[toPos] && (applyHunk(hunkLines, toPos + 1, maxErrors - 1, hunkLinesI + 1, false, patchedLines, patchedLinesLength + 1) || applyHunk(hunkLines, toPos + 1, maxErrors - 1, hunkLinesI, false, patchedLines, patchedLinesLength + 1)) || applyHunk(hunkLines, toPos, maxErrors - 1, hunkLinesI + 1, false, patchedLines, patchedLinesLength);
+        }
+      }
+    }
+
+    // Before returning, trim any unmodified context lines off the end of patchedLines and reduce
+    // toPos (and thus oldLineLastI) accordingly. This allows later hunks to be applied to a region
+    // that starts in this hunk's trailing context.
+    patchedLinesLength -= nConsecutiveOldContextLines;
+    toPos -= nConsecutiveOldContextLines;
+    patchedLines.length = patchedLinesLength;
+    return {
+      patchedLines: patchedLines,
+      oldLineLastI: toPos - 1
+    };
+  }
+  var resultLines = [];
+
+  // Search best fit offsets for each hunk based on the previous ones
+  var prevHunkOffset = 0;
+  for (var _i = 0; _i < hunks.length; _i++) {
+    var hunk = hunks[_i];
+    var hunkResult =
+    /*istanbul ignore start*/
+    void 0
+    /*istanbul ignore end*/
+    ;
+    var maxLine = lines.length - hunk.oldLines + fuzzFactor;
+    var toPos =
+    /*istanbul ignore start*/
+    void 0
+    /*istanbul ignore end*/
+    ;
+    for (var maxErrors = 0; maxErrors <= fuzzFactor; maxErrors++) {
+      toPos = hunk.oldStart + prevHunkOffset - 1;
+      var iterator =
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _distanceIterator
+      /*istanbul ignore end*/
+      [
+      /*istanbul ignore start*/
+      "default"
+      /*istanbul ignore end*/
+      ])(toPos, minLine, maxLine);
+      for (; toPos !== undefined; toPos = iterator()) {
+        hunkResult = applyHunk(hunk.lines, toPos, maxErrors);
+        if (hunkResult) {
+          break;
+        }
+      }
+      if (hunkResult) {
+        break;
+      }
+    }
+    if (!hunkResult) {
+      return false;
+    }
+
+    // Copy everything from the end of where we applied the last hunk to the start of this hunk
+    for (var _i2 = minLine; _i2 < toPos; _i2++) {
+      resultLines.push(lines[_i2]);
+    }
+
+    // Add the lines produced by applying the hunk:
+    for (var _i3 = 0; _i3 < hunkResult.patchedLines.length; _i3++) {
+      var _line = hunkResult.patchedLines[_i3];
+      resultLines.push(_line);
+    }
+
+    // Set lower text limit to end of the current hunk, so next ones don't try
+    // to fit over already patched text
+    minLine = hunkResult.oldLineLastI + 1;
+
+    // Note the offset between where the patch said the hunk should've applied and where we
+    // applied it, so we can adjust future hunks accordingly:
+    prevHunkOffset = toPos + 1 - hunk.oldStart;
+  }
+
+  // Copy over the rest of the lines from the old text
+  for (var _i4 = minLine; _i4 < lines.length; _i4++) {
+    resultLines.push(lines[_i4]);
+  }
+  return resultLines.join('\n');
+}
+
+// Wrapper that supports multiple file patches via callbacks.
+function applyPatches(uniDiff, options) {
+  if (typeof uniDiff === 'string') {
+    uniDiff =
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _parse
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    parsePatch)
+    /*istanbul ignore end*/
+    (uniDiff);
+  }
+  var currentIndex = 0;
+  function processIndex() {
+    var index = uniDiff[currentIndex++];
+    if (!index) {
+      return options.complete();
+    }
+    options.loadFile(index, function (err, data) {
+      if (err) {
+        return options.complete(err);
+      }
+      var updatedContent = applyPatch(data, index, options);
+      options.patched(index, updatedContent, function (err) {
+        if (err) {
+          return options.complete(err);
+        }
+        processIndex();
+      });
+    });
+  }
+  processIndex();
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfc3RyaW5nIiwicmVxdWlyZSIsIl9saW5lRW5kaW5ncyIsIl9wYXJzZSIsIl9kaXN0YW5jZUl0ZXJhdG9yIiwiX2ludGVyb3BSZXF1aXJlRGVmYXVsdCIsIm9iaiIsIl9fZXNNb2R1bGUiLCJhcHBseVBhdGNoIiwic291cmNlIiwidW5pRGlmZiIsIm9wdGlvbnMiLCJhcmd1bWVudHMiLCJsZW5ndGgiLCJ1bmRlZmluZWQiLCJwYXJzZVBhdGNoIiwiQXJyYXkiLCJpc0FycmF5IiwiRXJyb3IiLCJhdXRvQ29udmVydExpbmVFbmRpbmdzIiwiaGFzT25seVdpbkxpbmVFbmRpbmdzIiwiaXNVbml4IiwidW5peFRvV2luIiwiaGFzT25seVVuaXhMaW5lRW5kaW5ncyIsImlzV2luIiwid2luVG9Vbml4IiwibGluZXMiLCJzcGxpdCIsImh1bmtzIiwiY29tcGFyZUxpbmUiLCJsaW5lTnVtYmVyIiwibGluZSIsIm9wZXJhdGlvbiIsInBhdGNoQ29udGVudCIsImZ1enpGYWN0b3IiLCJtaW5MaW5lIiwiTnVtYmVyIiwiaXNJbnRlZ2VyIiwicHJldkxpbmUiLCJyZW1vdmVFT0ZOTCIsImFkZEVPRk5MIiwiaSIsInBvcCIsInB1c2giLCJhcHBseUh1bmsiLCJodW5rTGluZXMiLCJ0b1BvcyIsIm1heEVycm9ycyIsImh1bmtMaW5lc0kiLCJsYXN0Q29udGV4dExpbmVNYXRjaGVkIiwicGF0Y2hlZExpbmVzIiwicGF0Y2hlZExpbmVzTGVuZ3RoIiwibkNvbnNlY3V0aXZlT2xkQ29udGV4dExpbmVzIiwibmV4dENvbnRleHRMaW5lTXVzdE1hdGNoIiwiaHVua0xpbmUiLCJjb250ZW50Iiwic3Vic3RyIiwib2xkTGluZUxhc3RJIiwicmVzdWx0TGluZXMiLCJwcmV2SHVua09mZnNldCIsImh1bmsiLCJodW5rUmVzdWx0IiwibWF4TGluZSIsIm9sZExpbmVzIiwib2xkU3RhcnQiLCJpdGVyYXRvciIsImRpc3RhbmNlSXRlcmF0b3IiLCJqb2luIiwiYXBwbHlQYXRjaGVzIiwiY3VycmVudEluZGV4IiwicHJvY2Vzc0luZGV4IiwiaW5kZXgiLCJjb21wbGV0ZSIsImxvYWRGaWxlIiwiZXJyIiwiZGF0YSIsInVwZGF0ZWRDb250ZW50IiwicGF0Y2hlZCJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9wYXRjaC9hcHBseS5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge2hhc09ubHlXaW5MaW5lRW5kaW5ncywgaGFzT25seVVuaXhMaW5lRW5kaW5nc30gZnJvbSAnLi4vdXRpbC9zdHJpbmcnO1xuaW1wb3J0IHtpc1dpbiwgaXNVbml4LCB1bml4VG9XaW4sIHdpblRvVW5peH0gZnJvbSAnLi9saW5lLWVuZGluZ3MnO1xuaW1wb3J0IHtwYXJzZVBhdGNofSBmcm9tICcuL3BhcnNlJztcbmltcG9ydCBkaXN0YW5jZUl0ZXJhdG9yIGZyb20gJy4uL3V0aWwvZGlzdGFuY2UtaXRlcmF0b3InO1xuXG5leHBvcnQgZnVuY3Rpb24gYXBwbHlQYXRjaChzb3VyY2UsIHVuaURpZmYsIG9wdGlvbnMgPSB7fSkge1xuICBpZiAodHlwZW9mIHVuaURpZmYgPT09ICdzdHJpbmcnKSB7XG4gICAgdW5pRGlmZiA9IHBhcnNlUGF0Y2godW5pRGlmZik7XG4gIH1cblxuICBpZiAoQXJyYXkuaXNBcnJheSh1bmlEaWZmKSkge1xuICAgIGlmICh1bmlEaWZmLmxlbmd0aCA+IDEpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignYXBwbHlQYXRjaCBvbmx5IHdvcmtzIHdpdGggYSBzaW5nbGUgaW5wdXQuJyk7XG4gICAgfVxuXG4gICAgdW5pRGlmZiA9IHVuaURpZmZbMF07XG4gIH1cblxuICBpZiAob3B0aW9ucy5hdXRvQ29udmVydExpbmVFbmRpbmdzIHx8IG9wdGlvbnMuYXV0b0NvbnZlcnRMaW5lRW5kaW5ncyA9PSBudWxsKSB7XG4gICAgaWYgKGhhc09ubHlXaW5MaW5lRW5kaW5ncyhzb3VyY2UpICYmIGlzVW5peCh1bmlEaWZmKSkge1xuICAgICAgdW5pRGlmZiA9IHVuaXhUb1dpbih1bmlEaWZmKTtcbiAgICB9IGVsc2UgaWYgKGhhc09ubHlVbml4TGluZUVuZGluZ3Moc291cmNlKSAmJiBpc1dpbih1bmlEaWZmKSkge1xuICAgICAgdW5pRGlmZiA9IHdpblRvVW5peCh1bmlEaWZmKTtcbiAgICB9XG4gIH1cblxuICAvLyBBcHBseSB0aGUgZGlmZiB0byB0aGUgaW5wdXRcbiAgbGV0IGxpbmVzID0gc291cmNlLnNwbGl0KCdcXG4nKSxcbiAgICAgIGh1bmtzID0gdW5pRGlmZi5odW5rcyxcblxuICAgICAgY29tcGFyZUxpbmUgPSBvcHRpb25zLmNvbXBhcmVMaW5lIHx8ICgobGluZU51bWJlciwgbGluZSwgb3BlcmF0aW9uLCBwYXRjaENvbnRlbnQpID0+IGxpbmUgPT09IHBhdGNoQ29udGVudCksXG4gICAgICBmdXp6RmFjdG9yID0gb3B0aW9ucy5mdXp6RmFjdG9yIHx8IDAsXG4gICAgICBtaW5MaW5lID0gMDtcblxuICBpZiAoZnV6ekZhY3RvciA8IDAgfHwgIU51bWJlci5pc0ludGVnZXIoZnV6ekZhY3RvcikpIHtcbiAgICB0aHJvdyBuZXcgRXJyb3IoJ2Z1enpGYWN0b3IgbXVzdCBiZSBhIG5vbi1uZWdhdGl2ZSBpbnRlZ2VyJyk7XG4gIH1cblxuICAvLyBTcGVjaWFsIGNhc2UgZm9yIGVtcHR5IHBhdGNoLlxuICBpZiAoIWh1bmtzLmxlbmd0aCkge1xuICAgIHJldHVybiBzb3VyY2U7XG4gIH1cblxuICAvLyBCZWZvcmUgYW55dGhpbmcgZWxzZSwgaGFuZGxlIEVPRk5MIGluc2VydGlvbi9yZW1vdmFsLiBJZiB0aGUgcGF0Y2ggdGVsbHMgdXMgdG8gbWFrZSBhIGNoYW5nZVxuICAvLyB0byB0aGUgRU9GTkwgdGhhdCBpcyByZWR1bmRhbnQvaW1wb3NzaWJsZSAtIGkuZS4gdG8gcmVtb3ZlIGEgbmV3bGluZSB0aGF0J3Mgbm90IHRoZXJlLCBvciBhZGQgYVxuICAvLyBuZXdsaW5lIHRoYXQgYWxyZWFkeSBleGlzdHMgLSB0aGVuIHdlIGVpdGhlciByZXR1cm4gZmFsc2UgYW5kIGZhaWwgdG8gYXBwbHkgdGhlIHBhdGNoIChpZlxuICAvLyBmdXp6RmFjdG9yIGlzIDApIG9yIHNpbXBseSBpZ25vcmUgdGhlIHByb2JsZW0gYW5kIGRvIG5vdGhpbmcgKGlmIGZ1enpGYWN0b3IgaXMgPjApLlxuICAvLyBJZiB3ZSBkbyBuZWVkIHRvIHJlbW92ZS9hZGQgYSBuZXdsaW5lIGF0IEVPRiwgdGhpcyB3aWxsIGFsd2F5cyBiZSBpbiB0aGUgZmluYWwgaHVuazpcbiAgbGV0IHByZXZMaW5lID0gJycsXG4gICAgICByZW1vdmVFT0ZOTCA9IGZhbHNlLFxuICAgICAgYWRkRU9GTkwgPSBmYWxzZTtcbiAgZm9yIChsZXQgaSA9IDA7IGkgPCBodW5rc1todW5rcy5sZW5ndGggLSAxXS5saW5lcy5sZW5ndGg7IGkrKykge1xuICAgIGNvbnN0IGxpbmUgPSBodW5rc1todW5rcy5sZW5ndGggLSAxXS5saW5lc1tpXTtcbiAgICBpZiAobGluZVswXSA9PSAnXFxcXCcpIHtcbiAgICAgIGlmIChwcmV2TGluZVswXSA9PSAnKycpIHtcbiAgICAgICAgcmVtb3ZlRU9GTkwgPSB0cnVlO1xuICAgICAgfSBlbHNlIGlmIChwcmV2TGluZVswXSA9PSAnLScpIHtcbiAgICAgICAgYWRkRU9GTkwgPSB0cnVlO1xuICAgICAgfVxuICAgIH1cbiAgICBwcmV2TGluZSA9IGxpbmU7XG4gIH1cbiAgaWYgKHJlbW92ZUVPRk5MKSB7XG4gICAgaWYgKGFkZEVPRk5MKSB7XG4gICAgICAvLyBUaGlzIG1lYW5zIHRoZSBmaW5hbCBsaW5lIGdldHMgY2hhbmdlZCBidXQgZG9lc24ndCBoYXZlIGEgdHJhaWxpbmcgbmV3bGluZSBpbiBlaXRoZXIgdGhlXG4gICAgICAvLyBvcmlnaW5hbCBvciBwYXRjaGVkIHZlcnNpb24uIEluIHRoYXQgY2FzZSwgd2UgZG8gbm90aGluZyBpZiBmdXp6RmFjdG9yID4gMCwgYW5kIGlmXG4gICAgICAvLyBmdXp6RmFjdG9yIGlzIDAsIHdlIHNpbXBseSB2YWxpZGF0ZSB0aGF0IHRoZSBzb3VyY2UgZmlsZSBoYXMgbm8gdHJhaWxpbmcgbmV3bGluZS5cbiAgICAgIGlmICghZnV6ekZhY3RvciAmJiBsaW5lc1tsaW5lcy5sZW5ndGggLSAxXSA9PSAnJykge1xuICAgICAgICByZXR1cm4gZmFsc2U7XG4gICAgICB9XG4gICAgfSBlbHNlIGlmIChsaW5lc1tsaW5lcy5sZW5ndGggLSAxXSA9PSAnJykge1xuICAgICAgbGluZXMucG9wKCk7XG4gICAgfSBlbHNlIGlmICghZnV6ekZhY3Rvcikge1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfSBlbHNlIGlmIChhZGRFT0ZOTCkge1xuICAgIGlmIChsaW5lc1tsaW5lcy5sZW5ndGggLSAxXSAhPSAnJykge1xuICAgICAgbGluZXMucHVzaCgnJyk7XG4gICAgfSBlbHNlIGlmICghZnV6ekZhY3Rvcikge1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfVxuXG4gIC8qKlxuICAgKiBDaGVja3MgaWYgdGhlIGh1bmsgY2FuIGJlIG1hZGUgdG8gZml0IGF0IHRoZSBwcm92aWRlZCBsb2NhdGlvbiB3aXRoIGF0IG1vc3QgYG1heEVycm9yc2BcbiAgICogaW5zZXJ0aW9ucywgc3Vic3RpdHV0aW9ucywgb3IgZGVsZXRpb25zLCB3aGlsZSBlbnN1cmluZyBhbHNvIHRoYXQ6XG4gICAqIC0gbGluZXMgZGVsZXRlZCBpbiB0aGUgaHVuayBtYXRjaCBleGFjdGx5LCBhbmRcbiAgICogLSB3aGVyZXZlciBhbiBpbnNlcnRpb24gb3BlcmF0aW9uIG9yIGJsb2NrIG9mIGluc2VydGlvbiBvcGVyYXRpb25zIGFwcGVhcnMgaW4gdGhlIGh1bmssIHRoZVxuICAgKiAgIGltbWVkaWF0ZWx5IHByZWNlZGluZyBhbmQgZm9sbG93aW5nIGxpbmVzIG9mIGNvbnRleHQgbWF0Y2ggZXhhY3RseVxuICAgKlxuICAgKiBgdG9Qb3NgIHNob3VsZCBiZSBzZXQgc3VjaCB0aGF0IGxpbmVzW3RvUG9zXSBpcyBtZWFudCB0byBtYXRjaCBodW5rTGluZXNbMF0uXG4gICAqXG4gICAqIElmIHRoZSBodW5rIGNhbiBiZSBhcHBsaWVkLCByZXR1cm5zIGFuIG9iamVjdCB3aXRoIHByb3BlcnRpZXMgYG9sZExpbmVMYXN0SWAgYW5kXG4gICAqIGByZXBsYWNlbWVudExpbmVzYC4gT3RoZXJ3aXNlLCByZXR1cm5zIG51bGwuXG4gICAqL1xuICBmdW5jdGlvbiBhcHBseUh1bmsoXG4gICAgaHVua0xpbmVzLFxuICAgIHRvUG9zLFxuICAgIG1heEVycm9ycyxcbiAgICBodW5rTGluZXNJID0gMCxcbiAgICBsYXN0Q29udGV4dExpbmVNYXRjaGVkID0gdHJ1ZSxcbiAgICBwYXRjaGVkTGluZXMgPSBbXSxcbiAgICBwYXRjaGVkTGluZXNMZW5ndGggPSAwLFxuICApIHtcbiAgICBsZXQgbkNvbnNlY3V0aXZlT2xkQ29udGV4dExpbmVzID0gMDtcbiAgICBsZXQgbmV4dENvbnRleHRMaW5lTXVzdE1hdGNoID0gZmFsc2U7XG4gICAgZm9yICg7IGh1bmtMaW5lc0kgPCBodW5rTGluZXMubGVuZ3RoOyBodW5rTGluZXNJKyspIHtcbiAgICAgIGxldCBodW5rTGluZSA9IGh1bmtMaW5lc1todW5rTGluZXNJXSxcbiAgICAgICAgICBvcGVyYXRpb24gPSAoaHVua0xpbmUubGVuZ3RoID4gMCA/IGh1bmtMaW5lWzBdIDogJyAnKSxcbiAgICAgICAgICBjb250ZW50ID0gKGh1bmtMaW5lLmxlbmd0aCA+IDAgPyBodW5rTGluZS5zdWJzdHIoMSkgOiBodW5rTGluZSk7XG5cbiAgICAgIGlmIChvcGVyYXRpb24gPT09ICctJykge1xuICAgICAgICBpZiAoY29tcGFyZUxpbmUodG9Qb3MgKyAxLCBsaW5lc1t0b1Bvc10sIG9wZXJhdGlvbiwgY29udGVudCkpIHtcbiAgICAgICAgICB0b1BvcysrO1xuICAgICAgICAgIG5Db25zZWN1dGl2ZU9sZENvbnRleHRMaW5lcyA9IDA7XG4gICAgICAgIH0gZWxzZSB7XG4gICAgICAgICAgaWYgKCFtYXhFcnJvcnMgfHwgbGluZXNbdG9Qb3NdID09IG51bGwpIHtcbiAgICAgICAgICAgIHJldHVybiBudWxsO1xuICAgICAgICAgIH1cbiAgICAgICAgICBwYXRjaGVkTGluZXNbcGF0Y2hlZExpbmVzTGVuZ3RoXSA9IGxpbmVzW3RvUG9zXTtcbiAgICAgICAgICByZXR1cm4gYXBwbHlIdW5rKFxuICAgICAgICAgICAgaHVua0xpbmVzLFxuICAgICAgICAgICAgdG9Qb3MgKyAxLFxuICAgICAgICAgICAgbWF4RXJyb3JzIC0gMSxcbiAgICAgICAgICAgIGh1bmtMaW5lc0ksXG4gICAgICAgICAgICBmYWxzZSxcbiAgICAgICAgICAgIHBhdGNoZWRMaW5lcyxcbiAgICAgICAgICAgIHBhdGNoZWRMaW5lc0xlbmd0aCArIDEsXG4gICAgICAgICAgKTtcbiAgICAgICAgfVxuICAgICAgfVxuXG4gICAgICBpZiAob3BlcmF0aW9uID09PSAnKycpIHtcbiAgICAgICAgaWYgKCFsYXN0Q29udGV4dExpbmVNYXRjaGVkKSB7XG4gICAgICAgICAgcmV0dXJuIG51bGw7XG4gICAgICAgIH1cbiAgICAgICAgcGF0Y2hlZExpbmVzW3BhdGNoZWRMaW5lc0xlbmd0aF0gPSBjb250ZW50O1xuICAgICAgICBwYXRjaGVkTGluZXNMZW5ndGgrKztcbiAgICAgICAgbkNvbnNlY3V0aXZlT2xkQ29udGV4dExpbmVzID0gMDtcbiAgICAgICAgbmV4dENvbnRleHRMaW5lTXVzdE1hdGNoID0gdHJ1ZTtcbiAgICAgIH1cblxuICAgICAgaWYgKG9wZXJhdGlvbiA9PT0gJyAnKSB7XG4gICAgICAgIG5Db25zZWN1dGl2ZU9sZENvbnRleHRMaW5lcysrO1xuICAgICAgICBwYXRjaGVkTGluZXNbcGF0Y2hlZExpbmVzTGVuZ3RoXSA9IGxpbmVzW3RvUG9zXTtcbiAgICAgICAgaWYgKGNvbXBhcmVMaW5lKHRvUG9zICsgMSwgbGluZXNbdG9Qb3NdLCBvcGVyYXRpb24sIGNvbnRlbnQpKSB7XG4gICAgICAgICAgcGF0Y2hlZExpbmVzTGVuZ3RoKys7XG4gICAgICAgICAgbGFzdENvbnRleHRMaW5lTWF0Y2hlZCA9IHRydWU7XG4gICAgICAgICAgbmV4dENvbnRleHRMaW5lTXVzdE1hdGNoID0gZmFsc2U7XG4gICAgICAgICAgdG9Qb3MrKztcbiAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICBpZiAobmV4dENvbnRleHRMaW5lTXVzdE1hdGNoIHx8ICFtYXhFcnJvcnMpIHtcbiAgICAgICAgICAgIHJldHVybiBudWxsO1xuICAgICAgICAgIH1cblxuICAgICAgICAgIC8vIENvbnNpZGVyIDMgcG9zc2liaWxpdGllcyBpbiBzZXF1ZW5jZTpcbiAgICAgICAgICAvLyAxLiBsaW5lcyBjb250YWlucyBhICpzdWJzdGl0dXRpb24qIG5vdCBpbmNsdWRlZCBpbiB0aGUgcGF0Y2ggY29udGV4dCwgb3JcbiAgICAgICAgICAvLyAyLiBsaW5lcyBjb250YWlucyBhbiAqaW5zZXJ0aW9uKiBub3QgaW5jbHVkZWQgaW4gdGhlIHBhdGNoIGNvbnRleHQsIG9yXG4gICAgICAgICAgLy8gMy4gbGluZXMgY29udGFpbnMgYSAqZGVsZXRpb24qIG5vdCBpbmNsdWRlZCBpbiB0aGUgcGF0Y2ggY29udGV4dFxuICAgICAgICAgIC8vIFRoZSBmaXJzdCB0d28gb3B0aW9ucyBhcmUgb2YgY291cnNlIG9ubHkgcG9zc2libGUgaWYgdGhlIGxpbmUgZnJvbSBsaW5lcyBpcyBub24tbnVsbCAtXG4gICAgICAgICAgLy8gaS5lLiBvbmx5IG9wdGlvbiAzIGlzIHBvc3NpYmxlIGlmIHdlJ3ZlIG92ZXJydW4gdGhlIGVuZCBvZiB0aGUgb2xkIGZpbGUuXG4gICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgIGxpbmVzW3RvUG9zXSAmJiAoXG4gICAgICAgICAgICAgIGFwcGx5SHVuayhcbiAgICAgICAgICAgICAgICBodW5rTGluZXMsXG4gICAgICAgICAgICAgICAgdG9Qb3MgKyAxLFxuICAgICAgICAgICAgICAgIG1heEVycm9ycyAtIDEsXG4gICAgICAgICAgICAgICAgaHVua0xpbmVzSSArIDEsXG4gICAgICAgICAgICAgICAgZmFsc2UsXG4gICAgICAgICAgICAgICAgcGF0Y2hlZExpbmVzLFxuICAgICAgICAgICAgICAgIHBhdGNoZWRMaW5lc0xlbmd0aCArIDFcbiAgICAgICAgICAgICAgKSB8fCBhcHBseUh1bmsoXG4gICAgICAgICAgICAgICAgaHVua0xpbmVzLFxuICAgICAgICAgICAgICAgIHRvUG9zICsgMSxcbiAgICAgICAgICAgICAgICBtYXhFcnJvcnMgLSAxLFxuICAgICAgICAgICAgICAgIGh1bmtMaW5lc0ksXG4gICAgICAgICAgICAgICAgZmFsc2UsXG4gICAgICAgICAgICAgICAgcGF0Y2hlZExpbmVzLFxuICAgICAgICAgICAgICAgIHBhdGNoZWRMaW5lc0xlbmd0aCArIDFcbiAgICAgICAgICAgICAgKVxuICAgICAgICAgICAgKSB8fCBhcHBseUh1bmsoXG4gICAgICAgICAgICAgIGh1bmtMaW5lcyxcbiAgICAgICAgICAgICAgdG9Qb3MsXG4gICAgICAgICAgICAgIG1heEVycm9ycyAtIDEsXG4gICAgICAgICAgICAgIGh1bmtMaW5lc0kgKyAxLFxuICAgICAgICAgICAgICBmYWxzZSxcbiAgICAgICAgICAgICAgcGF0Y2hlZExpbmVzLFxuICAgICAgICAgICAgICBwYXRjaGVkTGluZXNMZW5ndGhcbiAgICAgICAgICAgIClcbiAgICAgICAgICApO1xuICAgICAgICB9XG4gICAgICB9XG4gICAgfVxuXG4gICAgLy8gQmVmb3JlIHJldHVybmluZywgdHJpbSBhbnkgdW5tb2RpZmllZCBjb250ZXh0IGxpbmVzIG9mZiB0aGUgZW5kIG9mIHBhdGNoZWRMaW5lcyBhbmQgcmVkdWNlXG4gICAgLy8gdG9Qb3MgKGFuZCB0aHVzIG9sZExpbmVMYXN0SSkgYWNjb3JkaW5nbHkuIFRoaXMgYWxsb3dzIGxhdGVyIGh1bmtzIHRvIGJlIGFwcGxpZWQgdG8gYSByZWdpb25cbiAgICAvLyB0aGF0IHN0YXJ0cyBpbiB0aGlzIGh1bmsncyB0cmFpbGluZyBjb250ZXh0LlxuICAgIHBhdGNoZWRMaW5lc0xlbmd0aCAtPSBuQ29uc2VjdXRpdmVPbGRDb250ZXh0TGluZXM7XG4gICAgdG9Qb3MgLT0gbkNvbnNlY3V0aXZlT2xkQ29udGV4dExpbmVzO1xuICAgIHBhdGNoZWRMaW5lcy5sZW5ndGggPSBwYXRjaGVkTGluZXNMZW5ndGg7XG4gICAgcmV0dXJuIHtcbiAgICAgIHBhdGNoZWRMaW5lcyxcbiAgICAgIG9sZExpbmVMYXN0STogdG9Qb3MgLSAxXG4gICAgfTtcbiAgfVxuXG4gIGNvbnN0IHJlc3VsdExpbmVzID0gW107XG5cbiAgLy8gU2VhcmNoIGJlc3QgZml0IG9mZnNldHMgZm9yIGVhY2ggaHVuayBiYXNlZCBvbiB0aGUgcHJldmlvdXMgb25lc1xuICBsZXQgcHJldkh1bmtPZmZzZXQgPSAwO1xuICBmb3IgKGxldCBpID0gMDsgaSA8IGh1bmtzLmxlbmd0aDsgaSsrKSB7XG4gICAgY29uc3QgaHVuayA9IGh1bmtzW2ldO1xuICAgIGxldCBodW5rUmVzdWx0O1xuICAgIGxldCBtYXhMaW5lID0gbGluZXMubGVuZ3RoIC0gaHVuay5vbGRMaW5lcyArIGZ1enpGYWN0b3I7XG4gICAgbGV0IHRvUG9zO1xuICAgIGZvciAobGV0IG1heEVycm9ycyA9IDA7IG1heEVycm9ycyA8PSBmdXp6RmFjdG9yOyBtYXhFcnJvcnMrKykge1xuICAgICAgdG9Qb3MgPSBodW5rLm9sZFN0YXJ0ICsgcHJldkh1bmtPZmZzZXQgLSAxO1xuICAgICAgbGV0IGl0ZXJhdG9yID0gZGlzdGFuY2VJdGVyYXRvcih0b1BvcywgbWluTGluZSwgbWF4TGluZSk7XG4gICAgICBmb3IgKDsgdG9Qb3MgIT09IHVuZGVmaW5lZDsgdG9Qb3MgPSBpdGVyYXRvcigpKSB7XG4gICAgICAgIGh1bmtSZXN1bHQgPSBhcHBseUh1bmsoaHVuay5saW5lcywgdG9Qb3MsIG1heEVycm9ycyk7XG4gICAgICAgIGlmIChodW5rUmVzdWx0KSB7XG4gICAgICAgICAgYnJlYWs7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICAgIGlmIChodW5rUmVzdWx0KSB7XG4gICAgICAgIGJyZWFrO1xuICAgICAgfVxuICAgIH1cblxuICAgIGlmICghaHVua1Jlc3VsdCkge1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cblxuICAgIC8vIENvcHkgZXZlcnl0aGluZyBmcm9tIHRoZSBlbmQgb2Ygd2hlcmUgd2UgYXBwbGllZCB0aGUgbGFzdCBodW5rIHRvIHRoZSBzdGFydCBvZiB0aGlzIGh1bmtcbiAgICBmb3IgKGxldCBpID0gbWluTGluZTsgaSA8IHRvUG9zOyBpKyspIHtcbiAgICAgIHJlc3VsdExpbmVzLnB1c2gobGluZXNbaV0pO1xuICAgIH1cblxuICAgIC8vIEFkZCB0aGUgbGluZXMgcHJvZHVjZWQgYnkgYXBwbHlpbmcgdGhlIGh1bms6XG4gICAgZm9yIChsZXQgaSA9IDA7IGkgPCBodW5rUmVzdWx0LnBhdGNoZWRMaW5lcy5sZW5ndGg7IGkrKykge1xuICAgICAgY29uc3QgbGluZSA9IGh1bmtSZXN1bHQucGF0Y2hlZExpbmVzW2ldO1xuICAgICAgcmVzdWx0TGluZXMucHVzaChsaW5lKTtcbiAgICB9XG5cbiAgICAvLyBTZXQgbG93ZXIgdGV4dCBsaW1pdCB0byBlbmQgb2YgdGhlIGN1cnJlbnQgaHVuaywgc28gbmV4dCBvbmVzIGRvbid0IHRyeVxuICAgIC8vIHRvIGZpdCBvdmVyIGFscmVhZHkgcGF0Y2hlZCB0ZXh0XG4gICAgbWluTGluZSA9IGh1bmtSZXN1bHQub2xkTGluZUxhc3RJICsgMTtcblxuICAgIC8vIE5vdGUgdGhlIG9mZnNldCBiZXR3ZWVuIHdoZXJlIHRoZSBwYXRjaCBzYWlkIHRoZSBodW5rIHNob3VsZCd2ZSBhcHBsaWVkIGFuZCB3aGVyZSB3ZVxuICAgIC8vIGFwcGxpZWQgaXQsIHNvIHdlIGNhbiBhZGp1c3QgZnV0dXJlIGh1bmtzIGFjY29yZGluZ2x5OlxuICAgIHByZXZIdW5rT2Zmc2V0ID0gdG9Qb3MgKyAxIC0gaHVuay5vbGRTdGFydDtcbiAgfVxuXG4gIC8vIENvcHkgb3ZlciB0aGUgcmVzdCBvZiB0aGUgbGluZXMgZnJvbSB0aGUgb2xkIHRleHRcbiAgZm9yIChsZXQgaSA9IG1pbkxpbmU7IGkgPCBsaW5lcy5sZW5ndGg7IGkrKykge1xuICAgIHJlc3VsdExpbmVzLnB1c2gobGluZXNbaV0pO1xuICB9XG5cbiAgcmV0dXJuIHJlc3VsdExpbmVzLmpvaW4oJ1xcbicpO1xufVxuXG4vLyBXcmFwcGVyIHRoYXQgc3VwcG9ydHMgbXVsdGlwbGUgZmlsZSBwYXRjaGVzIHZpYSBjYWxsYmFja3MuXG5leHBvcnQgZnVuY3Rpb24gYXBwbHlQYXRjaGVzKHVuaURpZmYsIG9wdGlvbnMpIHtcbiAgaWYgKHR5cGVvZiB1bmlEaWZmID09PSAnc3RyaW5nJykge1xuICAgIHVuaURpZmYgPSBwYXJzZVBhdGNoKHVuaURpZmYpO1xuICB9XG5cbiAgbGV0IGN1cnJlbnRJbmRleCA9IDA7XG4gIGZ1bmN0aW9uIHByb2Nlc3NJbmRleCgpIHtcbiAgICBsZXQgaW5kZXggPSB1bmlEaWZmW2N1cnJlbnRJbmRleCsrXTtcbiAgICBpZiAoIWluZGV4KSB7XG4gICAgICByZXR1cm4gb3B0aW9ucy5jb21wbGV0ZSgpO1xuICAgIH1cblxuICAgIG9wdGlvbnMubG9hZEZpbGUoaW5kZXgsIGZ1bmN0aW9uKGVyciwgZGF0YSkge1xuICAgICAgaWYgKGVycikge1xuICAgICAgICByZXR1cm4gb3B0aW9ucy5jb21wbGV0ZShlcnIpO1xuICAgICAgfVxuXG4gICAgICBsZXQgdXBkYXRlZENvbnRlbnQgPSBhcHBseVBhdGNoKGRhdGEsIGluZGV4LCBvcHRpb25zKTtcbiAgICAgIG9wdGlvbnMucGF0Y2hlZChpbmRleCwgdXBkYXRlZENvbnRlbnQsIGZ1bmN0aW9uKGVycikge1xuICAgICAgICBpZiAoZXJyKSB7XG4gICAgICAgICAgcmV0dXJuIG9wdGlvbnMuY29tcGxldGUoZXJyKTtcbiAgICAgICAgfVxuXG4gICAgICAgIHByb2Nlc3NJbmRleCgpO1xuICAgICAgfSk7XG4gICAgfSk7XG4gIH1cbiAgcHJvY2Vzc0luZGV4KCk7XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztB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
+
+
+/***/ }),
+
+/***/ 3148:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.createPatch = createPatch;
+exports.createTwoFilesPatch = createTwoFilesPatch;
+exports.formatPatch = formatPatch;
+exports.structuredPatch = structuredPatch;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_line = __nccwpck_require__(5129)
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/*istanbul ignore end*/
+function structuredPatch(oldFileName, newFileName, oldStr, newStr, oldHeader, newHeader, options) {
+  if (!options) {
+    options = {};
+  }
+  if (typeof options === 'function') {
+    options = {
+      callback: options
+    };
+  }
+  if (typeof options.context === 'undefined') {
+    options.context = 4;
+  }
+  if (options.newlineIsToken) {
+    throw new Error('newlineIsToken may not be used with patch-generation functions, only with diffing functions');
+  }
+  if (!options.callback) {
+    return diffLinesResultToPatch(
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _line
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    diffLines)
+    /*istanbul ignore end*/
+    (oldStr, newStr, options));
+  } else {
+    var
+      /*istanbul ignore start*/
+      _options =
+      /*istanbul ignore end*/
+      options,
+      /*istanbul ignore start*/
+      /*istanbul ignore end*/
+      _callback = _options.callback;
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _line
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    diffLines)
+    /*istanbul ignore end*/
+    (oldStr, newStr,
+    /*istanbul ignore start*/
+    _objectSpread(_objectSpread({},
+    /*istanbul ignore end*/
+    options), {}, {
+      callback: function
+      /*istanbul ignore start*/
+      callback
+      /*istanbul ignore end*/
+      (diff) {
+        var patch = diffLinesResultToPatch(diff);
+        _callback(patch);
+      }
+    }));
+  }
+  function diffLinesResultToPatch(diff) {
+    // STEP 1: Build up the patch with no "\ No newline at end of file" lines and with the arrays
+    //         of lines containing trailing newline characters. We'll tidy up later...
+
+    if (!diff) {
+      return;
+    }
+    diff.push({
+      value: '',
+      lines: []
+    }); // Append an empty value to make cleanup easier
+
+    function contextLines(lines) {
+      return lines.map(function (entry) {
+        return ' ' + entry;
+      });
+    }
+    var hunks = [];
+    var oldRangeStart = 0,
+      newRangeStart = 0,
+      curRange = [],
+      oldLine = 1,
+      newLine = 1;
+    /*istanbul ignore start*/
+    var _loop = function _loop()
+    /*istanbul ignore end*/
+    {
+      var current = diff[i],
+        lines = current.lines || splitLines(current.value);
+      current.lines = lines;
+      if (current.added || current.removed) {
+        /*istanbul ignore start*/
+        var _curRange;
+        /*istanbul ignore end*/
+        // If we have previous context, start with that
+        if (!oldRangeStart) {
+          var prev = diff[i - 1];
+          oldRangeStart = oldLine;
+          newRangeStart = newLine;
+          if (prev) {
+            curRange = options.context > 0 ? contextLines(prev.lines.slice(-options.context)) : [];
+            oldRangeStart -= curRange.length;
+            newRangeStart -= curRange.length;
+          }
+        }
+
+        // Output our changes
+        /*istanbul ignore start*/
+        /*istanbul ignore end*/
+        /*istanbul ignore start*/
+        (_curRange =
+        /*istanbul ignore end*/
+        curRange).push.apply(
+        /*istanbul ignore start*/
+        _curRange
+        /*istanbul ignore end*/
+        ,
+        /*istanbul ignore start*/
+        _toConsumableArray(
+        /*istanbul ignore end*/
+        lines.map(function (entry) {
+          return (current.added ? '+' : '-') + entry;
+        })));
+
+        // Track the updated file position
+        if (current.added) {
+          newLine += lines.length;
+        } else {
+          oldLine += lines.length;
+        }
+      } else {
+        // Identical context lines. Track line changes
+        if (oldRangeStart) {
+          // Close out any changes that have been output (or join overlapping)
+          if (lines.length <= options.context * 2 && i < diff.length - 2) {
+            /*istanbul ignore start*/
+            var _curRange2;
+            /*istanbul ignore end*/
+            // Overlapping
+            /*istanbul ignore start*/
+            /*istanbul ignore end*/
+            /*istanbul ignore start*/
+            (_curRange2 =
+            /*istanbul ignore end*/
+            curRange).push.apply(
+            /*istanbul ignore start*/
+            _curRange2
+            /*istanbul ignore end*/
+            ,
+            /*istanbul ignore start*/
+            _toConsumableArray(
+            /*istanbul ignore end*/
+            contextLines(lines)));
+          } else {
+            /*istanbul ignore start*/
+            var _curRange3;
+            /*istanbul ignore end*/
+            // end the range and output
+            var contextSize = Math.min(lines.length, options.context);
+            /*istanbul ignore start*/
+            /*istanbul ignore end*/
+            /*istanbul ignore start*/
+            (_curRange3 =
+            /*istanbul ignore end*/
+            curRange).push.apply(
+            /*istanbul ignore start*/
+            _curRange3
+            /*istanbul ignore end*/
+            ,
+            /*istanbul ignore start*/
+            _toConsumableArray(
+            /*istanbul ignore end*/
+            contextLines(lines.slice(0, contextSize))));
+            var _hunk = {
+              oldStart: oldRangeStart,
+              oldLines: oldLine - oldRangeStart + contextSize,
+              newStart: newRangeStart,
+              newLines: newLine - newRangeStart + contextSize,
+              lines: curRange
+            };
+            hunks.push(_hunk);
+            oldRangeStart = 0;
+            newRangeStart = 0;
+            curRange = [];
+          }
+        }
+        oldLine += lines.length;
+        newLine += lines.length;
+      }
+    };
+    for (var i = 0; i < diff.length; i++)
+    /*istanbul ignore start*/
+    {
+      _loop();
+    }
+
+    // Step 2: eliminate the trailing `\n` from each line of each hunk, and, where needed, add
+    //         "\ No newline at end of file".
+    /*istanbul ignore end*/
+    for (
+    /*istanbul ignore start*/
+    var _i = 0, _hunks =
+      /*istanbul ignore end*/
+      hunks;
+    /*istanbul ignore start*/
+    _i < _hunks.length
+    /*istanbul ignore end*/
+    ;
+    /*istanbul ignore start*/
+    _i++
+    /*istanbul ignore end*/
+    ) {
+      var hunk =
+      /*istanbul ignore start*/
+      _hunks[_i]
+      /*istanbul ignore end*/
+      ;
+      for (var _i2 = 0; _i2 < hunk.lines.length; _i2++) {
+        if (hunk.lines[_i2].endsWith('\n')) {
+          hunk.lines[_i2] = hunk.lines[_i2].slice(0, -1);
+        } else {
+          hunk.lines.splice(_i2 + 1, 0, '\\ No newline at end of file');
+          _i2++; // Skip the line we just added, then continue iterating
+        }
+      }
+    }
+    return {
+      oldFileName: oldFileName,
+      newFileName: newFileName,
+      oldHeader: oldHeader,
+      newHeader: newHeader,
+      hunks: hunks
+    };
+  }
+}
+function formatPatch(diff) {
+  if (Array.isArray(diff)) {
+    return diff.map(formatPatch).join('\n');
+  }
+  var ret = [];
+  if (diff.oldFileName == diff.newFileName) {
+    ret.push('Index: ' + diff.oldFileName);
+  }
+  ret.push('===================================================================');
+  ret.push('--- ' + diff.oldFileName + (typeof diff.oldHeader === 'undefined' ? '' : '\t' + diff.oldHeader));
+  ret.push('+++ ' + diff.newFileName + (typeof diff.newHeader === 'undefined' ? '' : '\t' + diff.newHeader));
+  for (var i = 0; i < diff.hunks.length; i++) {
+    var hunk = diff.hunks[i];
+    // Unified Diff Format quirk: If the chunk size is 0,
+    // the first number is one lower than one would expect.
+    // https://www.artima.com/weblogs/viewpost.jsp?thread=164293
+    if (hunk.oldLines === 0) {
+      hunk.oldStart -= 1;
+    }
+    if (hunk.newLines === 0) {
+      hunk.newStart -= 1;
+    }
+    ret.push('@@ -' + hunk.oldStart + ',' + hunk.oldLines + ' +' + hunk.newStart + ',' + hunk.newLines + ' @@');
+    ret.push.apply(ret, hunk.lines);
+  }
+  return ret.join('\n') + '\n';
+}
+function createTwoFilesPatch(oldFileName, newFileName, oldStr, newStr, oldHeader, newHeader, options) {
+  /*istanbul ignore start*/
+  var _options2;
+  /*istanbul ignore end*/
+  if (typeof options === 'function') {
+    options = {
+      callback: options
+    };
+  }
+  if (!
+  /*istanbul ignore start*/
+  ((_options2 =
+  /*istanbul ignore end*/
+  options) !== null && _options2 !== void 0 &&
+  /*istanbul ignore start*/
+  _options2
+  /*istanbul ignore end*/
+  .callback)) {
+    var patchObj = structuredPatch(oldFileName, newFileName, oldStr, newStr, oldHeader, newHeader, options);
+    if (!patchObj) {
+      return;
+    }
+    return formatPatch(patchObj);
+  } else {
+    var
+      /*istanbul ignore start*/
+      _options3 =
+      /*istanbul ignore end*/
+      options,
+      /*istanbul ignore start*/
+      /*istanbul ignore end*/
+      _callback2 = _options3.callback;
+    structuredPatch(oldFileName, newFileName, oldStr, newStr, oldHeader, newHeader,
+    /*istanbul ignore start*/
+    _objectSpread(_objectSpread({},
+    /*istanbul ignore end*/
+    options), {}, {
+      callback: function
+      /*istanbul ignore start*/
+      callback
+      /*istanbul ignore end*/
+      (patchObj) {
+        if (!patchObj) {
+          _callback2();
+        } else {
+          _callback2(formatPatch(patchObj));
+        }
+      }
+    }));
+  }
+}
+function createPatch(fileName, oldStr, newStr, oldHeader, newHeader, options) {
+  return createTwoFilesPatch(fileName, fileName, oldStr, newStr, oldHeader, newHeader, options);
+}
+
+/**
+ * Split `text` into an array of lines, including the trailing newline character (where present)
+ */
+function splitLines(text) {
+  var hasTrailingNl = text.endsWith('\n');
+  var result = text.split('\n').map(function (line)
+  /*istanbul ignore start*/
+  {
+    return (
+      /*istanbul ignore end*/
+      line + '\n'
+    );
+  });
+  if (hasTrailingNl) {
+    result.pop();
+  } else {
+    result.push(result.pop().slice(0, -1));
+  }
+  return result;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfbGluZSIsInJlcXVpcmUiLCJfdHlwZW9mIiwibyIsIlN5bWJvbCIsIml0ZXJhdG9yIiwiY29uc3RydWN0b3IiLCJwcm90b3R5cGUiLCJfdG9Db25zdW1hYmxlQXJyYXkiLCJhcnIiLCJfYXJyYXlXaXRob3V0SG9sZXMiLCJfaXRlcmFibGVUb0FycmF5IiwiX3Vuc3VwcG9ydGVkSXRlcmFibGVUb0FycmF5IiwiX25vbkl0ZXJhYmxlU3ByZWFkIiwiVHlwZUVycm9yIiwibWluTGVuIiwiX2FycmF5TGlrZVRvQXJyYXkiLCJuIiwiT2JqZWN0IiwidG9TdHJpbmciLCJjYWxsIiwic2xpY2UiLCJuYW1lIiwiQXJyYXkiLCJmcm9tIiwidGVzdCIsIml0ZXIiLCJpc0FycmF5IiwibGVuIiwibGVuZ3RoIiwiaSIsImFycjIiLCJvd25LZXlzIiwiZSIsInIiLCJ0Iiwia2V5cyIsImdldE93blByb3BlcnR5U3ltYm9scyIsImZpbHRlciIsImdldE93blByb3BlcnR5RGVzY3JpcHRvciIsImVudW1lcmFibGUiLCJwdXNoIiwiYXBwbHkiLCJfb2JqZWN0U3ByZWFkIiwiYXJndW1lbnRzIiwiZm9yRWFjaCIsIl9kZWZpbmVQcm9wZXJ0eSIsImdldE93blByb3BlcnR5RGVzY3JpcHRvcnMiLCJkZWZpbmVQcm9wZXJ0aWVzIiwiZGVmaW5lUHJvcGVydHkiLCJvYmoiLCJrZXkiLCJ2YWx1ZSIsIl90b1Byb3BlcnR5S2V5IiwiY29uZmlndXJhYmxlIiwid3JpdGFibGUiLCJfdG9QcmltaXRpdmUiLCJ0b1ByaW1pdGl2ZSIsIlN0cmluZyIsIk51bWJlciIsInN0cnVjdHVyZWRQYXRjaCIsIm9sZEZpbGVOYW1lIiwibmV3RmlsZU5hbWUiLCJvbGRTdHIiLCJuZXdTdHIiLCJvbGRIZWFkZXIiLCJuZXdIZWFkZXIiLCJvcHRpb25zIiwiY2FsbGJhY2siLCJjb250ZXh0IiwibmV3bGluZUlzVG9rZW4iLCJFcnJvciIsImRpZmZMaW5lc1Jlc3VsdFRvUGF0Y2giLCJkaWZmTGluZXMiLCJfb3B0aW9ucyIsImRpZmYiLCJwYXRjaCIsImxpbmVzIiwiY29udGV4dExpbmVzIiwibWFwIiwiZW50cnkiLCJodW5rcyIsIm9sZFJhbmdlU3RhcnQiLCJuZXdSYW5nZVN0YXJ0IiwiY3VyUmFuZ2UiLCJvbGRMaW5lIiwibmV3TGluZSIsIl9sb29wIiwiY3VycmVudCIsInNwbGl0TGluZXMiLCJhZGRlZCIsInJlbW92ZWQiLCJfY3VyUmFuZ2UiLCJwcmV2IiwiX2N1clJhbmdlMiIsIl9jdXJSYW5nZTMiLCJjb250ZXh0U2l6ZSIsIk1hdGgiLCJtaW4iLCJodW5rIiwib2xkU3RhcnQiLCJvbGRMaW5lcyIsIm5ld1N0YXJ0IiwibmV3TGluZXMiLCJfaSIsIl9odW5rcyIsImVuZHNXaXRoIiwic3BsaWNlIiwiZm9ybWF0UGF0Y2giLCJqb2luIiwicmV0IiwiY3JlYXRlVHdvRmlsZXNQYXRjaCIsIl9vcHRpb25zMiIsInBhdGNoT2JqIiwiX29wdGlvbnMzIiwiY3JlYXRlUGF0Y2giLCJmaWxlTmFtZSIsInRleHQiLCJoYXNUcmFpbGluZ05sIiwicmVzdWx0Iiwic3BsaXQiLCJsaW5lIiwicG9wIl0sInNvdXJjZXMiOlsiLi4vLi4vc3JjL3BhdGNoL2NyZWF0ZS5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge2RpZmZMaW5lc30gZnJvbSAnLi4vZGlmZi9saW5lJztcblxuZXhwb3J0IGZ1bmN0aW9uIHN0cnVjdHVyZWRQYXRjaChvbGRGaWxlTmFtZSwgbmV3RmlsZU5hbWUsIG9sZFN0ciwgbmV3U3RyLCBvbGRIZWFkZXIsIG5ld0hlYWRlciwgb3B0aW9ucykge1xuICBpZiAoIW9wdGlvbnMpIHtcbiAgICBvcHRpb25zID0ge307XG4gIH1cbiAgaWYgKHR5cGVvZiBvcHRpb25zID09PSAnZnVuY3Rpb24nKSB7XG4gICAgb3B0aW9ucyA9IHtjYWxsYmFjazogb3B0aW9uc307XG4gIH1cbiAgaWYgKHR5cGVvZiBvcHRpb25zLmNvbnRleHQgPT09ICd1bmRlZmluZWQnKSB7XG4gICAgb3B0aW9ucy5jb250ZXh0ID0gNDtcbiAgfVxuICBpZiAob3B0aW9ucy5uZXdsaW5lSXNUb2tlbikge1xuICAgIHRocm93IG5ldyBFcnJvcignbmV3bGluZUlzVG9rZW4gbWF5IG5vdCBiZSB1c2VkIHdpdGggcGF0Y2gtZ2VuZXJhdGlvbiBmdW5jdGlvbnMsIG9ubHkgd2l0aCBkaWZmaW5nIGZ1bmN0aW9ucycpO1xuICB9XG5cbiAgaWYgKCFvcHRpb25zLmNhbGxiYWNrKSB7XG4gICAgcmV0dXJuIGRpZmZMaW5lc1Jlc3VsdFRvUGF0Y2goZGlmZkxpbmVzKG9sZFN0ciwgbmV3U3RyLCBvcHRpb25zKSk7XG4gIH0gZWxzZSB7XG4gICAgY29uc3Qge2NhbGxiYWNrfSA9IG9wdGlvbnM7XG4gICAgZGlmZkxpbmVzKFxuICAgICAgb2xkU3RyLFxuICAgICAgbmV3U3RyLFxuICAgICAge1xuICAgICAgICAuLi5vcHRpb25zLFxuICAgICAgICBjYWxsYmFjazogKGRpZmYpID0+IHtcbiAgICAgICAgICBjb25zdCBwYXRjaCA9IGRpZmZMaW5lc1Jlc3VsdFRvUGF0Y2goZGlmZik7XG4gICAgICAgICAgY2FsbGJhY2socGF0Y2gpO1xuICAgICAgICB9XG4gICAgICB9XG4gICAgKTtcbiAgfVxuXG4gIGZ1bmN0aW9uIGRpZmZMaW5lc1Jlc3VsdFRvUGF0Y2goZGlmZikge1xuICAgIC8vIFNURVAgMTogQnVpbGQgdXAgdGhlIHBhdGNoIHdpdGggbm8gXCJcXCBObyBuZXdsaW5lIGF0IGVuZCBvZiBmaWxlXCIgbGluZXMgYW5kIHdpdGggdGhlIGFycmF5c1xuICAgIC8vICAgICAgICAgb2YgbGluZXMgY29udGFpbmluZyB0cmFpbGluZyBuZXdsaW5lIGNoYXJhY3RlcnMuIFdlJ2xsIHRpZHkgdXAgbGF0ZXIuLi5cblxuICAgIGlmKCFkaWZmKSB7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgZGlmZi5wdXNoKHt2YWx1ZTogJycsIGxpbmVzOiBbXX0pOyAvLyBBcHBlbmQgYW4gZW1wdHkgdmFsdWUgdG8gbWFrZSBjbGVhbnVwIGVhc2llclxuXG4gICAgZnVuY3Rpb24gY29udGV4dExpbmVzKGxpbmVzKSB7XG4gICAgICByZXR1cm4gbGluZXMubWFwKGZ1bmN0aW9uKGVudHJ5KSB7IHJldHVybiAnICcgKyBlbnRyeTsgfSk7XG4gICAgfVxuXG4gICAgbGV0IGh1bmtzID0gW107XG4gICAgbGV0IG9sZFJhbmdlU3RhcnQgPSAwLCBuZXdSYW5nZVN0YXJ0ID0gMCwgY3VyUmFuZ2UgPSBbXSxcbiAgICAgICAgb2xkTGluZSA9IDEsIG5ld0xpbmUgPSAxO1xuICAgIGZvciAobGV0IGkgPSAwOyBpIDwgZGlmZi5sZW5ndGg7IGkrKykge1xuICAgICAgY29uc3QgY3VycmVudCA9IGRpZmZbaV0sXG4gICAgICAgICAgICBsaW5lcyA9IGN1cnJlbnQubGluZXMgfHwgc3BsaXRMaW5lcyhjdXJyZW50LnZhbHVlKTtcbiAgICAgIGN1cnJlbnQubGluZXMgPSBsaW5lcztcblxuICAgICAgaWYgKGN1cnJlbnQuYWRkZWQgfHwgY3VycmVudC5yZW1vdmVkKSB7XG4gICAgICAgIC8vIElmIHdlIGhhdmUgcHJldmlvdXMgY29udGV4dCwgc3RhcnQgd2l0aCB0aGF0XG4gICAgICAgIGlmICghb2xkUmFuZ2VTdGFydCkge1xuICAgICAgICAgIGNvbnN0IHByZXYgPSBkaWZmW2kgLSAxXTtcbiAgICAgICAgICBvbGRSYW5nZVN0YXJ0ID0gb2xkTGluZTtcbiAgICAgICAgICBuZXdSYW5nZVN0YXJ0ID0gbmV3TGluZTtcblxuICAgICAgICAgIGlmIChwcmV2KSB7XG4gICAgICAgICAgICBjdXJSYW5nZSA9IG9wdGlvbnMuY29udGV4dCA+IDAgPyBjb250ZXh0TGluZXMocHJldi5saW5lcy5zbGljZSgtb3B0aW9ucy5jb250ZXh0KSkgOiBbXTtcbiAgICAgICAgICAgIG9sZFJhbmdlU3RhcnQgLT0gY3VyUmFuZ2UubGVuZ3RoO1xuICAgICAgICAgICAgbmV3UmFuZ2VTdGFydCAtPSBjdXJSYW5nZS5sZW5ndGg7XG4gICAgICAgICAgfVxuICAgICAgICB9XG5cbiAgICAgICAgLy8gT3V0cHV0IG91ciBjaGFuZ2VzXG4gICAgICAgIGN1clJhbmdlLnB1c2goLi4uIGxpbmVzLm1hcChmdW5jdGlvbihlbnRyeSkge1xuICAgICAgICAgIHJldHVybiAoY3VycmVudC5hZGRlZCA/ICcrJyA6ICctJykgKyBlbnRyeTtcbiAgICAgICAgfSkpO1xuXG4gICAgICAgIC8vIFRyYWNrIHRoZSB1cGRhdGVkIGZpbGUgcG9zaXRpb25cbiAgICAgICAgaWYgKGN1cnJlbnQuYWRkZWQpIHtcbiAgICAgICAgICBuZXdMaW5lICs9IGxpbmVzLmxlbmd0aDtcbiAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICBvbGRMaW5lICs9IGxpbmVzLmxlbmd0aDtcbiAgICAgICAgfVxuICAgICAgfSBlbHNlIHtcbiAgICAgICAgLy8gSWRlbnRpY2FsIGNvbnRleHQgbGluZXMuIFRyYWNrIGxpbmUgY2hhbmdlc1xuICAgICAgICBpZiAob2xkUmFuZ2VTdGFydCkge1xuICAgICAgICAgIC8vIENsb3NlIG91dCBhbnkgY2hhbmdlcyB0aGF0IGhhdmUgYmVlbiBvdXRwdXQgKG9yIGpvaW4gb3ZlcmxhcHBpbmcpXG4gICAgICAgICAgaWYgKGxpbmVzLmxlbmd0aCA8PSBvcHRpb25zLmNvbnRleHQgKiAyICYmIGkgPCBkaWZmLmxlbmd0aCAtIDIpIHtcbiAgICAgICAgICAgIC8vIE92ZXJsYXBwaW5nXG4gICAgICAgICAgICBjdXJSYW5nZS5wdXNoKC4uLiBjb250ZXh0TGluZXMobGluZXMpKTtcbiAgICAgICAgICB9IGVsc2Uge1xuICAgICAgICAgICAgLy8gZW5kIHRoZSByYW5nZSBhbmQgb3V0cHV0XG4gICAgICAgICAgICBsZXQgY29udGV4dFNpemUgPSBNYXRoLm1pbihsaW5lcy5sZW5ndGgsIG9wdGlvbnMuY29udGV4dCk7XG4gICAgICAgICAgICBjdXJSYW5nZS5wdXNoKC4uLiBjb250ZXh0TGluZXMobGluZXMuc2xpY2UoMCwgY29udGV4dFNpemUpKSk7XG5cbiAgICAgICAgICAgIGxldCBodW5rID0ge1xuICAgICAgICAgICAgICBvbGRTdGFydDogb2xkUmFuZ2VTdGFydCxcbiAgICAgICAgICAgICAgb2xkTGluZXM6IChvbGRMaW5lIC0gb2xkUmFuZ2VTdGFydCArIGNvbnRleHRTaXplKSxcbiAgICAgICAgICAgICAgbmV3U3RhcnQ6IG5ld1JhbmdlU3RhcnQsXG4gICAgICAgICAgICAgIG5ld0xpbmVzOiAobmV3TGluZSAtIG5ld1JhbmdlU3RhcnQgKyBjb250ZXh0U2l6ZSksXG4gICAgICAgICAgICAgIGxpbmVzOiBjdXJSYW5nZVxuICAgICAgICAgICAgfTtcbiAgICAgICAgICAgIGh1bmtzLnB1c2goaHVuayk7XG5cbiAgICAgICAgICAgIG9sZFJhbmdlU3RhcnQgPSAwO1xuICAgICAgICAgICAgbmV3UmFuZ2VTdGFydCA9IDA7XG4gICAgICAgICAgICBjdXJSYW5nZSA9IFtdO1xuICAgICAgICAgIH1cbiAgICAgICAgfVxuICAgICAgICBvbGRMaW5lICs9IGxpbmVzLmxlbmd0aDtcbiAgICAgICAgbmV3TGluZSArPSBsaW5lcy5sZW5ndGg7XG4gICAgICB9XG4gICAgfVxuXG4gICAgLy8gU3RlcCAyOiBlbGltaW5hdGUgdGhlIHRyYWlsaW5nIGBcXG5gIGZyb20gZWFjaCBsaW5lIG9mIGVhY2ggaHVuaywgYW5kLCB3aGVyZSBuZWVkZWQsIGFkZFxuICAgIC8vICAgICAgICAgXCJcXCBObyBuZXdsaW5lIGF0IGVuZCBvZiBmaWxlXCIuXG4gICAgZm9yIChjb25zdCBodW5rIG9mIGh1bmtzKSB7XG4gICAgICBmb3IgKGxldCBpID0gMDsgaSA8IGh1bmsubGluZXMubGVuZ3RoOyBpKyspIHtcbiAgICAgICAgaWYgKGh1bmsubGluZXNbaV0uZW5kc1dpdGgoJ1xcbicpKSB7XG4gICAgICAgICAgaHVuay5saW5lc1tpXSA9IGh1bmsubGluZXNbaV0uc2xpY2UoMCwgLTEpO1xuICAgICAgICB9IGVsc2Uge1xuICAgICAgICAgIGh1bmsubGluZXMuc3BsaWNlKGkgKyAxLCAwLCAnXFxcXCBObyBuZXdsaW5lIGF0IGVuZCBvZiBmaWxlJyk7XG4gICAgICAgICAgaSsrOyAvLyBTa2lwIHRoZSBsaW5lIHdlIGp1c3QgYWRkZWQsIHRoZW4gY29udGludWUgaXRlcmF0aW5nXG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG5cbiAgICByZXR1cm4ge1xuICAgICAgb2xkRmlsZU5hbWU6IG9sZEZpbGVOYW1lLCBuZXdGaWxlTmFtZTogbmV3RmlsZU5hbWUsXG4gICAgICBvbGRIZWFkZXI6IG9sZEhlYWRlciwgbmV3SGVhZGVyOiBuZXdIZWFkZXIsXG4gICAgICBodW5rczogaHVua3NcbiAgICB9O1xuICB9XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBmb3JtYXRQYXRjaChkaWZmKSB7XG4gIGlmIChBcnJheS5pc0FycmF5KGRpZmYpKSB7XG4gICAgcmV0dXJuIGRpZmYubWFwKGZvcm1hdFBhdGNoKS5qb2luKCdcXG4nKTtcbiAgfVxuXG4gIGNvbnN0IHJldCA9IFtdO1xuICBpZiAoZGlmZi5vbGRGaWxlTmFtZSA9PSBkaWZmLm5ld0ZpbGVOYW1lKSB7XG4gICAgcmV0LnB1c2goJ0luZGV4OiAnICsgZGlmZi5vbGRGaWxlTmFtZSk7XG4gIH1cbiAgcmV0LnB1c2goJz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0nKTtcbiAgcmV0LnB1c2goJy0tLSAnICsgZGlmZi5vbGRGaWxlTmFtZSArICh0eXBlb2YgZGlmZi5vbGRIZWFkZXIgPT09ICd1bmRlZmluZWQnID8gJycgOiAnXFx0JyArIGRpZmYub2xkSGVhZGVyKSk7XG4gIHJldC5wdXNoKCcrKysgJyArIGRpZmYubmV3RmlsZU5hbWUgKyAodHlwZW9mIGRpZmYubmV3SGVhZGVyID09PSAndW5kZWZpbmVkJyA/ICcnIDogJ1xcdCcgKyBkaWZmLm5ld0hlYWRlcikpO1xuXG4gIGZvciAobGV0IGkgPSAwOyBpIDwgZGlmZi5odW5rcy5sZW5ndGg7IGkrKykge1xuICAgIGNvbnN0IGh1bmsgPSBkaWZmLmh1bmtzW2ldO1xuICAgIC8vIFVuaWZpZWQgRGlmZiBGb3JtYXQgcXVpcms6IElmIHRoZSBjaHVuayBzaXplIGlzIDAsXG4gICAgLy8gdGhlIGZpcnN0IG51bWJlciBpcyBvbmUgbG93ZXIgdGhhbiBvbmUgd291bGQgZXhwZWN0LlxuICAgIC8vIGh0dHBzOi8vd3d3LmFydGltYS5jb20vd2VibG9ncy92aWV3cG9zdC5qc3A/dGhyZWFkPTE2NDI5M1xuICAgIGlmIChodW5rLm9sZExpbmVzID09PSAwKSB7XG4gICAgICBodW5rLm9sZFN0YXJ0IC09IDE7XG4gICAgfVxuICAgIGlmIChodW5rLm5ld0xpbmVzID09PSAwKSB7XG4gICAgICBodW5rLm5ld1N0YXJ0IC09IDE7XG4gICAgfVxuICAgIHJldC5wdXNoKFxuICAgICAgJ0BAIC0nICsgaHVuay5vbGRTdGFydCArICcsJyArIGh1bmsub2xkTGluZXNcbiAgICAgICsgJyArJyArIGh1bmsubmV3U3RhcnQgKyAnLCcgKyBodW5rLm5ld0xpbmVzXG4gICAgICArICcgQEAnXG4gICAgKTtcbiAgICByZXQucHVzaC5hcHBseShyZXQsIGh1bmsubGluZXMpO1xuICB9XG5cbiAgcmV0dXJuIHJldC5qb2luKCdcXG4nKSArICdcXG4nO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gY3JlYXRlVHdvRmlsZXNQYXRjaChvbGRGaWxlTmFtZSwgbmV3RmlsZU5hbWUsIG9sZFN0ciwgbmV3U3RyLCBvbGRIZWFkZXIsIG5ld0hlYWRlciwgb3B0aW9ucykge1xuICBpZiAodHlwZW9mIG9wdGlvbnMgPT09ICdmdW5jdGlvbicpIHtcbiAgICBvcHRpb25zID0ge2NhbGxiYWNrOiBvcHRpb25zfTtcbiAgfVxuXG4gIGlmICghb3B0aW9ucz8uY2FsbGJhY2spIHtcbiAgICBjb25zdCBwYXRjaE9iaiA9IHN0cnVjdHVyZWRQYXRjaChvbGRGaWxlTmFtZSwgbmV3RmlsZU5hbWUsIG9sZFN0ciwgbmV3U3RyLCBvbGRIZWFkZXIsIG5ld0hlYWRlciwgb3B0aW9ucyk7XG4gICAgaWYgKCFwYXRjaE9iaikge1xuICAgICAgcmV0dXJuO1xuICAgIH1cbiAgICByZXR1cm4gZm9ybWF0UGF0Y2gocGF0Y2hPYmopO1xuICB9IGVsc2Uge1xuICAgIGNvbnN0IHtjYWxsYmFja30gPSBvcHRpb25zO1xuICAgIHN0cnVjdHVyZWRQYXRjaChcbiAgICAgIG9sZEZpbGVOYW1lLFxuICAgICAgbmV3RmlsZU5hbWUsXG4gICAgICBvbGRTdHIsXG4gICAgICBuZXdTdHIsXG4gICAgICBvbGRIZWFkZXIsXG4gICAgICBuZXdIZWFkZXIsXG4gICAgICB7XG4gICAgICAgIC4uLm9wdGlvbnMsXG4gICAgICAgIGNhbGxiYWNrOiBwYXRjaE9iaiA9PiB7XG4gICAgICAgICAgaWYgKCFwYXRjaE9iaikge1xuICAgICAgICAgICAgY2FsbGJhY2soKTtcbiAgICAgICAgICB9IGVsc2Uge1xuICAgICAgICAgICAgY2FsbGJhY2soZm9ybWF0UGF0Y2gocGF0Y2hPYmopKTtcbiAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICApO1xuICB9XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBjcmVhdGVQYXRjaChmaWxlTmFtZSwgb2xkU3RyLCBuZXdTdHIsIG9sZEhlYWRlciwgbmV3SGVhZGVyLCBvcHRpb25zKSB7XG4gIHJldHVybiBjcmVhdGVUd29GaWxlc1BhdGNoKGZpbGVOYW1lLCBmaWxlTmFtZSwgb2xkU3RyLCBuZXdTdHIsIG9sZEhlYWRlciwgbmV3SGVhZGVyLCBvcHRpb25zKTtcbn1cblxuLyoqXG4gKiBTcGxpdCBgdGV4dGAgaW50byBhbiBhcnJheSBvZiBsaW5lcywgaW5jbHVkaW5nIHRoZSB0cmFpbGluZyBuZXdsaW5lIGNoYXJhY3RlciAod2hlcmUgcHJlc2VudClcbiAqL1xuZnVuY3Rpb24gc3BsaXRMaW5lcyh0ZXh0KSB7XG4gIGNvbnN0IGhhc1RyYWlsaW5nTmwgPSB0ZXh0LmVuZHNXaXRoKCdcXG4nKTtcbiAgY29uc3QgcmVzdWx0ID0gdGV4dC5zcGxpdCgnXFxuJykubWFwKGxpbmUgPT4gbGluZSArICdcXG4nKTtcbiAgaWYgKGhhc1RyYWlsaW5nTmwpIHtcbiAgICByZXN1bHQucG9wKCk7XG4gIH0gZWxzZSB7XG4gICAgcmVzdWx0LnB1c2gocmVzdWx0LnBvcCgpLnNsaWNlKDAsIC0xKSk7XG4gIH1cbiAgcmV0dXJuIHJlc3VsdDtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7QUFBQTtBQUFBO0FBQUFBLEtBQUEsR0FBQUMsT0FBQTtBQUFBO0FBQUE7QUFBdUMsbUNBQUFDLFFBQUFDLENBQUEsc0NBQUFELE9BQUEsd0JBQUFFLE1BQUEsdUJBQUFBLE1BQUEsQ0FBQUMsUUFBQSxhQUFBRixDQUFBLGtCQUFBQSxDQUFBLGdCQUFBQSxDQUFBLFdBQUFBLENBQUEseUJBQUFDLE1BQUEsSUFBQUQsQ0FBQSxDQUFBRyxXQUFBLEtBQUFGLE1BQUEsSUFBQUQsQ0FBQSxLQUFBQyxNQUFBLENBQUFHLFNBQUEscUJBQUFKLENBQUEsS0FBQUQsT0FBQSxDQUFBQyxDQUFBO0FBQUEsU0FBQUssbUJBQUFDLEdBQUEsV0FBQUMsa0JBQUEsQ0FBQUQsR0FBQSxLQUFBRSxnQkFBQSxDQUFBRixHQUFBLEtBQUFHLDJCQUFBLENBQUFILEdBQUEsS0FBQUksa0JBQUE7QUFBQSxTQUFBQSxtQkFBQSxjQUFBQyxTQUFBO0FBQUEsU0FBQUYsNEJBQUFULENBQUEsRUFBQVksTUFBQSxTQUFBWixDQUFBLHFCQUFBQSxDQUFBLHNCQUFBYSxpQkFBQSxDQUFBYixDQUFBLEVBQUFZLE1BQUEsT0FBQUUsQ0FBQSxHQUFBQyxNQUFBLENBQUFYLFNBQUEsQ0FBQVksUUFBQSxDQUFBQyxJQUFBLENBQUFqQixDQUFBLEVBQUFrQixLQUFBLGFBQUFKLENBQUEsaUJBQUFkLENBQUEsQ0FBQUcsV0FBQSxFQUFBVyxDQUFBLEdBQUFkLENBQUEsQ0FBQUcsV0FBQSxDQUFBZ0IsSUFBQSxNQUFBTCxDQUFBLGNBQUFBLENBQUEsbUJBQUFNLEtBQUEsQ0FBQUMsSUFBQSxDQUFBckIsQ0FBQSxPQUFBYyxDQUFBLCtE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
+
+
+/***/ }),
+
+/***/ 8959:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.isUnix = isUnix;
+exports.isWin = isWin;
+exports.unixToWin = unixToWin;
+exports.winToUnix = winToUnix;
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/*istanbul ignore end*/
+function unixToWin(patch) {
+  if (Array.isArray(patch)) {
+    return patch.map(unixToWin);
+  }
+  return (
+    /*istanbul ignore start*/
+    _objectSpread(_objectSpread({},
+    /*istanbul ignore end*/
+    patch), {}, {
+      hunks: patch.hunks.map(function (hunk)
+      /*istanbul ignore start*/
+      {
+        return _objectSpread(_objectSpread({},
+        /*istanbul ignore end*/
+        hunk), {}, {
+          lines: hunk.lines.map(function (line, i)
+          /*istanbul ignore start*/
+          {
+            var _hunk$lines;
+            return (
+              /*istanbul ignore end*/
+              line.startsWith('\\') || line.endsWith('\r') ||
+              /*istanbul ignore start*/
+              (_hunk$lines =
+              /*istanbul ignore end*/
+              hunk.lines[i + 1]) !== null && _hunk$lines !== void 0 &&
+              /*istanbul ignore start*/
+              _hunk$lines
+              /*istanbul ignore end*/
+              .startsWith('\\') ? line : line + '\r'
+            );
+          })
+        });
+      })
+    })
+  );
+}
+function winToUnix(patch) {
+  if (Array.isArray(patch)) {
+    return patch.map(winToUnix);
+  }
+  return (
+    /*istanbul ignore start*/
+    _objectSpread(_objectSpread({},
+    /*istanbul ignore end*/
+    patch), {}, {
+      hunks: patch.hunks.map(function (hunk)
+      /*istanbul ignore start*/
+      {
+        return _objectSpread(_objectSpread({},
+        /*istanbul ignore end*/
+        hunk), {}, {
+          lines: hunk.lines.map(function (line)
+          /*istanbul ignore start*/
+          {
+            return (
+              /*istanbul ignore end*/
+              line.endsWith('\r') ? line.substring(0, line.length - 1) : line
+            );
+          })
+        });
+      })
+    })
+  );
+}
+
+/**
+ * Returns true if the patch consistently uses Unix line endings (or only involves one line and has
+ * no line endings).
+ */
+function isUnix(patch) {
+  if (!Array.isArray(patch)) {
+    patch = [patch];
+  }
+  return !patch.some(function (index)
+  /*istanbul ignore start*/
+  {
+    return (
+      /*istanbul ignore end*/
+      index.hunks.some(function (hunk)
+      /*istanbul ignore start*/
+      {
+        return (
+          /*istanbul ignore end*/
+          hunk.lines.some(function (line)
+          /*istanbul ignore start*/
+          {
+            return (
+              /*istanbul ignore end*/
+              !line.startsWith('\\') && line.endsWith('\r')
+            );
+          })
+        );
+      })
+    );
+  });
+}
+
+/**
+ * Returns true if the patch uses Windows line endings and only Windows line endings.
+ */
+function isWin(patch) {
+  if (!Array.isArray(patch)) {
+    patch = [patch];
+  }
+  return patch.some(function (index)
+  /*istanbul ignore start*/
+  {
+    return (
+      /*istanbul ignore end*/
+      index.hunks.some(function (hunk)
+      /*istanbul ignore start*/
+      {
+        return (
+          /*istanbul ignore end*/
+          hunk.lines.some(function (line)
+          /*istanbul ignore start*/
+          {
+            return (
+              /*istanbul ignore end*/
+              line.endsWith('\r')
+            );
+          })
+        );
+      })
+    );
+  }) && patch.every(function (index)
+  /*istanbul ignore start*/
+  {
+    return (
+      /*istanbul ignore end*/
+      index.hunks.every(function (hunk)
+      /*istanbul ignore start*/
+      {
+        return (
+          /*istanbul ignore end*/
+          hunk.lines.every(function (line, i)
+          /*istanbul ignore start*/
+          {
+            var _hunk$lines2;
+            return (
+              /*istanbul ignore end*/
+              line.startsWith('\\') || line.endsWith('\r') ||
+              /*istanbul ignore start*/
+              ((_hunk$lines2 =
+              /*istanbul ignore end*/
+              hunk.lines[i + 1]) === null || _hunk$lines2 === void 0 ? void 0 :
+              /*istanbul ignore start*/
+              _hunk$lines2
+              /*istanbul ignore end*/
+              .startsWith('\\'))
+            );
+          })
+        );
+      })
+    );
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJ1bml4VG9XaW4iLCJwYXRjaCIsIkFycmF5IiwiaXNBcnJheSIsIm1hcCIsIl9vYmplY3RTcHJlYWQiLCJodW5rcyIsImh1bmsiLCJsaW5lcyIsImxpbmUiLCJpIiwiX2h1bmskbGluZXMiLCJzdGFydHNXaXRoIiwiZW5kc1dpdGgiLCJ3aW5Ub1VuaXgiLCJzdWJzdHJpbmciLCJsZW5ndGgiLCJpc1VuaXgiLCJzb21lIiwiaW5kZXgiLCJpc1dpbiIsImV2ZXJ5IiwiX2h1bmskbGluZXMyIl0sInNvdXJjZXMiOlsiLi4vLi4vc3JjL3BhdGNoL2xpbmUtZW5kaW5ncy5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZnVuY3Rpb24gdW5peFRvV2luKHBhdGNoKSB7XG4gIGlmIChBcnJheS5pc0FycmF5KHBhdGNoKSkge1xuICAgIHJldHVybiBwYXRjaC5tYXAodW5peFRvV2luKTtcbiAgfVxuXG4gIHJldHVybiB7XG4gICAgLi4ucGF0Y2gsXG4gICAgaHVua3M6IHBhdGNoLmh1bmtzLm1hcChodW5rID0+ICh7XG4gICAgICAuLi5odW5rLFxuICAgICAgbGluZXM6IGh1bmsubGluZXMubWFwKFxuICAgICAgICAobGluZSwgaSkgPT5cbiAgICAgICAgICAobGluZS5zdGFydHNXaXRoKCdcXFxcJykgfHwgbGluZS5lbmRzV2l0aCgnXFxyJykgfHwgaHVuay5saW5lc1tpICsgMV0/LnN0YXJ0c1dpdGgoJ1xcXFwnKSlcbiAgICAgICAgICAgID8gbGluZVxuICAgICAgICAgICAgOiBsaW5lICsgJ1xccidcbiAgICAgIClcbiAgICB9KSlcbiAgfTtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIHdpblRvVW5peChwYXRjaCkge1xuICBpZiAoQXJyYXkuaXNBcnJheShwYXRjaCkpIHtcbiAgICByZXR1cm4gcGF0Y2gubWFwKHdpblRvVW5peCk7XG4gIH1cblxuICByZXR1cm4ge1xuICAgIC4uLnBhdGNoLFxuICAgIGh1bmtzOiBwYXRjaC5odW5rcy5tYXAoaHVuayA9PiAoe1xuICAgICAgLi4uaHVuayxcbiAgICAgIGxpbmVzOiBodW5rLmxpbmVzLm1hcChsaW5lID0+IGxpbmUuZW5kc1dpdGgoJ1xccicpID8gbGluZS5zdWJzdHJpbmcoMCwgbGluZS5sZW5ndGggLSAxKSA6IGxpbmUpXG4gICAgfSkpXG4gIH07XG59XG5cbi8qKlxuICogUmV0dXJucyB0cnVlIGlmIHRoZSBwYXRjaCBjb25zaXN0ZW50bHkgdXNlcyBVbml4IGxpbmUgZW5kaW5ncyAob3Igb25seSBpbnZvbHZlcyBvbmUgbGluZSBhbmQgaGFzXG4gKiBubyBsaW5lIGVuZGluZ3MpLlxuICovXG5leHBvcnQgZnVuY3Rpb24gaXNVbml4KHBhdGNoKSB7XG4gIGlmICghQXJyYXkuaXNBcnJheShwYXRjaCkpIHsgcGF0Y2ggPSBbcGF0Y2hdOyB9XG4gIHJldHVybiAhcGF0Y2guc29tZShcbiAgICBpbmRleCA9PiBpbmRleC5odW5rcy5zb21lKFxuICAgICAgaHVuayA9PiBodW5rLmxpbmVzLnNvbWUoXG4gICAgICAgIGxpbmUgPT4gIWxpbmUuc3RhcnRzV2l0aCgnXFxcXCcpICYmIGxpbmUuZW5kc1dpdGgoJ1xccicpXG4gICAgICApXG4gICAgKVxuICApO1xufVxuXG4vKipcbiAqIFJldHVybnMgdHJ1ZSBpZiB0aGUgcGF0Y2ggdXNlcyBXaW5kb3dzIGxpbmUgZW5kaW5ncyBhbmQgb25seSBXaW5kb3dzIGxpbmUgZW5kaW5ncy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGlzV2luKHBhdGNoKSB7XG4gIGlmICghQXJyYXkuaXNBcnJheShwYXRjaCkpIHsgcGF0Y2ggPSBbcGF0Y2hdOyB9XG4gIHJldHVybiBwYXRjaC5zb21lKGluZGV4ID0+IGluZGV4Lmh1bmtzLnNvbWUoaHVuayA9PiBodW5rLmxpbmVzLnNvbWUobGluZSA9PiBsaW5lLmVuZHNXaXRoKCdcXHInKSkpKVxuICAgICYmIHBhdGNoLmV2ZXJ5KFxuICAgICAgaW5kZXggPT4gaW5kZXguaHVua3MuZXZlcnkoXG4gICAgICAgIGh1bmsgPT4gaHVuay5saW5lcy5ldmVyeShcbiAgICAgICAgICAobGluZSwgaSkgPT4gbGluZS5zdGFydHNXaXRoKCdcXFxcJykgfHwgbGluZS5lbmRzV2l0aCgnXFxyJykgfHwgaHVuay5saW5lc1tpICsgMV0/LnN0YXJ0c1dpdGgoJ1xcXFwnKVxuICAgICAgICApXG4gICAgICApXG4gICAgKTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBTyxTQUFTQSxTQUFTQSxDQUFDQyxLQUFLLEVBQUU7RUFDL0IsSUFBSUMsS0FBSyxDQUFDQyxPQUFPLENBQUNGLEtBQUssQ0FBQyxFQUFFO0lBQ3hCLE9BQU9BLEtBQUssQ0FBQ0csR0FBRyxDQUFDSixTQUFTLENBQUM7RUFDN0I7RUFFQTtJQUFBO0lBQUFLLGFBQUEsQ0FBQUEsYUFBQTtJQUFBO0lBQ0tKLEtBQUs7TUFDUkssS0FBSyxFQUFFTCxLQUFLLENBQUNLLEtBQUssQ0FBQ0YsR0FBRyxDQUFDLFVBQUFHLElBQUk7TUFBQTtNQUFBO1FBQUEsT0FBQUYsYUFBQSxDQUFBQSxhQUFBO1FBQUE7UUFDdEJFLElBQUk7VUFDUEMsS0FBSyxFQUFFRCxJQUFJLENBQUNDLEtBQUssQ0FBQ0osR0FBRyxDQUNuQixVQUFDSyxJQUFJLEVBQUVDLENBQUM7VUFBQTtVQUFBO1lBQUEsSUFBQUMsV0FBQTtZQUFBO2NBQUE7Y0FDTEYsSUFBSSxDQUFDRyxVQUFVLENBQUMsSUFBSSxDQUFDLElBQUlILElBQUksQ0FBQ0ksUUFBUSxDQUFDLElBQUksQ0FBQztjQUFBO2NBQUEsQ0FBQUYsV0FBQTtjQUFBO2NBQUlKLElBQUksQ0FBQ0MsS0FBSyxDQUFDRSxDQUFDLEdBQUcsQ0FBQyxDQUFDLGNBQUFDLFdBQUE7Y0FBakI7Y0FBQUE7Y0FBQTtjQUFBLENBQW1CQyxVQUFVLENBQUMsSUFBSSxDQUFDLEdBQ2hGSCxJQUFJLEdBQ0pBLElBQUksR0FBRztZQUFJO1VBQUEsQ0FDbkI7UUFBQztNQUFBLENBQ0Q7SUFBQztFQUFBO0FBRVA7QUFFTyxTQUFTSyxTQUFTQSxDQUFDYixLQUFL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
+
+
+/***/ }),
+
+/***/ 6974:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.calcLineCount = calcLineCount;
+exports.merge = merge;
+/*istanbul ignore end*/
+var
+/*istanbul ignore start*/
+_create = __nccwpck_require__(3148)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_parse = __nccwpck_require__(6997)
+/*istanbul ignore end*/
+;
+var
+/*istanbul ignore start*/
+_array = __nccwpck_require__(6937)
+/*istanbul ignore end*/
+;
+/*istanbul ignore start*/ function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+/*istanbul ignore end*/
+function calcLineCount(hunk) {
+  var
+    /*istanbul ignore start*/
+    _calcOldNewLineCount =
+    /*istanbul ignore end*/
+    calcOldNewLineCount(hunk.lines),
+    /*istanbul ignore start*/
+    /*istanbul ignore end*/
+    oldLines = _calcOldNewLineCount.oldLines,
+    /*istanbul ignore start*/
+    /*istanbul ignore end*/
+    newLines = _calcOldNewLineCount.newLines;
+  if (oldLines !== undefined) {
+    hunk.oldLines = oldLines;
+  } else {
+    delete hunk.oldLines;
+  }
+  if (newLines !== undefined) {
+    hunk.newLines = newLines;
+  } else {
+    delete hunk.newLines;
+  }
+}
+function merge(mine, theirs, base) {
+  mine = loadPatch(mine, base);
+  theirs = loadPatch(theirs, base);
+  var ret = {};
+
+  // For index we just let it pass through as it doesn't have any necessary meaning.
+  // Leaving sanity checks on this to the API consumer that may know more about the
+  // meaning in their own context.
+  if (mine.index || theirs.index) {
+    ret.index = mine.index || theirs.index;
+  }
+  if (mine.newFileName || theirs.newFileName) {
+    if (!fileNameChanged(mine)) {
+      // No header or no change in ours, use theirs (and ours if theirs does not exist)
+      ret.oldFileName = theirs.oldFileName || mine.oldFileName;
+      ret.newFileName = theirs.newFileName || mine.newFileName;
+      ret.oldHeader = theirs.oldHeader || mine.oldHeader;
+      ret.newHeader = theirs.newHeader || mine.newHeader;
+    } else if (!fileNameChanged(theirs)) {
+      // No header or no change in theirs, use ours
+      ret.oldFileName = mine.oldFileName;
+      ret.newFileName = mine.newFileName;
+      ret.oldHeader = mine.oldHeader;
+      ret.newHeader = mine.newHeader;
+    } else {
+      // Both changed... figure it out
+      ret.oldFileName = selectField(ret, mine.oldFileName, theirs.oldFileName);
+      ret.newFileName = selectField(ret, mine.newFileName, theirs.newFileName);
+      ret.oldHeader = selectField(ret, mine.oldHeader, theirs.oldHeader);
+      ret.newHeader = selectField(ret, mine.newHeader, theirs.newHeader);
+    }
+  }
+  ret.hunks = [];
+  var mineIndex = 0,
+    theirsIndex = 0,
+    mineOffset = 0,
+    theirsOffset = 0;
+  while (mineIndex < mine.hunks.length || theirsIndex < theirs.hunks.length) {
+    var mineCurrent = mine.hunks[mineIndex] || {
+        oldStart: Infinity
+      },
+      theirsCurrent = theirs.hunks[theirsIndex] || {
+        oldStart: Infinity
+      };
+    if (hunkBefore(mineCurrent, theirsCurrent)) {
+      // This patch does not overlap with any of the others, yay.
+      ret.hunks.push(cloneHunk(mineCurrent, mineOffset));
+      mineIndex++;
+      theirsOffset += mineCurrent.newLines - mineCurrent.oldLines;
+    } else if (hunkBefore(theirsCurrent, mineCurrent)) {
+      // This patch does not overlap with any of the others, yay.
+      ret.hunks.push(cloneHunk(theirsCurrent, theirsOffset));
+      theirsIndex++;
+      mineOffset += theirsCurrent.newLines - theirsCurrent.oldLines;
+    } else {
+      // Overlap, merge as best we can
+      var mergedHunk = {
+        oldStart: Math.min(mineCurrent.oldStart, theirsCurrent.oldStart),
+        oldLines: 0,
+        newStart: Math.min(mineCurrent.newStart + mineOffset, theirsCurrent.oldStart + theirsOffset),
+        newLines: 0,
+        lines: []
+      };
+      mergeLines(mergedHunk, mineCurrent.oldStart, mineCurrent.lines, theirsCurrent.oldStart, theirsCurrent.lines);
+      theirsIndex++;
+      mineIndex++;
+      ret.hunks.push(mergedHunk);
+    }
+  }
+  return ret;
+}
+function loadPatch(param, base) {
+  if (typeof param === 'string') {
+    if (/^@@/m.test(param) || /^Index:/m.test(param)) {
+      return (
+        /*istanbul ignore start*/
+        (0,
+        /*istanbul ignore end*/
+        /*istanbul ignore start*/
+        _parse
+        /*istanbul ignore end*/
+        .
+        /*istanbul ignore start*/
+        parsePatch)
+        /*istanbul ignore end*/
+        (param)[0]
+      );
+    }
+    if (!base) {
+      throw new Error('Must provide a base reference or pass in a patch');
+    }
+    return (
+      /*istanbul ignore start*/
+      (0,
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      _create
+      /*istanbul ignore end*/
+      .
+      /*istanbul ignore start*/
+      structuredPatch)
+      /*istanbul ignore end*/
+      (undefined, undefined, base, param)
+    );
+  }
+  return param;
+}
+function fileNameChanged(patch) {
+  return patch.newFileName && patch.newFileName !== patch.oldFileName;
+}
+function selectField(index, mine, theirs) {
+  if (mine === theirs) {
+    return mine;
+  } else {
+    index.conflict = true;
+    return {
+      mine: mine,
+      theirs: theirs
+    };
+  }
+}
+function hunkBefore(test, check) {
+  return test.oldStart < check.oldStart && test.oldStart + test.oldLines < check.oldStart;
+}
+function cloneHunk(hunk, offset) {
+  return {
+    oldStart: hunk.oldStart,
+    oldLines: hunk.oldLines,
+    newStart: hunk.newStart + offset,
+    newLines: hunk.newLines,
+    lines: hunk.lines
+  };
+}
+function mergeLines(hunk, mineOffset, mineLines, theirOffset, theirLines) {
+  // This will generally result in a conflicted hunk, but there are cases where the context
+  // is the only overlap where we can successfully merge the content here.
+  var mine = {
+      offset: mineOffset,
+      lines: mineLines,
+      index: 0
+    },
+    their = {
+      offset: theirOffset,
+      lines: theirLines,
+      index: 0
+    };
+
+  // Handle any leading content
+  insertLeading(hunk, mine, their);
+  insertLeading(hunk, their, mine);
+
+  // Now in the overlap content. Scan through and select the best changes from each.
+  while (mine.index < mine.lines.length && their.index < their.lines.length) {
+    var mineCurrent = mine.lines[mine.index],
+      theirCurrent = their.lines[their.index];
+    if ((mineCurrent[0] === '-' || mineCurrent[0] === '+') && (theirCurrent[0] === '-' || theirCurrent[0] === '+')) {
+      // Both modified ...
+      mutualChange(hunk, mine, their);
+    } else if (mineCurrent[0] === '+' && theirCurrent[0] === ' ') {
+      /*istanbul ignore start*/
+      var _hunk$lines;
+      /*istanbul ignore end*/
+      // Mine inserted
+      /*istanbul ignore start*/
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      (_hunk$lines =
+      /*istanbul ignore end*/
+      hunk.lines).push.apply(
+      /*istanbul ignore start*/
+      _hunk$lines
+      /*istanbul ignore end*/
+      ,
+      /*istanbul ignore start*/
+      _toConsumableArray(
+      /*istanbul ignore end*/
+      collectChange(mine)));
+    } else if (theirCurrent[0] === '+' && mineCurrent[0] === ' ') {
+      /*istanbul ignore start*/
+      var _hunk$lines2;
+      /*istanbul ignore end*/
+      // Theirs inserted
+      /*istanbul ignore start*/
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      (_hunk$lines2 =
+      /*istanbul ignore end*/
+      hunk.lines).push.apply(
+      /*istanbul ignore start*/
+      _hunk$lines2
+      /*istanbul ignore end*/
+      ,
+      /*istanbul ignore start*/
+      _toConsumableArray(
+      /*istanbul ignore end*/
+      collectChange(their)));
+    } else if (mineCurrent[0] === '-' && theirCurrent[0] === ' ') {
+      // Mine removed or edited
+      removal(hunk, mine, their);
+    } else if (theirCurrent[0] === '-' && mineCurrent[0] === ' ') {
+      // Their removed or edited
+      removal(hunk, their, mine, true);
+    } else if (mineCurrent === theirCurrent) {
+      // Context identity
+      hunk.lines.push(mineCurrent);
+      mine.index++;
+      their.index++;
+    } else {
+      // Context mismatch
+      conflict(hunk, collectChange(mine), collectChange(their));
+    }
+  }
+
+  // Now push anything that may be remaining
+  insertTrailing(hunk, mine);
+  insertTrailing(hunk, their);
+  calcLineCount(hunk);
+}
+function mutualChange(hunk, mine, their) {
+  var myChanges = collectChange(mine),
+    theirChanges = collectChange(their);
+  if (allRemoves(myChanges) && allRemoves(theirChanges)) {
+    // Special case for remove changes that are supersets of one another
+    if (
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _array
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    arrayStartsWith)
+    /*istanbul ignore end*/
+    (myChanges, theirChanges) && skipRemoveSuperset(their, myChanges, myChanges.length - theirChanges.length)) {
+      /*istanbul ignore start*/
+      var _hunk$lines3;
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      (_hunk$lines3 =
+      /*istanbul ignore end*/
+      hunk.lines).push.apply(
+      /*istanbul ignore start*/
+      _hunk$lines3
+      /*istanbul ignore end*/
+      ,
+      /*istanbul ignore start*/
+      _toConsumableArray(
+      /*istanbul ignore end*/
+      myChanges));
+      return;
+    } else if (
+    /*istanbul ignore start*/
+    (0,
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    _array
+    /*istanbul ignore end*/
+    .
+    /*istanbul ignore start*/
+    arrayStartsWith)
+    /*istanbul ignore end*/
+    (theirChanges, myChanges) && skipRemoveSuperset(mine, theirChanges, theirChanges.length - myChanges.length)) {
+      /*istanbul ignore start*/
+      var _hunk$lines4;
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      /*istanbul ignore end*/
+      /*istanbul ignore start*/
+      (_hunk$lines4 =
+      /*istanbul ignore end*/
+      hunk.lines).push.apply(
+      /*istanbul ignore start*/
+      _hunk$lines4
+      /*istanbul ignore end*/
+      ,
+      /*istanbul ignore start*/
+      _toConsumableArray(
+      /*istanbul ignore end*/
+      theirChanges));
+      return;
+    }
+  } else if (
+  /*istanbul ignore start*/
+  (0,
+  /*istanbul ignore end*/
+  /*istanbul ignore start*/
+  _array
+  /*istanbul ignore end*/
+  .
+  /*istanbul ignore start*/
+  arrayEqual)
+  /*istanbul ignore end*/
+  (myChanges, theirChanges)) {
+    /*istanbul ignore start*/
+    var _hunk$lines5;
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    (_hunk$lines5 =
+    /*istanbul ignore end*/
+    hunk.lines).push.apply(
+    /*istanbul ignore start*/
+    _hunk$lines5
+    /*istanbul ignore end*/
+    ,
+    /*istanbul ignore start*/
+    _toConsumableArray(
+    /*istanbul ignore end*/
+    myChanges));
+    return;
+  }
+  conflict(hunk, myChanges, theirChanges);
+}
+function removal(hunk, mine, their, swap) {
+  var myChanges = collectChange(mine),
+    theirChanges = collectContext(their, myChanges);
+  if (theirChanges.merged) {
+    /*istanbul ignore start*/
+    var _hunk$lines6;
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    /*istanbul ignore end*/
+    /*istanbul ignore start*/
+    (_hunk$lines6 =
+    /*istanbul ignore end*/
+    hunk.lines).push.apply(
+    /*istanbul ignore start*/
+    _hunk$lines6
+    /*istanbul ignore end*/
+    ,
+    /*istanbul ignore start*/
+    _toConsumableArray(
+    /*istanbul ignore end*/
+    theirChanges.merged));
+  } else {
+    conflict(hunk, swap ? theirChanges : myChanges, swap ? myChanges : theirChanges);
+  }
+}
+function conflict(hunk, mine, their) {
+  hunk.conflict = true;
+  hunk.lines.push({
+    conflict: true,
+    mine: mine,
+    theirs: their
+  });
+}
+function insertLeading(hunk, insert, their) {
+  while (insert.offset < their.offset && insert.index < insert.lines.length) {
+    var line = insert.lines[insert.index++];
+    hunk.lines.push(line);
+    insert.offset++;
+  }
+}
+function insertTrailing(hunk, insert) {
+  while (insert.index < insert.lines.length) {
+    var line = insert.lines[insert.index++];
+    hunk.lines.push(line);
+  }
+}
+function collectChange(state) {
+  var ret = [],
+    operation = state.lines[state.index][0];
+  while (state.index < state.lines.length) {
+    var line = state.lines[state.index];
+
+    // Group additions that are immediately after subtractions and treat them as one "atomic" modify change.
+    if (operation === '-' && line[0] === '+') {
+      operation = '+';
+    }
+    if (operation === line[0]) {
+      ret.push(line);
+      state.index++;
+    } else {
+      break;
+    }
+  }
+  return ret;
+}
+function collectContext(state, matchChanges) {
+  var changes = [],
+    merged = [],
+    matchIndex = 0,
+    contextChanges = false,
+    conflicted = false;
+  while (matchIndex < matchChanges.length && state.index < state.lines.length) {
+    var change = state.lines[state.index],
+      match = matchChanges[matchIndex];
+
+    // Once we've hit our add, then we are done
+    if (match[0] === '+') {
+      break;
+    }
+    contextChanges = contextChanges || change[0] !== ' ';
+    merged.push(match);
+    matchIndex++;
+
+    // Consume any additions in the other block as a conflict to attempt
+    // to pull in the remaining context after this
+    if (change[0] === '+') {
+      conflicted = true;
+      while (change[0] === '+') {
+        changes.push(change);
+        change = state.lines[++state.index];
+      }
+    }
+    if (match.substr(1) === change.substr(1)) {
+      changes.push(change);
+      state.index++;
+    } else {
+      conflicted = true;
+    }
+  }
+  if ((matchChanges[matchIndex] || '')[0] === '+' && contextChanges) {
+    conflicted = true;
+  }
+  if (conflicted) {
+    return changes;
+  }
+  while (matchIndex < matchChanges.length) {
+    merged.push(matchChanges[matchIndex++]);
+  }
+  return {
+    merged: merged,
+    changes: changes
+  };
+}
+function allRemoves(changes) {
+  return changes.reduce(function (prev, change) {
+    return prev && change[0] === '-';
+  }, true);
+}
+function skipRemoveSuperset(state, removeChanges, delta) {
+  for (var i = 0; i < delta; i++) {
+    var changeContent = removeChanges[removeChanges.length - delta + i].substr(1);
+    if (state.lines[state.index + i] !== ' ' + changeContent) {
+      return false;
+    }
+  }
+  state.index += delta;
+  return true;
+}
+function calcOldNewLineCount(lines) {
+  var oldLines = 0;
+  var newLines = 0;
+  lines.forEach(function (line) {
+    if (typeof line !== 'string') {
+      var myCount = calcOldNewLineCount(line.mine);
+      var theirCount = calcOldNewLineCount(line.theirs);
+      if (oldLines !== undefined) {
+        if (myCount.oldLines === theirCount.oldLines) {
+          oldLines += myCount.oldLines;
+        } else {
+          oldLines = undefined;
+        }
+      }
+      if (newLines !== undefined) {
+        if (myCount.newLines === theirCount.newLines) {
+          newLines += myCount.newLines;
+        } else {
+          newLines = undefined;
+        }
+      }
+    } else {
+      if (newLines !== undefined && (line[0] === '+' || line[0] === ' ')) {
+        newLines++;
+      }
+      if (oldLines !== undefined && (line[0] === '-' || line[0] === ' ')) {
+        oldLines++;
+      }
+    }
+  });
+  return {
+    oldLines: oldLines,
+    newLines: newLines
+  };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfY3JlYXRlIiwicmVxdWlyZSIsIl9wYXJzZSIsIl9hcnJheSIsIl90b0NvbnN1bWFibGVBcnJheSIsImFyciIsIl9hcnJheVdpdGhvdXRIb2xlcyIsIl9pdGVyYWJsZVRvQXJyYXkiLCJfdW5zdXBwb3J0ZWRJdGVyYWJsZVRvQXJyYXkiLCJfbm9uSXRlcmFibGVTcHJlYWQiLCJUeXBlRXJyb3IiLCJvIiwibWluTGVuIiwiX2FycmF5TGlrZVRvQXJyYXkiLCJuIiwiT2JqZWN0IiwicHJvdG90eXBlIiwidG9TdHJpbmciLCJjYWxsIiwic2xpY2UiLCJjb25zdHJ1Y3RvciIsIm5hbWUiLCJBcnJheSIsImZyb20iLCJ0ZXN0IiwiaXRlciIsIlN5bWJvbCIsIml0ZXJhdG9yIiwiaXNBcnJheSIsImxlbiIsImxlbmd0aCIsImkiLCJhcnIyIiwiY2FsY0xpbmVDb3VudCIsImh1bmsiLCJfY2FsY09sZE5ld0xpbmVDb3VudCIsImNhbGNPbGROZXdMaW5lQ291bnQiLCJsaW5lcyIsIm9sZExpbmVzIiwibmV3TGluZXMiLCJ1bmRlZmluZWQiLCJtZXJnZSIsIm1pbmUiLCJ0aGVpcnMiLCJiYXNlIiwibG9hZFBhdGNoIiwicmV0IiwiaW5kZXgiLCJuZXdGaWxlTmFtZSIsImZpbGVOYW1lQ2hhbmdlZCIsIm9sZEZpbGVOYW1lIiwib2xkSGVhZGVyIiwibmV3SGVhZGVyIiwic2VsZWN0RmllbGQiLCJodW5rcyIsIm1pbmVJbmRleCIsInRoZWlyc0luZGV4IiwibWluZU9mZnNldCIsInRoZWlyc09mZnNldCIsIm1pbmVDdXJyZW50Iiwib2xkU3RhcnQiLCJJbmZpbml0eSIsInRoZWlyc0N1cnJlbnQiLCJodW5rQmVmb3JlIiwicHVzaCIsImNsb25lSHVuayIsIm1lcmdlZEh1bmsiLCJNYXRoIiwibWluIiwibmV3U3RhcnQiLCJtZXJnZUxpbmVzIiwicGFyYW0iLCJwYXJzZVBhdGNoIiwiRXJyb3IiLCJzdHJ1Y3R1cmVkUGF0Y2giLCJwYXRjaCIsImNvbmZsaWN0IiwiY2hlY2siLCJvZmZzZXQiLCJtaW5lTGluZXMiLCJ0aGVpck9mZnNldCIsInRoZWlyTGluZXMiLCJ0aGVpciIsImluc2VydExlYWRpbmciLCJ0aGVpckN1cnJlbnQiLCJtdXR1YWxDaGFuZ2UiLCJfaHVuayRsaW5lcyIsImFwcGx5IiwiY29sbGVjdENoYW5nZSIsIl9odW5rJGxpbmVzMiIsInJlbW92YWwiLCJpbnNlcnRUcmFpbGluZyIsIm15Q2hhbmdlcyIsInRoZWlyQ2hhbmdlcyIsImFsbFJlbW92ZXMiLCJhcnJheVN0YXJ0c1dpdGgiLCJza2lwUmVtb3ZlU3VwZXJzZXQiLCJfaHVuayRsaW5lczMiLCJfaHVuayRsaW5lczQiLCJhcnJheUVxdWFsIiwiX2h1bmskbGluZXM1Iiwic3dhcCIsImNvbGxlY3RDb250ZXh0IiwibWVyZ2VkIiwiX2h1bmskbGluZXM2IiwiaW5zZXJ0IiwibGluZSIsInN0YXRlIiwib3BlcmF0aW9uIiwibWF0Y2hDaGFuZ2VzIiwiY2hhbmdlcyIsIm1hdGNoSW5kZXgiLCJjb250ZXh0Q2hhbmdlcyIsImNvbmZsaWN0ZWQiLCJjaGFuZ2UiLCJtYXRjaCIsInN1YnN0ciIsInJlZHVjZSIsInByZXYiLCJyZW1vdmVDaGFuZ2VzIiwiZGVsdGEiLCJjaGFuZ2VDb250ZW50IiwiZm9yRWFjaCIsIm15Q291bnQiLCJ0aGVpckNvdW50Il0sInNvdXJjZXMiOlsiLi4vLi4vc3JjL3BhdGNoL21lcmdlLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7c3RydWN0dXJlZFBhdGNofSBmcm9tICcuL2NyZWF0ZSc7XG5pbXBvcnQge3BhcnNlUGF0Y2h9IGZyb20gJy4vcGFyc2UnO1xuXG5pbXBvcnQge2FycmF5RXF1YWwsIGFycmF5U3RhcnRzV2l0aH0gZnJvbSAnLi4vdXRpbC9hcnJheSc7XG5cbmV4cG9ydCBmdW5jdGlvbiBjYWxjTGluZUNvdW50KGh1bmspIHtcbiAgY29uc3Qge29sZExpbmVzLCBuZXdMaW5lc30gPSBjYWxjT2xkTmV3TGluZUNvdW50KGh1bmsubGluZXMpO1xuXG4gIGlmIChvbGRMaW5lcyAhPT0gdW5kZWZpbmVkKSB7XG4gICAgaHVuay5vbGRMaW5lcyA9IG9sZExpbmVzO1xuICB9IGVsc2Uge1xuICAgIGRlbGV0ZSBodW5rLm9sZExpbmVzO1xuICB9XG5cbiAgaWYgKG5ld0xpbmVzICE9PSB1bmRlZmluZWQpIHtcbiAgICBodW5rLm5ld0xpbmVzID0gbmV3TGluZXM7XG4gIH0gZWxzZSB7XG4gICAgZGVsZXRlIGh1bmsubmV3TGluZXM7XG4gIH1cbn1cblxuZXhwb3J0IGZ1bmN0aW9uIG1lcmdlKG1pbmUsIHRoZWlycywgYmFzZSkge1xuICBtaW5lID0gbG9hZFBhdGNoKG1pbmUsIGJhc2UpO1xuICB0aGVpcnMgPSBsb2FkUGF0Y2godGhlaXJzLCBiYXNlKTtcblxuICBsZXQgcmV0ID0ge307XG5cbiAgLy8gRm9yIGluZGV4IHdlIGp1c3QgbGV0IGl0IHBhc3MgdGhyb3VnaCBhcyBpdCBkb2Vzbid0IGhhdmUgYW55IG5lY2Vzc2FyeSBtZWFuaW5nLlxuICAvLyBMZWF2aW5nIHNhbml0eSBjaGVja3Mgb24gdGhpcyB0byB0aGUgQVBJIGNvbnN1bWVyIHRoYXQgbWF5IGtub3cgbW9yZSBhYm91dCB0aGVcbiAgLy8gbWVhbmluZyBpbiB0aGVpciBvd24gY29udGV4dC5cbiAgaWYgKG1pbmUuaW5kZXggfHwgdGhlaXJzLmluZGV4KSB7XG4gICAgcmV0LmluZGV4ID0gbWluZS5pbmRleCB8fCB0aGVpcnMuaW5kZXg7XG4gIH1cblxuICBpZiAobWluZS5uZXdGaWxlTmFtZSB8fCB0aGVpcnMubmV3RmlsZU5hbWUpIHtcbiAgICBpZiAoIWZpbGVOYW1lQ2hhbmdlZChtaW5lKSkge1xuICAgICAgLy8gTm8gaGVhZGVyIG9yIG5vIGNoYW5nZSBpbiBvdXJzLCB1c2UgdGhlaXJzIChhbmQgb3VycyBpZiB0aGVpcnMgZG9lcyBub3QgZXhpc3QpXG4gICAgICByZXQub2xkRmlsZU5hbWUgPSB0aGVpcnMub2xkRmlsZU5hbWUgfHwgbWluZS5vbGRGaWxlTmFtZTtcbiAgICAgIHJldC5uZXdGaWxlTmFtZSA9IHRoZWlycy5uZXdGaWxlTmFtZSB8fCBtaW5lLm5ld0ZpbGVOYW1lO1xuICAgICAgcmV0Lm9sZEhlYWRlciA9IHRoZWlycy5vbGRIZWFkZXIgfHwgbWluZS5vbGRIZWFkZXI7XG4gICAgICByZXQubmV3SGVhZGVyID0gdGhlaXJzLm5ld0hlYWRlciB8fCBtaW5lLm5ld0hlYWRlcjtcbiAgICB9IGVsc2UgaWYgKCFmaWxlTmFtZUNoYW5nZWQodGhlaXJzKSkge1xuICAgICAgLy8gTm8gaGVhZGVyIG9yIG5vIGNoYW5nZSBpbiB0aGVpcnMsIHVzZSBvdXJzXG4gICAgICByZXQub2xkRmlsZU5hbWUgPSBtaW5lLm9sZEZpbGVOYW1lO1xuICAgICAgcmV0Lm5ld0ZpbGVOYW1lID0gbWluZS5uZXdGaWxlTmFtZTtcbiAgICAgIHJldC5vbGRIZWFkZXIgPSBtaW5lLm9sZEhlYWRlcjtcbiAgICAgIHJldC5uZXdIZWFkZXIgPSBtaW5lLm5ld0hlYWRlcjtcbiAgICB9IGVsc2Uge1xuICAgICAgLy8gQm90aCBjaGFuZ2VkLi4uIGZpZ3VyZSBpdCBvdXRcbiAgICAgIHJldC5vbGRGaWxlTmFtZSA9IHNlbGVjdEZpZWxkKHJldCwgbWluZS5vbGRGaWxlTmFtZSwgdGhlaXJzLm9sZEZpbGVOYW1lKTtcbiAgICAgIHJldC5uZXdGaWxlTmFtZSA9IHNlbGVjdEZpZWxkKHJldCwgbWluZS5uZXdGaWxlTmFtZSwgdGhlaXJzLm5ld0ZpbGVOYW1lKTtcbiAgICAgIHJldC5vbGRIZWFkZXIgPSBzZWxlY3RGaWVsZChyZXQsIG1pbmUub2xkSGVhZGVyLCB0aGVpcnMub2xkSGVhZGVyKTtcbiAgICAgIHJldC5uZXdIZWFkZXIgPSBzZWxlY3RGaWVsZChyZXQsIG1pbmUubmV3SGVhZGVyLCB0aGVpcnMubmV3SGVhZGVyKTtcbiAgICB9XG4gIH1cblxuICByZXQuaHVua3MgPSBbXTtcblxuICBsZXQgbWluZUluZGV4ID0gMCxcbiAgICAgIHRoZWlyc0luZGV4ID0gMCxcbiAgICAgIG1pbmVPZmZzZXQgPSAwLFxuICAgICAgdGhlaXJzT2Zmc2V0ID0gMDtcblxuICB3aGlsZSAobWluZUluZGV4IDwgbWluZS5odW5rcy5sZW5ndGggfHwgdGhlaXJzSW5kZXggPCB0aGVpcnMuaHVua3MubGVuZ3RoKSB7XG4gICAgbGV0IG1pbmVDdXJyZW50ID0gbWluZS5odW5rc1ttaW5lSW5kZXhdIHx8IHtvbGRTdGFydDogSW5maW5pdHl9LFxuICAgICAgICB0aGVpcnNDdXJyZW50ID0gdGhlaXJzLmh1bmtzW3RoZWlyc0luZGV4XSB8fCB7b2xkU3RhcnQ6IEluZmluaXR5fTtcblxuICAgIGlmIChodW5rQmVmb3JlKG1pbmVDdXJyZW50LCB0aGVpcnNDdXJyZW50KSkge1xuICAgICAgLy8gVGhpcyBwYXRjaCBkb2VzIG5vdCBvdmVybGFwIHdpdGggYW55IG9mIHRoZSBvdGhlcnMsIHlheS5cbiAgICAgIHJldC5odW5rcy5wdXNoKGNsb25lSHVuayhtaW5lQ3VycmVudCwgbWluZU9mZnNldCkpO1xuICAgICAgbWluZUluZGV4Kys7XG4gICAgICB0aGVpcnNPZmZzZXQgKz0gbWluZUN1cnJlbnQubmV3TGluZXMgLSBtaW5lQ3VycmVudC5vbGRMaW5lcztcbiAgICB9IGVsc2UgaWYgKGh1bmtCZWZvcmUodGhlaXJzQ3VycmVudCwgbWluZUN1cnJlbnQpKSB7XG4gICAgICAvLyBUaGlzIHBhdGNoIGRvZXMgbm90IG92ZXJsYXAgd2l0aCBhbnkgb2YgdGhlIG90aGVycywgeWF5LlxuICAgICAgcmV0Lmh1bmtzLnB1c2goY2xvbmVIdW5rKHRoZWlyc0N1cnJlbnQsIHRoZWlyc09mZnNldCkpO1xuICAgICAgdGhlaXJzSW5kZXgrKztcbiAgICAgIG1pbmVPZmZzZXQgKz0gdGhlaXJzQ3VycmVudC5uZXdMaW5lcyAtIHRoZWlyc0N1cnJlbnQub2xkTGluZXM7XG4gICAgfSBlbHNlIHtcbiAgICAgIC8vIE92ZXJsYXAsIG1lcmdlIGFzIGJlc3Qgd2UgY2FuXG4gICAgICBsZXQgbWVyZ2VkSHVuayA9IHtcbiAgICAgICAgb2xkU3RhcnQ6IE1hdGgubWluKG1pbmVDdXJyZW50Lm9sZFN0YXJ0LCB0aGVpcnNDdXJyZW50Lm9sZFN0YXJ0KSxcbiAgICAgICAgb2xkTGluZXM6IDAsXG4gICAgICAgIG5ld1N0YXJ0OiBNYXRoLm1pbihtaW5lQ3VycmVudC5uZXdTdGFydCArIG1pbmVPZmZzZXQsIHRoZWlyc0N1cnJlbnQub2xkU3RhcnQgKyB0aGVpcnNPZmZzZXQpLFxuICAgICAgICBuZXdMaW5lczogMCxcbiAgICAgICAgbGluZXM6IFtdXG4gICAgICB9O1xuICAgICAgbWVyZ2VMaW5lcyhtZXJnZWRIdW5rLCBtaW5lQ3VycmVudC5vbGRTdGFydCwgbWluZUN1cnJlbnQubGluZXMsIHRoZWlyc0N1cnJlbnQub2xkU3RhcnQsIHRoZWlyc0N1cnJlbnQubGluZXMpO1xuICAgICAgdGhlaXJzSW5kZXgrKztcbiAgICAgIG1pbmVJbmRleCsrO1xuXG4gICAgICByZXQuaHVua3MucHVzaChtZXJnZWRIdW5rKTtcbiAgICB9XG4gIH1cblxuICByZXR1cm4gcmV0O1xufVxuXG5mdW5jdGlvbiBsb2FkUGF0Y2gocGFyYW0sIGJhc2UpIHtcbiAgaWYgKHR5cGVvZiBwYXJhbSA9PT0gJ3N0cmluZycpIHtcbiAgICBpZiAoKC9eQEAvbSkudGVzdChwYXJhbSkgfHwgKCgvXkluZGV4Oi9tKS50ZXN0KHBhcmFtKSkpIHtcbiAgICAgIHJldHVybiBwYXJzZVBhdGNoKHBhcmFtKVswXTtcbiAgICB9XG5cbiAgICBpZiAoIWJhc2UpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignTXVzdCBwcm92aWRlIGEgYmFzZSByZWZlcmVuY2Ugb3IgcGFzcyBpbiBhIHBhdGNoJyk7XG4gICAgfVxuICAgIHJldHVybiBzdHJ1Y3R1cmVkUGF0Y2godW5kZWZpbmVkLCB1bmRlZmluZWQsIGJhc2UsIHBhcmFtKTtcbiAgfVxuXG4gIHJldHVybiBwYXJhbTtcbn1cblxuZnVuY3Rpb24gZmlsZU5hbWVDaGFuZ2VkKHBhdGNoKSB7XG4gIHJldHVybiBwYXRjaC5uZXdGaWxlTmFtZSAmJiBwYXRjaC5uZXdGaWxlTmFtZSAhPT0gcGF0Y2gub2xkRmlsZU5hbWU7XG59XG5cbmZ1bmN0aW9uIHNlbGVjdEZpZWxkKGluZGV4LCBtaW5lLCB0aGVpcnMpIHtcbiAgaWYgKG1pbmUgPT09IHRoZWlycykge1xuICAgIHJldHVybiBtaW5lO1xuICB9IGVsc2Uge1xuICAgIGluZGV4LmNvbmZsaWN0ID0gdHJ1ZTtcbiAgICByZXR1cm4ge21pbmUsIHRoZWlyc307XG4gIH1cbn1cblxuZnVuY3Rpb24gaHVua0JlZm9yZSh0ZXN0LCBjaGVjaykge1xuICByZXR1cm4gdGVzdC5vbGRTdGFydCA8IGNoZWNrLm9sZFN0YXJ0XG4gICAgJiYgKHRlc3Qub2xkU3RhcnQgKyB0ZXN0Lm9sZExpbmVzKSA8IGNoZWNrLm9sZFN0YXJ0O1xufVxuXG5mdW5jdGlvbiBjbG9uZUh1bmsoaHVuaywgb2Zmc2V0KSB7XG4gIHJldHVybiB7XG4gICAgb2xkU3RhcnQ6IGh1bmsub2xkU3RhcnQsIG9sZExpbmVzOiBodW5rLm9sZExpbmVzLFxuICAgIG5ld1N0YXJ0OiBodW5rLm5ld1N0YXJ0ICsgb2Zmc2V0LCBuZXdMaW5lczogaHVuay5uZXdMaW5lcyxcbiAgICBsaW5lczogaHVuay5saW5lc1xuICB9O1xufVxuXG5mdW5jdGlvbiBtZXJnZUxpbmVzKGh1bmssIG1pbmVPZmZzZXQsIG1pbmVMaW5lcywgdGhlaXJPZmZzZXQsIHRoZWlyTGluZXMpIHtcbiAgLy8gVGhpcyB3aWxsIGdlbmVyYWxseSByZXN1bHQgaW4gYSBjb25mbGljdGVkIGh1bmssIGJ1dCB0aGVyZSBhcmUgY2FzZXMgd2hlcmUgdGhlIGNvbnRleHRcbiAgLy8gaXMgdGhlIG9ubHkgb3ZlcmxhcCB3aGVyZSB3ZSBjYW4gc3VjY2Vzc2Z1bGx5IG1lcmdlIHRoZSBjb250ZW50IGhlcmUuXG4gIGxldCBtaW5lID0ge29mZnNldDogbWluZU9mZnNldCwgbGluZXM6IG1pbmVMaW5lcywgaW5kZXg6IDB9LFxuICAgICAgdGhlaXIgPSB7b2Zmc2V0OiB0aGVpck9mZnNldCwgbGluZXM6IHRoZWlyTGluZXMsIGluZGV4OiAwfTtcblxuICAvLyBIYW5kbGUgYW55IGxlYWRpbmcgY29udGVudFxuICBpbnNlcnRMZWFkaW5nKGh1bmssIG1pbmUsIHRoZWlyKTtcbiAgaW5zZXJ0TGVhZGluZyhodW5rLCB0aGVpciwgbWluZSk7XG5cbiAgLy8gTm93IGluIHRoZSBvdmVybGFwIGNvbnRlbnQuIFNjYW4gdGhyb3VnaCBhbmQgc2VsZWN0IHRoZSBiZXN0IGNoYW5nZXMgZnJvbSBlYWNoLlxuICB3aGlsZSAobWluZS5pbmRleCA8IG1pbmUubGluZXMubGVuZ3RoICYmIHRoZWlyLmluZGV4IDwgdGhlaXIubGluZXMubGVuZ3RoKSB7XG4gICAgbGV0IG1pbmVDdXJyZW50ID0gbWluZS5saW5lc1ttaW5lLmluZGV4XSxcbiAgICAgICAgdGhlaXJDdXJyZW50ID0gdGhlaXIubGluZXNbdGhlaXIuaW5kZXhdO1xuXG4gICAgaWYgKChtaW5lQ3VycmVudFswXSA9PT0gJy0nIHx8IG1pbmVDdXJyZW50WzBdID09PSAnKycpXG4gICAgICAgICYmICh0aGVpckN1cnJlbnRbMF0gPT09ICctJyB8fCB0aGVpckN1cnJlbnRbMF0gPT09ICcrJykpIHtcbiAgICAgIC8vIEJvdGggbW9kaWZpZWQgLi4uXG4gICAgICBtdXR1YWxDaGFuZ2UoaHVuaywgbWluZSwgdGhlaXIpO1xuICAgIH0gZWxzZSBpZiAobWluZUN1cnJlbnRbMF0gPT09ICcrJyAmJiB0aGVpckN1cnJlbnRbMF0gPT09ICcgJykge1xuICAgICAgLy8gTWluZSBpbnNlcnRlZFxuICAgICAgaHVuay5saW5lcy5wdXNoKC4uLiBjb2xsZWN0Q2hhbmdlKG1pbmUpKTtcbiAgICB9IGVsc2UgaWYgKHRoZWlyQ3VycmVudFswXSA9PT0gJysnICYmIG1pbmVDdXJyZW50WzBdID09PSAnICcpIHtcbiAgICAgIC8vIFRoZWlycyBpbnNlcnRlZFxuICAgICAgaHVuay5saW5lcy5wdXNoKC4uLiBjb2xsZWN0Q2hhbmdlKHRoZWlyKSk7XG4gICAgfSBlbHNlIGlmIChtaW5lQ3VycmVudFswXSA9PT0gJy0nICYmIHRoZWlyQ3VycmVudFswXSA9PT0gJyAnKSB7XG4gICAgICAvLyBNaW5lIHJlbW92ZWQgb3IgZWRpdGVkXG4gICAgICByZW1vdmFsKGh1bmssIG1pbmUsIHRoZWlyKTtcbiAgICB9IGVsc2UgaWYgKHRoZWlyQ3VycmVudFswXSA9PT0gJy0nICYmIG1pbmVDdXJyZW50WzBdID09PSAnICcpIHtcbiAgICAgIC8vIFRoZWlyIHJlbW92ZWQgb3IgZWRpdGVkXG4gICAgICByZW1vdmFsKGh1bmssIHRoZWlyLCBtaW5lLCB0cnVlKTtcbiAgICB9IGVsc2UgaWYgKG1pbmVDdXJyZW50ID09PSB0aGVpckN1cnJlbnQpIHtcbiAgICAgIC8vIENvbnRleHQgaWRlbnRpdHlcbiAgICAgIGh1bmsubGluZXMucHVzaChtaW5lQ3VycmVudCk7XG4gICAgICBtaW5lLmluZGV4Kys7XG4gICAgICB0aGVpci5pbmRleCsrO1xuICAgIH0gZWxzZSB7XG4gICAgICAvLyBDb250ZXh0IG1pc21hdGNoXG4gICAgICBjb25mbGljdChodW5rLCBjb2xsZWN0Q2hhbmdlKG1pbmUpLCBjb2xsZWN0Q2hhbmdlKHRoZWlyKSk7XG4gICAgfVxuICB9XG5cbiAgLy8gTm93IHB1c2ggYW55dGhpbmcgdGhhdCBtYXkgYmUgcmVtYWluaW5nXG4gIGluc2VydFRyYWlsaW5nKGh1bmssIG1pbmUpO1xuICBpbnNlcnRUcmFpbGluZyhodW5rLCB0aGVpcik7XG5cbiAgY2FsY0xpbmVDb3VudChodW5rKTtcbn1cblxuZnVuY3Rpb24gbXV0dWFsQ2hhbmdlKGh1bmssIG1pbmUsIHRoZWlyKSB7XG4gIGxldCBteUNoYW5nZXMgPSBjb2xsZWN0Q2hhbmdlKG1pbmUpLFxuICAgICAgdGhlaXJDaGFuZ2VzID0gY29sbGVjdENoYW5nZSh0aGVpcik7XG5cbiAgaWYgKGFsbFJlbW92ZXMobXlDaGFuZ2VzKSAmJiBhbGxSZW1vdmVzKHRoZWlyQ2hhbmdlcykpIHtcbiAgICAvLyBTcGVjaWFsIGNhc2UgZm9yIHJlbW92ZSBjaGFuZ2VzIHRoYXQgYXJlIHN1cGVyc2V0cyBvZiBvbmUgYW5vdGhlclxuICAgIGlmIChhcnJheVN0YXJ0c1dpdGgobXlDaGFuZ2VzLCB0aGVpckNoYW5nZXMpXG4gICAgICAgICYmIHNraXBSZW1vdmVTdXBlcnNldCh0aGVpciwgbXlDaGFuZ2VzLCBteUNoYW5nZXMubGVuZ3RoIC0gdGhlaXJDaGFuZ2VzLmxlbmd0aCkpIHtcbiAgICAgIGh1bmsubGluZXMucHVzaCguLi4gbXlDaGFuZ2VzKTtcbiAgICAgIHJldHVybjtcbiAgICB9IGVsc2UgaWYgKGFycmF5U3RhcnRzV2l0aCh0aGVpckNoYW5nZXMsIG15Q2hhbmdlcylcbiAgICAgICAgJiYgc2tpcFJlbW92ZVN1cGVyc2V0KG1pbmUsIHRoZWlyQ2hhbmdlcywgdGhlaXJDaGFuZ2VzLmxlbmd0aCAtIG15Q2hhbmdlcy5sZW5ndGgpKSB7XG4gICAgICBodW5rLmxpbmVzLnB1c2goLi4uIHRoZWlyQ2hhbmdlcyk7XG4gICAgICByZXR1cm47XG4gICAgfVxuICB9IGVsc2UgaWYgKGFycmF5RXF1YWwobXlDaGFuZ2VzLCB0aGVpckNoYW5nZXMpKSB7XG4gICAgaHVuay5saW5lcy5wdXNoKC4uLiBteUNoYW5nZXMpO1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGNvbmZsaWN0KGh1bmssIG15Q2hhbmdlcywgdGhlaXJDaGFuZ2VzKTtcbn1cblxuZnVuY3Rpb24gcmVtb3ZhbChodW5rLCBtaW5lLCB0aGVpciwgc3dhcCkge1xuICBsZXQgbXlDaGFuZ2VzID0gY29sbGVjdENoYW5nZShtaW5lKSxcbiAgICAgIHRoZWlyQ2hhbmdlcyA9IGNvbGxlY3RDb250ZXh0KHRoZWlyLCBteUNoYW5nZXMpO1xuICBpZiAodGhlaXJDaGFuZ2VzLm1lcmdlZCkge1xuICAgIGh1bmsubGluZXMucHVzaCguLi4gdGhlaXJDaGFuZ2VzLm1lcmdlZCk7XG4gIH0gZWxzZSB7XG4gICAgY29uZmxpY3QoaHVuaywgc3dhcCA/IHRoZWlyQ2hhbmdlcyA6IG15Q2hhbmdlcywgc3dhcCA/IG15Q2hhbmdlcyA6IHRoZWlyQ2hhbmdlcyk7XG4gIH1cbn1cblxuZnVuY3Rpb24gY29uZmxpY3QoaHVuaywgbWluZSwgdGhlaXIpIHtcbiAgaHVuay5jb25mbGljdCA9IHRydWU7XG4gIGh1bmsubGluZXMucHVzaCh7XG4gICAgY29uZmxpY3Q6IHRydWUsXG4gICAgbWluZTogbWluZSxcbiAgICB0aGVpcnM6IHRoZWlyXG4gIH0pO1xufVxuXG5mdW5jdGlvbiBpbnNlcnRMZWFkaW5nKGh1bmssIGluc2VydCwgdGhlaXIpIHtcbiAgd2hpbGUgKGluc2VydC5vZmZzZXQgPCB0aGVpci5vZmZzZXQgJiYgaW5zZXJ0LmluZGV4IDwgaW5zZXJ0LmxpbmVzLmxlbmd0aCkge1xuICAgIGxldCBsaW5lID0gaW5zZXJ0LmxpbmVzW2luc2VydC5pbmRleCsrXTtcbiAgICBodW5rLmxpbmVzLnB1c2gobGluZSk7XG4gICAgaW5zZXJ0Lm9mZnNldCsrO1xuICB9XG59XG5mdW5jdGlvbiBpbnNlcnRUcmFpbGluZyhodW5rLCBpbnNlcnQpIHtcbiAgd2hpbGUgKGluc2VydC5pbmRleCA8IGluc2VydC5saW5lcy5sZW5ndGgpIHtcbiAgICBsZXQgbGluZSA9IGluc2VydC5saW5lc1tpbnNlcnQuaW5kZXgrK107XG4gICAgaHVuay5saW5lcy5wdXNoKGxpbmUpO1xuICB9XG59XG5cbmZ1bmN0aW9uIGNvbGxlY3RDaGFuZ2Uoc3RhdGUpIHtcbiAgbGV0IHJldCA9IFtdLFxuICAgICAgb3BlcmF0aW9uID0gc3RhdGUubGluZXNbc3RhdGUuaW5kZXhdWzBdO1xuICB3aGlsZSAoc3RhdGUuaW5kZXggPCBzdGF0ZS5saW5lcy5sZW5ndGgpIHtcbiAgICBsZXQgbGluZSA9IHN0YXRlLmxpbmVzW3N0YXRlLmluZGV4XTtcblxuICAgIC8vIEdyb3VwIGFkZGl0aW9ucyB0aGF0IGFyZSBpbW1lZGlhdGVseSBhZnRlciBzdWJ0cmFjdGlvbnMgYW5kIHRyZWF0IHRoZW0gYXMgb25lIFwiYXRvbWljXCIgbW9kaWZ5IGNoYW5nZS5cbiAgICBpZiAob3BlcmF0aW9uID09PSAnLScgJiYgbGluZVswXSA9PT0gJysnKSB7XG4gICAgICBvcGVyYXRpb24gPSAnKyc7XG4gICAgfVxuXG4gICAgaWYgKG9wZXJhdGlvbiA9PT0gbGluZVswXSkge1xuICAgICAgcmV0LnB1c2gobGluZSk7XG4gICAgICBzdGF0ZS5pbmRleCsrO1xuICAgIH0gZWxzZSB7XG4gICAgICBicmVhaztcbiAgICB9XG4gIH1cblxuICByZXR1cm4gcmV0O1xufVxuZnVuY3Rpb24gY29sbGVjdENvbnRleHQoc3RhdGUsIG1hdGNoQ2hhbmdlcykge1xuICBsZXQgY2hhbmdlcyA9IFtdLFxuICAgICAgbWVyZ2VkID0gW10sXG4gICAgICBtYXRjaEluZGV4ID0gMCxcbiAgICAgIGNvbnRleHRDaGFuZ2VzID0gZmFsc2UsXG4gICAgICBjb25mbGljdGVkID0gZmFsc2U7XG4gIHdoaWxlIChtYXRjaEluZGV4IDwgbWF0Y2hDaGFuZ2VzLmxlbmd0aFxuICAgICAgICAmJiBzdGF0ZS5pbmRleCA8IHN0YXRlLmxpbmVzLmxlbmd0aCkge1xuICAgIGxldCBjaGFuZ2UgPSBzdGF0ZS5saW5lc1tzdGF0ZS5pbmRleF0sXG4gICAgICAgIG1hdGNoID0gbWF0Y2hDaGFuZ2VzW21hdGNoSW5kZXhdO1xuXG4gICAgLy8gT25jZSB3ZSd2ZSBoaXQgb3VyIGFkZCwgdGhlbiB3ZSBhcmUgZG9uZVxuICAgIGlmIChtYXRjaFswXSA9PT0gJysnKSB7XG4gICAgICBicmVhaztcbiAgICB9XG5cbiAgICBjb250ZXh0Q2hhbmdlcyA9IGNvbnRleHRDaGFuZ2VzIHx8IGNoYW5nZVswXSAhPT0gJyAnO1xuXG4gICAgbWVyZ2VkLnB1c2gobWF0Y2gpO1xuICAgIG1hdGNoSW5kZXgrKztcblxuICAgIC8vIENvbnN1bWUgYW55IGFkZGl0aW9ucyBpbiB0aGUgb3RoZXIgYmxvY2sgYXMgYSBjb25mbGljdCB0byBhdHRlbXB0XG4gICAgLy8gdG8gcHVsbCBpbiB0aGUgcmVtYWluaW5nIGNvbnRleHQgYWZ0ZXIgdGhpc1xuICAgIGlmIChjaGFuZ2VbMF0gPT09ICcrJykge1xuICAgICAgY29uZmxpY3RlZCA9IHRydWU7XG5cbiAgICAgIHdoaWxlIChjaGFuZ2VbMF0gPT09ICcrJykge1xuICAgICAgICBjaGFuZ2VzLnB1c2goY2hhbmdlKTtcbiAgICAgICAgY2hhbmdlID0gc3RhdGUubGluZXNbKytzdGF0ZS5pbmRleF07XG4gICAgICB9XG4gICAgfVxuXG4gICAgaWYgKG1hdGNoLnN1YnN0cigxKSA9PT0gY2hhbmdlLnN1YnN0cigxKSkge1xuICAgICAgY2hhbmdlcy5wdXNoKGNoYW5nZSk7XG4gICAgICBzdGF0ZS5pbmRleCsrO1xuICAgIH0gZWxzZSB7XG4gICAgICBjb25mbGljdGVkID0gdHJ1ZTtcbiAgICB9XG4gIH1cblxuICBpZiAoKG1hdGNoQ2hhbmdlc1ttYXRjaEluZGV4XSB8fCAnJylbMF0gPT09ICcrJ1xuICAgICAgJiYgY29udGV4dENoYW5nZXMpIHtcbiAgICBjb25mbGljdGVkID0gdHJ1ZTtcbiAgfVxuXG4gIGlmIChjb25mbGljdGVkKSB7XG4gICAgcmV0dXJuIGNoYW5nZXM7XG4gIH1cblxuICB3aGlsZSAobWF0Y2hJbmRleCA8IG1hdGNoQ2hhbmdlcy5sZW5ndGgpIHtcbiAgICBtZXJnZWQucHVzaChtYXRjaENoYW5nZXNbbWF0Y2hJbmRleCsrXSk7XG4gIH1cblxuICByZXR1cm4ge1xuICAgIG1lcmdlZCxcbiAgICBjaGFuZ2VzXG4gIH07XG59XG5cbmZ1bmN0aW9uIGFsbFJlbW92ZXMoY2hhbmdlcykge1xuICByZXR1cm4gY2hhbmdlcy5yZWR1Y2UoZnVuY3Rpb24ocHJldiwgY2hhbmdlKSB7XG4gICAgcmV0dXJuIHByZXYgJiYgY2hhbmdlWzBdID09PSAnLSc7XG4gIH0sIHRydWUpO1xufVxuZnVuY3Rpb24gc2tpcFJlbW92ZVN1cGVyc2V0KHN0YXRlLCByZW1vdmVDaGFuZ2VzLCBkZWx0YSkge1xuICBmb3IgKGxldCBpID0gMDsgaSA8IGRlbHRhOyBpKyspIHtcbiAgICBsZXQgY2hhbmdlQ29udGVudCA9IHJlbW92ZUNoYW5nZXNbcmVtb3ZlQ2hhbmdlcy5sZW5ndGggLSBkZWx0YSArIGldLnN1YnN0cigxKTtcbiAgICBpZiAoc3RhdGUubGluZXNbc3RhdGUuaW5kZXggKyBpXSAhPT0gJyAnICsgY2hhbmdlQ29udGVudCkge1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfVxuXG4gIHN0YXRlLmluZGV4ICs9IGRlbHRhO1xuICByZXR1cm4gdHJ1ZTtcbn1cblxuZnVuY3Rpb24gY2FsY09sZE5ld0xpbmVDb3VudChsaW5lcykge1xuICBsZXQgb2xkTGluZXMgPSAwO1xuICBsZXQgbmV3TGluZXMgPSAwO1xuXG4gIGxpbmVzLmZvckVhY2goZnVuY3Rpb24obGluZSkge1xuICAgIGlmICh0eXBlb2YgbGluZSAhPT0gJ3N0cmluZycpIHtcbiAgICAgIGxldCBteUNvdW50ID0gY2FsY09sZE5ld0xpbmVDb3VudChsaW5lLm1pbmUpO1xuICAgICAgbGV0IHRoZWlyQ291bnQgPSBjYWxjT2xkTmV3TGluZUNvdW50KGxpbmUudGhlaXJzKTtcblxuICAgICAgaWYgKG9sZExpbmVzICE9PSB1bmRlZmluZWQpIHtcbiAgICAgICAgaWYgKG15Q291bnQub2xkTGluZXMgPT09IHRoZWlyQ291bnQub2xkTGluZXMpIHtcbiAgICAgICAgICBvbGRMaW5lcyArPSBteUNvdW50Lm9sZExpbmVzO1xuICAgICAgICB9IGVsc2Uge1xuICAgICAgICAgIG9sZExpbmVzID0gdW5kZWZpbmVkO1xuICAgICAgICB9XG4gICAgICB9XG5cbiAgICAgIGlmIChuZXdMaW5lcyAhPT0gdW5kZWZpbmVkKSB7XG4gICAgICAgIGlmIChteUNvdW50Lm5ld0xpbmVzID09PSB0aGVpckNvdW50Lm5ld0xpbmVzKSB7XG4gICAgICAgICAgbmV3TGluZXMgKz0gbXlDb3VudC5uZXdMaW5lcztcbiAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICBuZXdMaW5lcyA9IHVuZGVmaW5lZDtcbiAgICAgICAgfVxuICAgICAgfVxuICAgIH0gZWxzZSB7XG4gICAgICBpZiAobmV3TGluZXMgIT09IHVuZGVmaW5lZCAmJiAobGluZVswXSA9PT0gJysnIHx8IGxpbmVbMF0gPT09ICcgJykpIHtcbiAgICAgICAgbmV3TGluZXMrKztcbiAgICAgIH1cbiAgICAgIGlmIChvbGRMaW5lcyAhPT0gdW5kZWZpbmVkICYmIChsaW5lWzBdID09PSAnLScgfHwgbGluZVswXSA9PT0gJyAnKSkge1xuICAgICAgICBvbGRMaW5lcysrO1xuICAgICAgfVxuICAgIH1cbiAgfSk7XG5cbiAgcmV0dXJuIHtvbGRMaW5lcywgbmV3TGluZXN9O1xufVxuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7QUFBQTtBQUFBO0FBQUFBLE9BQUEsR0FBQUMsT0FBQTtBQUFBO0FBQUE7QUFDQTtBQUFBO0FBQUFDLE1BQUEsR0FBQUQsT0FBQTtBQUFBO0FBQUE7QUFFQTtBQUFBO0FBQUFFLE1BQUEsR0FBQUYsT0FBQTtBQUFBO0FBQUE7QUFBMEQsbUNBQUFHLG1CQUFBQyxHQUFBLFdBQUFDLGtCQUFBLENBQUFELEdBQUEsS0FBQUUsZ0JBQUEsQ0FBQUYsR0FBQSxLQUFBRywyQkFBQSxDQUFBSCxHQUFBLEtBQUFJLGtCQUFBO0FBQUEsU0FBQUEsbUJBQUEsY0FBQUMsU0FBQTtBQUFBLFNBQUFGLDRCQUFBRyxDQUFBLEVBQUFDLE1BQUEsU0FBQUQsQ0FBQSxxQkFBQUEsQ0FBQSxzQkFBQUUsaUJBQUEsQ0FBQUYsQ0FBQSxFQUFBQyxNQUFBLE9BQUFFLENBQUEsR0FBQUMsTUFBQSxDQUFBQyxTQUFBLENBQUFDLFFBQUEsQ0FBQUMsSUFBQSxDQUFBUCxDQUFBLEVBQUFRLEtBQUEsYUFBQUwsQ0FBQSxpQkFBQUgsQ0FBQSxDQUFBUyxXQUFBLEVBQUFOLENBQUEsR0FBQUgsQ0FBQSxDQUFBUyxXQUFBLENBQUFDLElBQUEsTUFBQVAsQ0FBQSxjQUFBQSxDQUFBLG1CQUFBUSxLQUFBLENBQUFDLElBQUEsQ0FBQVosQ0FBQSxPQUFBRyxDQUFBLCtEQUFBVSxJQUFBLENB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
+
+
+/***/ }),
+
+/***/ 6997:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.parsePatch = parsePatch;
+/*istanbul ignore end*/
+function parsePatch(uniDiff) {
+  var diffstr = uniDiff.split(/\n/),
+    list = [],
+    i = 0;
+  function parseIndex() {
+    var index = {};
+    list.push(index);
+
+    // Parse diff metadata
+    while (i < diffstr.length) {
+      var line = diffstr[i];
+
+      // File header found, end parsing diff metadata
+      if (/^(\-\-\-|\+\+\+|@@)\s/.test(line)) {
+        break;
+      }
+
+      // Diff index
+      var header = /^(?:Index:|diff(?: -r \w+)+)\s+(.+?)\s*$/.exec(line);
+      if (header) {
+        index.index = header[1];
+      }
+      i++;
+    }
+
+    // Parse file headers if they are defined. Unified diff requires them, but
+    // there's no technical issues to have an isolated hunk without file header
+    parseFileHeader(index);
+    parseFileHeader(index);
+
+    // Parse hunks
+    index.hunks = [];
+    while (i < diffstr.length) {
+      var _line = diffstr[i];
+      if (/^(Index:\s|diff\s|\-\-\-\s|\+\+\+\s|===================================================================)/.test(_line)) {
+        break;
+      } else if (/^@@/.test(_line)) {
+        index.hunks.push(parseHunk());
+      } else if (_line) {
+        throw new Error('Unknown line ' + (i + 1) + ' ' + JSON.stringify(_line));
+      } else {
+        i++;
+      }
+    }
+  }
+
+  // Parses the --- and +++ headers, if none are found, no lines
+  // are consumed.
+  function parseFileHeader(index) {
+    var fileHeader = /^(---|\+\+\+)\s+(.*)\r?$/.exec(diffstr[i]);
+    if (fileHeader) {
+      var keyPrefix = fileHeader[1] === '---' ? 'old' : 'new';
+      var data = fileHeader[2].split('\t', 2);
+      var fileName = data[0].replace(/\\\\/g, '\\');
+      if (/^".*"$/.test(fileName)) {
+        fileName = fileName.substr(1, fileName.length - 2);
+      }
+      index[keyPrefix + 'FileName'] = fileName;
+      index[keyPrefix + 'Header'] = (data[1] || '').trim();
+      i++;
+    }
+  }
+
+  // Parses a hunk
+  // This assumes that we are at the start of a hunk.
+  function parseHunk() {
+    var chunkHeaderIndex = i,
+      chunkHeaderLine = diffstr[i++],
+      chunkHeader = chunkHeaderLine.split(/@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/);
+    var hunk = {
+      oldStart: +chunkHeader[1],
+      oldLines: typeof chunkHeader[2] === 'undefined' ? 1 : +chunkHeader[2],
+      newStart: +chunkHeader[3],
+      newLines: typeof chunkHeader[4] === 'undefined' ? 1 : +chunkHeader[4],
+      lines: []
+    };
+
+    // Unified Diff Format quirk: If the chunk size is 0,
+    // the first number is one lower than one would expect.
+    // https://www.artima.com/weblogs/viewpost.jsp?thread=164293
+    if (hunk.oldLines === 0) {
+      hunk.oldStart += 1;
+    }
+    if (hunk.newLines === 0) {
+      hunk.newStart += 1;
+    }
+    var addCount = 0,
+      removeCount = 0;
+    for (; i < diffstr.length && (removeCount < hunk.oldLines || addCount < hunk.newLines ||
+    /*istanbul ignore start*/
+    (_diffstr$i =
+    /*istanbul ignore end*/
+    diffstr[i]) !== null && _diffstr$i !== void 0 &&
+    /*istanbul ignore start*/
+    _diffstr$i
+    /*istanbul ignore end*/
+    .startsWith('\\')); i++) {
+      /*istanbul ignore start*/
+      var _diffstr$i;
+      /*istanbul ignore end*/
+      var operation = diffstr[i].length == 0 && i != diffstr.length - 1 ? ' ' : diffstr[i][0];
+      if (operation === '+' || operation === '-' || operation === ' ' || operation === '\\') {
+        hunk.lines.push(diffstr[i]);
+        if (operation === '+') {
+          addCount++;
+        } else if (operation === '-') {
+          removeCount++;
+        } else if (operation === ' ') {
+          addCount++;
+          removeCount++;
+        }
+      } else {
+        throw new Error(
+        /*istanbul ignore start*/
+        "Hunk at line ".concat(
+        /*istanbul ignore end*/
+        chunkHeaderIndex + 1, " contained invalid line ").concat(diffstr[i]));
+      }
+    }
+
+    // Handle the empty block count case
+    if (!addCount && hunk.newLines === 1) {
+      hunk.newLines = 0;
+    }
+    if (!removeCount && hunk.oldLines === 1) {
+      hunk.oldLines = 0;
+    }
+
+    // Perform sanity checking
+    if (addCount !== hunk.newLines) {
+      throw new Error('Added line count did not match for hunk at line ' + (chunkHeaderIndex + 1));
+    }
+    if (removeCount !== hunk.oldLines) {
+      throw new Error('Removed line count did not match for hunk at line ' + (chunkHeaderIndex + 1));
+    }
+    return hunk;
+  }
+  while (i < diffstr.length) {
+    parseIndex();
+  }
+  return list;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJwYXJzZVBhdGNoIiwidW5pRGlmZiIsImRpZmZzdHIiLCJzcGxpdCIsImxpc3QiLCJpIiwicGFyc2VJbmRleCIsImluZGV4IiwicHVzaCIsImxlbmd0aCIsImxpbmUiLCJ0ZXN0IiwiaGVhZGVyIiwiZXhlYyIsInBhcnNlRmlsZUhlYWRlciIsImh1bmtzIiwicGFyc2VIdW5rIiwiRXJyb3IiLCJKU09OIiwic3RyaW5naWZ5IiwiZmlsZUhlYWRlciIsImtleVByZWZpeCIsImRhdGEiLCJmaWxlTmFtZSIsInJlcGxhY2UiLCJzdWJzdHIiLCJ0cmltIiwiY2h1bmtIZWFkZXJJbmRleCIsImNodW5rSGVhZGVyTGluZSIsImNodW5rSGVhZGVyIiwiaHVuayIsIm9sZFN0YXJ0Iiwib2xkTGluZXMiLCJuZXdTdGFydCIsIm5ld0xpbmVzIiwibGluZXMiLCJhZGRDb3VudCIsInJlbW92ZUNvdW50IiwiX2RpZmZzdHIkaSIsInN0YXJ0c1dpdGgiLCJvcGVyYXRpb24iLCJjb25jYXQiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvcGF0Y2gvcGFyc2UuanMiXSwic291cmNlc0NvbnRlbnQiOlsiZXhwb3J0IGZ1bmN0aW9uIHBhcnNlUGF0Y2godW5pRGlmZikge1xuICBsZXQgZGlmZnN0ciA9IHVuaURpZmYuc3BsaXQoL1xcbi8pLFxuICAgICAgbGlzdCA9IFtdLFxuICAgICAgaSA9IDA7XG5cbiAgZnVuY3Rpb24gcGFyc2VJbmRleCgpIHtcbiAgICBsZXQgaW5kZXggPSB7fTtcbiAgICBsaXN0LnB1c2goaW5kZXgpO1xuXG4gICAgLy8gUGFyc2UgZGlmZiBtZXRhZGF0YVxuICAgIHdoaWxlIChpIDwgZGlmZnN0ci5sZW5ndGgpIHtcbiAgICAgIGxldCBsaW5lID0gZGlmZnN0cltpXTtcblxuICAgICAgLy8gRmlsZSBoZWFkZXIgZm91bmQsIGVuZCBwYXJzaW5nIGRpZmYgbWV0YWRhdGFcbiAgICAgIGlmICgoL14oXFwtXFwtXFwtfFxcK1xcK1xcK3xAQClcXHMvKS50ZXN0KGxpbmUpKSB7XG4gICAgICAgIGJyZWFrO1xuICAgICAgfVxuXG4gICAgICAvLyBEaWZmIGluZGV4XG4gICAgICBsZXQgaGVhZGVyID0gKC9eKD86SW5kZXg6fGRpZmYoPzogLXIgXFx3KykrKVxccysoLis/KVxccyokLykuZXhlYyhsaW5lKTtcbiAgICAgIGlmIChoZWFkZXIpIHtcbiAgICAgICAgaW5kZXguaW5kZXggPSBoZWFkZXJbMV07XG4gICAgICB9XG5cbiAgICAgIGkrKztcbiAgICB9XG5cbiAgICAvLyBQYXJzZSBmaWxlIGhlYWRlcnMgaWYgdGhleSBhcmUgZGVmaW5lZC4gVW5pZmllZCBkaWZmIHJlcXVpcmVzIHRoZW0sIGJ1dFxuICAgIC8vIHRoZXJlJ3Mgbm8gdGVjaG5pY2FsIGlzc3VlcyB0byBoYXZlIGFuIGlzb2xhdGVkIGh1bmsgd2l0aG91dCBmaWxlIGhlYWRlclxuICAgIHBhcnNlRmlsZUhlYWRlcihpbmRleCk7XG4gICAgcGFyc2VGaWxlSGVhZGVyKGluZGV4KTtcblxuICAgIC8vIFBhcnNlIGh1bmtzXG4gICAgaW5kZXguaHVua3MgPSBbXTtcblxuICAgIHdoaWxlIChpIDwgZGlmZnN0ci5sZW5ndGgpIHtcbiAgICAgIGxldCBsaW5lID0gZGlmZnN0cltpXTtcbiAgICAgIGlmICgoL14oSW5kZXg6XFxzfGRpZmZcXHN8XFwtXFwtXFwtXFxzfFxcK1xcK1xcK1xcc3w9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09KS8pLnRlc3QobGluZSkpIHtcbiAgICAgICAgYnJlYWs7XG4gICAgICB9IGVsc2UgaWYgKCgvXkBALykudGVzdChsaW5lKSkge1xuICAgICAgICBpbmRleC5odW5rcy5wdXNoKHBhcnNlSHVuaygpKTtcbiAgICAgIH0gZWxzZSBpZiAobGluZSkge1xuICAgICAgICB0aHJvdyBuZXcgRXJyb3IoJ1Vua25vd24gbGluZSAnICsgKGkgKyAxKSArICcgJyArIEpTT04uc3RyaW5naWZ5KGxpbmUpKTtcbiAgICAgIH0gZWxzZSB7XG4gICAgICAgIGkrKztcbiAgICAgIH1cbiAgICB9XG4gIH1cblxuICAvLyBQYXJzZXMgdGhlIC0tLSBhbmQgKysrIGhlYWRlcnMsIGlmIG5vbmUgYXJlIGZvdW5kLCBubyBsaW5lc1xuICAvLyBhcmUgY29uc3VtZWQuXG4gIGZ1bmN0aW9uIHBhcnNlRmlsZUhlYWRlcihpbmRleCkge1xuICAgIGNvbnN0IGZpbGVIZWFkZXIgPSAoL14oLS0tfFxcK1xcK1xcKylcXHMrKC4qKVxccj8kLykuZXhlYyhkaWZmc3RyW2ldKTtcbiAgICBpZiAoZmlsZUhlYWRlcikge1xuICAgICAgbGV0IGtleVByZWZpeCA9IGZpbGVIZWFkZXJbMV0gPT09ICctLS0nID8gJ29sZCcgOiAnbmV3JztcbiAgICAgIGNvbnN0IGRhdGEgPSBmaWxlSGVhZGVyWzJdLnNwbGl0KCdcXHQnLCAyKTtcbiAgICAgIGxldCBmaWxlTmFtZSA9IGRhdGFbMF0ucmVwbGFjZSgvXFxcXFxcXFwvZywgJ1xcXFwnKTtcbiAgICAgIGlmICgoL15cIi4qXCIkLykudGVzdChmaWxlTmFtZSkpIHtcbiAgICAgICAgZmlsZU5hbWUgPSBmaWxlTmFtZS5zdWJzdHIoMSwgZmlsZU5hbWUubGVuZ3RoIC0gMik7XG4gICAgICB9XG4gICAgICBpbmRleFtrZXlQcmVmaXggKyAnRmlsZU5hbWUnXSA9IGZpbGVOYW1lO1xuICAgICAgaW5kZXhba2V5UHJlZml4ICsgJ0hlYWRlciddID0gKGRhdGFbMV0gfHwgJycpLnRyaW0oKTtcblxuICAgICAgaSsrO1xuICAgIH1cbiAgfVxuXG4gIC8vIFBhcnNlcyBhIGh1bmtcbiAgLy8gVGhpcyBhc3N1bWVzIHRoYXQgd2UgYXJlIGF0IHRoZSBzdGFydCBvZiBhIGh1bmsuXG4gIGZ1bmN0aW9uIHBhcnNlSHVuaygpIHtcbiAgICBsZXQgY2h1bmtIZWFkZXJJbmRleCA9IGksXG4gICAgICAgIGNodW5rSGVhZGVyTGluZSA9IGRpZmZzdHJbaSsrXSxcbiAgICAgICAgY2h1bmtIZWFkZXIgPSBjaHVua0hlYWRlckxpbmUuc3BsaXQoL0BAIC0oXFxkKykoPzosKFxcZCspKT8gXFwrKFxcZCspKD86LChcXGQrKSk/IEBALyk7XG5cbiAgICBsZXQgaHVuayA9IHtcbiAgICAgIG9sZFN0YXJ0OiArY2h1bmtIZWFkZXJbMV0sXG4gICAgICBvbGRMaW5lczogdHlwZW9mIGNodW5rSGVhZGVyWzJdID09PSAndW5kZWZpbmVkJyA/IDEgOiArY2h1bmtIZWFkZXJbMl0sXG4gICAgICBuZXdTdGFydDogK2NodW5rSGVhZGVyWzNdLFxuICAgICAgbmV3TGluZXM6IHR5cGVvZiBjaHVua0hlYWRlcls0XSA9PT0gJ3VuZGVmaW5lZCcgPyAxIDogK2NodW5rSGVhZGVyWzRdLFxuICAgICAgbGluZXM6IFtdXG4gICAgfTtcblxuICAgIC8vIFVuaWZpZWQgRGlmZiBGb3JtYXQgcXVpcms6IElmIHRoZSBjaHVuayBzaXplIGlzIDAsXG4gICAgLy8gdGhlIGZpcnN0IG51bWJlciBpcyBvbmUgbG93ZXIgdGhhbiBvbmUgd291bGQgZXhwZWN0LlxuICAgIC8vIGh0dHBzOi8vd3d3LmFydGltYS5jb20vd2VibG9ncy92aWV3cG9zdC5qc3A/dGhyZWFkPTE2NDI5M1xuICAgIGlmIChodW5rLm9sZExpbmVzID09PSAwKSB7XG4gICAgICBodW5rLm9sZFN0YXJ0ICs9IDE7XG4gICAgfVxuICAgIGlmIChodW5rLm5ld0xpbmVzID09PSAwKSB7XG4gICAgICBodW5rLm5ld1N0YXJ0ICs9IDE7XG4gICAgfVxuXG4gICAgbGV0IGFkZENvdW50ID0gMCxcbiAgICAgICAgcmVtb3ZlQ291bnQgPSAwO1xuICAgIGZvciAoXG4gICAgICA7XG4gICAgICBpIDwgZGlmZnN0ci5sZW5ndGggJiYgKHJlbW92ZUNvdW50IDwgaHVuay5vbGRMaW5lcyB8fCBhZGRDb3VudCA8IGh1bmsubmV3TGluZXMgfHwgZGlmZnN0cltpXT8uc3RhcnRzV2l0aCgnXFxcXCcpKTtcbiAgICAgIGkrK1xuICAgICkge1xuICAgICAgbGV0IG9wZXJhdGlvbiA9IChkaWZmc3RyW2ldLmxlbmd0aCA9PSAwICYmIGkgIT0gKGRpZmZzdHIubGVuZ3RoIC0gMSkpID8gJyAnIDogZGlmZnN0cltpXVswXTtcbiAgICAgIGlmIChvcGVyYXRpb24gPT09ICcrJyB8fCBvcGVyYXRpb24gPT09ICctJyB8fCBvcGVyYXRpb24gPT09ICcgJyB8fCBvcGVyYXRpb24gPT09ICdcXFxcJykge1xuICAgICAgICBodW5rLmxpbmVzLnB1c2goZGlmZnN0cltpXSk7XG5cbiAgICAgICAgaWYgKG9wZXJhdGlvbiA9PT0gJysnKSB7XG4gICAgICAgICAgYWRkQ291bnQrKztcbiAgICAgICAgfSBlbHNlIGlmIChvcGVyYXRpb24gPT09ICctJykge1xuICAgICAgICAgIHJlbW92ZUNvdW50Kys7XG4gICAgICAgIH0gZWxzZSBpZiAob3BlcmF0aW9uID09PSAnICcpIHtcbiAgICAgICAgICBhZGRDb3VudCsrO1xuICAgICAgICAgIHJlbW92ZUNvdW50Kys7XG4gICAgICAgIH1cbiAgICAgIH0gZWxzZSB7XG4gICAgICAgIHRocm93IG5ldyBFcnJvcihgSHVuayBhdCBsaW5lICR7Y2h1bmtIZWFkZXJJbmRleCArIDF9IGNvbnRhaW5lZCBpbnZhbGlkIGxpbmUgJHtkaWZmc3RyW2ldfWApO1xuICAgICAgfVxuICAgIH1cblxuICAgIC8vIEhhbmRsZSB0aGUgZW1wdHkgYmxvY2sgY291bnQgY2FzZVxuICAgIGlmICghYWRkQ291bnQgJiYgaHVuay5uZXdMaW5lcyA9PT0gMSkge1xuICAgICAgaHVuay5uZXdMaW5lcyA9IDA7XG4gICAgfVxuICAgIGlmICghcmVtb3ZlQ291bnQgJiYgaHVuay5vbGRMaW5lcyA9PT0gMSkge1xuICAgICAgaHVuay5vbGRMaW5lcyA9IDA7XG4gICAgfVxuXG4gICAgLy8gUGVyZm9ybSBzYW5pdHkgY2hlY2tpbmdcbiAgICBpZiAoYWRkQ291bnQgIT09IGh1bmsubmV3TGluZXMpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignQWRkZWQgbGluZSBjb3VudCBkaWQgbm90IG1hdGNoIGZvciBodW5rIGF0IGxpbmUgJyArIChjaHVua0hlYWRlckluZGV4ICsgMSkpO1xuICAgIH1cbiAgICBpZiAocmVtb3ZlQ291bnQgIT09IGh1bmsub2xkTGluZXMpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignUmVtb3ZlZCBsaW5lIGNvdW50IGRpZCBub3QgbWF0Y2ggZm9yIGh1bmsgYXQgbGluZSAnICsgKGNodW5rSGVhZGVySW5kZXggKyAxKSk7XG4gICAgfVxuXG4gICAgcmV0dXJuIGh1bms7XG4gIH1cblxuICB3aGlsZSAoaSA8IGRpZmZzdHIubGVuZ3RoKSB7XG4gICAgcGFyc2VJbmRleCgpO1xuICB9XG5cbiAgcmV0dXJuIGxpc3Q7XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7O0FBQU8sU0FBU0EsVUFBVUEsQ0FBQ0MsT0FBTyxFQUFFO0VBQ2xDLElBQUlDLE9BQU8sR0FBR0QsT0FBTyxDQUFDRSxLQUFLLENBQUMsSUFBSSxDQUFDO0lBQzdCQyxJQUFJLEdBQUcsRUFBRTtJQUNUQyxDQUFDLEdBQUcsQ0FBQztFQUVULFNBQVNDLFVBQVVBLENBQUEsRUFBRztJQUNwQixJQUFJQyxLQUFLLEdBQUcsQ0FBQyxDQUFDO0lBQ2RILElBQUksQ0FBQ0ksSUFBSSxDQUFDRCxLQUFLLENBQUM7O0lBRWhCO0lBQ0EsT0FBT0YsQ0FBQyxHQUFHSCxPQUFPLENBQUNPLE1BQU0sRUFBRTtNQUN6QixJQUFJQyxJQUFJLEdBQUdSLE9BQU8sQ0FBQ0csQ0FBQyxDQUFDOztNQUVyQjtNQUNBLElBQUssdUJBQXVCLENBQUVNLElBQUksQ0FBQ0QsSUFBSSxDQUFDLEVBQUU7UUFDeEM7TUFDRjs7TUFFQTtNQUNBLElBQUlFLE1BQU0sR0FBSSwwQ0FBMEMsQ0FBRUMsSUFBSSxDQUFDSCxJQUFJLENBQUM7TUFDcEUsSUFBSUUsTUFBTSxFQUFFO1FBQ1ZMLEtBQUssQ0FBQ0EsS0FBSyxHQUFHSyxNQUFNLENBQUMsQ0FBQyxDQUFDO01BQ3pCO01BRUFQLENBQUMsRUFBRTtJQUNMOztJQUVBO0lBQ0E7SUFDQVMsZUFBZSxDQUFDUCxLQUFLLENBQUM7SUFDdEJPLGVBQWUsQ0FBQ1AsS0FBSyxDQUFDOztJQUV0QjtJQUNBQSxLQUFLLENBQUNRLEtBQUssR0FBRyxFQUFFO0lBRWhCLE9BQU9WLENBQUMsR0FBR0gsT0FBTyxDQUFDTyxNQUFNLEVBQUU7TUFDekIsSUFBSUMsS0FBSSxHQUFHUixPQUFPLENBQUNHLENBQUMsQ0FBQztNQUNyQixJQUFLLDBHQUEwRyxDQUFFTSxJQUFJLENBQUNELEtBQUksQ0FBQyxFQUFFO1FBQzNIO01BQ0YsQ0FBQyxNQUFNLElBQUssS0FBSyxDQUFFQyxJQUFJLENBQUNELEtBQUksQ0FBQyxFQUFFO1FBQzdCSCxLQUFLLENBQUNRLEtBQUssQ0FBQ1AsSUFBSSxDQUFDUSxTQUFTLENBQUMsQ0FBQyxDQUFDO01BQy9CLENBQUMsTUFBTSxJQUFJTixLQUFJLEVBQUU7UUFDZixNQUFNLElBQUlPLEtBQUssQ0FBQyxlQUFlLElBQUlaLENBQUMsR0FBRyxDQUFDLENBQUMsR0FBRyxHQUFHLEdBQUdhLElBQUksQ0FBQ0MsU0FBUyxDQUFDVCxLQUFJLENBQUMsQ0FBQztNQUN6RSxDQUFDLE1BQU07UUFDTEwsQ0FBQyxFQUFFO01BQ0w7SUFDRjtFQUNGOztFQUVBO0VBQ0E7RUFDQSxTQUFTUyxlQUFlQSxDQUFDUCxLQUFLLEVBQUU7SUFDOUIsSUFBTWEsVUFBVSxHQUFJLDBCQUEwQixDQUFFUCxJQUFJLENBQUNYLE9BQU8sQ0FBQ0csQ0FBQyxDQUFDLENBQUM7SUFDaEUsSUFBSWUsVUFBVSxFQUFFO01BQ2QsSUFBSUMsU0FBUyxHQUFHRCxVQUFVLENBQUMsQ0FBQyxDQUFDLEtBQUssS0FBSyxHQUFHLEtBQUssR0FBRyxLQUFLO01BQ3ZELElBQU1FLElBQUksR0FBR0YsVUFBVSxDQUFDLENBQUMsQ0FBQyxDQUFDakIsS0FBSyxDQUFDLElBQUksRUFBRSxDQUFDLENBQUM7TUFDekMsSUFBSW9CLFFBQVEsR0FBR0QsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDRSxPQUFPLENBQUMsT0FBTyxFQUFFLElBQUksQ0FBQztNQUM3QyxJQUFLLFFBQVEsQ0FBRWIsSUFBSSxDQUFDWSxRQUFRLENBQUMsRUFBRTtRQUM3QkEsUUFBUSxHQUFHQSxRQUFRLENBQUNFLE1BQU0sQ0FBQyxDQUFDLEVBQUVGLFFBQVEsQ0FBQ2QsTUFBTSxHQUFHLENBQUMsQ0FBQztNQUNwRDtNQUNBRixLQUFLLENBQUNjLFNBQVMsR0FBRyxVQUFVLENBQUMsR0FBR0UsUUFBUTtNQUN4Q2hCLEtBQUssQ0FBQ2MsU0FBUyxHQUFHLFFBQVEsQ0FBQyxHQUFHLENBQUNDLElBQUksQ0FBQyxDQUFDLENBQUMsSUFBSSxFQUFFLEVBQUVJLElBQUksQ0FBQyxDQUFDO01BRXBEckIsQ0FBQyxFQUFFO0lBQ0w7RUFDRjs7RUFFQTtFQUNBO0VBQ0EsU0FBU1csU0FBU0EsQ0FBQSxFQUFHO0lBQ25CLElBQUlXLGdCQUFnQixHQUFHdEIsQ0FBQztNQUNwQnVCLGVBQWUsR0FBRzFCLE9BQU8sQ0FBQ0csQ0FBQyxFQUFFLENBQUM7TUFDOUJ3QixXQUFXLEdBQUdELGVBQWUsQ0FBQ3pCLEtBQUssQ0FBQyw0Q0FBNEMsQ0FBQztJQUVyRixJQUFJMkIsSUFBSSxHQUFHO01BQ1RDLFFBQVEsRUFBRSxDQUFDRixXQUFXLENBQUMsQ0FBQyxDQUFDO01BQ3pCRyxRQUFRLEVBQUUsT0FBT0gsV0FBVyxDQUFDLENBQUMsQ0FBQyxLQUFLLFdBQVcsR0FBRyxDQUFDLEdBQUcsQ0FBQ0EsV0FBVyxDQUFDLENBQUMsQ0FBQztNQUNyRUksUUFBUSxFQUFFLENBQUNKLFdBQVcsQ0FBQyxDQUFDLENBQUM7TUFDekJLLFFBQVEsRUFBRSxPQUFPTCxXQUFXLENBQUMsQ0FBQyxDQUFDLEtBQUssV0FBVyxHQUFHLENBQUMsR0FBRyxDQUFDQSxXQUFXLENBQUMsQ0FBQyxDQUFDO01BQ3JFTSxLQUFLLEVBQUU7SUFDVCxDQUFDOztJQUVEO0lBQ0E7SUFDQTtJQUNBLElBQUlMLElBQUksQ0FBQ0UsUUFBUSxLQUFLLENBQUMsRUFBRTtNQUN2QkYsSUFBSSxDQUFDQyxRQUFRLElBQUksQ0FBQztJQUNwQjtJQUNBLElBQUlELElBQUksQ0FBQ0ksUUFBUSxLQUFLLENBQUMsRUFBRTtNQUN2QkosSUFBSSxDQUFDRyxRQUFRLElBQUksQ0FBQztJQUNwQjtJQUVBLElBQUlHLFFBQVEsR0FBRyxDQUFDO01BQ1pDLFdBQVcsR0FBRyxDQUFDO0lBQ25CLE9BRUVoQyxDQUFDLEdBQUdILE9BQU8sQ0FBQ08sTUFBTSxLQUFLNEIsV0FBVyxHQUFHUCxJQUFJLENBQUNFLFFBQVEsSUFBSUksUUFBUSxHQUFHTixJQUFJLENBQUNJLFFBQVE7SUFBQTtJQUFBLENBQUFJLFVBQUE7SUFBQTtJQUFJcEMsT0FBTyxDQUFDRyxDQUFDLENBQUMsY0FBQWlDLFVBQUE7SUFBVjtJQUFBQTtJQUFBO0lBQUEsQ0FBWUMsVUFBVSxDQUFDLElBQUksQ0FBQyxDQUFDLEVBQy9HbEMsQ0FBQyxFQUFFLEVBQ0g7TUFBQTtNQUFBLElBQUFpQyxVQUFBO01BQUE7TUFDQSxJQUFJRSxTQUFTLEdBQUl0QyxPQUFPLENBQUNHLENBQUMsQ0FBQyxDQUFDSSxNQUFNLElBQUksQ0FBQyxJQUFJSixDQUFDLElBQUtILE9BQU8sQ0FBQ08sTUFBTSxHQUFHLENBQUUsR0FBSSxHQUFHLEdBQUdQLE9BQU8sQ0FBQ0csQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDO01BQzNGLElBQUltQyxTQUFTLEtBQUssR0FBRyxJQUFJQSxTQUFTLEtBQUssR0FBRyxJQUFJQSxTQUFTLEtBQUssR0FBRyxJQUFJQSxTQUFTLEtBQUssSUFBSSxFQUFFO1FBQ3JGVixJQUFJLENBQUNLLEtBQUssQ0FBQzNCLElBQUksQ0FBQ04sT0FBTyxDQUFDRyxDQUFDLENBQUMsQ0FBQztRQUUzQixJQUFJbUMsU0FBUyxLQUFLLEdBQUcsRUFBRTtVQUNyQkosUUFBUSxFQUFFO1FBQ1osQ0FBQyxNQUFNLElBQUlJLFNBQVMsS0FBSyxHQUFHLEVBQUU7VUFDNUJILFdBQVcsRUFBRTtRQUNmLENBQUMsTUFBTSxJQUFJRyxTQUFTLEtBQUssR0FBRyxFQUFFO1VBQzVCSixRQUFRLEVBQUU7VUFDVkMsV0FBVyxFQUFFO1FBQ2Y7TUFDRixDQUFDLE1BQU07UUFDTCxNQUFNLElBQUlwQixLQUFLO1FBQUE7UUFBQSxnQkFBQXdCLE1BQUE7UUFBQTtRQUFpQmQsZ0JBQWdCLEdBQUcsQ0FBQyw4QkFBQWMsTUFBQSxDQUEyQnZDLE9BQU8sQ0FBQ0csQ0FBQyxDQUFDLENBQUUsQ0FBQztNQUM5RjtJQUNGOztJQUVBO0lBQ0EsSUFBSSxDQUFDK0IsUUFBUSxJQUFJTixJQUFJLENBQUNJLFFBQVEsS0FBSyxDQUFDLEVBQUU7TUFDcENKLElBQUksQ0FBQ0ksUUFBUSxHQUFHLENBQUM7SUFDbkI7SUFDQSxJQUFJLENBQUNHLFdBQVcsSUFBSVAsSUFBSSxDQUFDRSxRQUFRLEtBQUssQ0FBQyxFQUFFO01BQ3ZDRixJQUFJLENBQUNFLFFBQVEsR0FBRyxDQUFDO0lBQ25COztJQUVBO0lBQ0EsSUFBSUksUUFBUSxLQUFLTixJQUFJLENBQUNJLFFBQVEsRUFBRTtNQUM5QixNQUFNLElBQUlqQixLQUFLLENBQUMsa0RBQWtELElBQUlVLGdCQUFnQixHQUFHLENBQUMsQ0FBQyxDQUFDO0lBQzlGO0lBQ0EsSUFBSVUsV0FBVyxLQUFLUCxJQUFJLENBQUNFLFFBQVEsRUFBRTtNQUNqQyxNQUFNLElBQUlmLEtBQUssQ0FBQyxvREFBb0QsSUFBSVUsZ0JBQWdCLEdBQUcsQ0FBQyxDQUFDLENBQUM7SUFDaEc7SUFFQSxPQUFPRyxJQUFJO0VBQ2I7RUFFQSxPQUFPekIsQ0FBQyxHQUFHSCxPQUFPLENBQUNPLE1BQU0sRUFBRTtJQUN6QkgsVUFBVSxDQUFDLENBQUM7RUFDZDtFQUVBLE9BQU9GLElBQUk7QUFDYiIsImlnbm9yZUxpc3QiOltdfQ==
+
+
+/***/ }),
+
+/***/ 7560:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.reversePatch = reversePatch;
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/*istanbul ignore end*/
+function reversePatch(structuredPatch) {
+  if (Array.isArray(structuredPatch)) {
+    return structuredPatch.map(reversePatch).reverse();
+  }
+  return (
+    /*istanbul ignore start*/
+    _objectSpread(_objectSpread({},
+    /*istanbul ignore end*/
+    structuredPatch), {}, {
+      oldFileName: structuredPatch.newFileName,
+      oldHeader: structuredPatch.newHeader,
+      newFileName: structuredPatch.oldFileName,
+      newHeader: structuredPatch.oldHeader,
+      hunks: structuredPatch.hunks.map(function (hunk) {
+        return {
+          oldLines: hunk.newLines,
+          oldStart: hunk.newStart,
+          newLines: hunk.oldLines,
+          newStart: hunk.oldStart,
+          lines: hunk.lines.map(function (l) {
+            if (l.startsWith('-')) {
+              return (
+                /*istanbul ignore start*/
+                "+".concat(
+                /*istanbul ignore end*/
+                l.slice(1))
+              );
+            }
+            if (l.startsWith('+')) {
+              return (
+                /*istanbul ignore start*/
+                "-".concat(
+                /*istanbul ignore end*/
+                l.slice(1))
+              );
+            }
+            return l;
+          })
+        };
+      })
+    })
+  );
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJyZXZlcnNlUGF0Y2giLCJzdHJ1Y3R1cmVkUGF0Y2giLCJBcnJheSIsImlzQXJyYXkiLCJtYXAiLCJyZXZlcnNlIiwiX29iamVjdFNwcmVhZCIsIm9sZEZpbGVOYW1lIiwibmV3RmlsZU5hbWUiLCJvbGRIZWFkZXIiLCJuZXdIZWFkZXIiLCJodW5rcyIsImh1bmsiLCJvbGRMaW5lcyIsIm5ld0xpbmVzIiwib2xkU3RhcnQiLCJuZXdTdGFydCIsImxpbmVzIiwibCIsInN0YXJ0c1dpdGgiLCJjb25jYXQiLCJzbGljZSJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9wYXRjaC9yZXZlcnNlLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBmdW5jdGlvbiByZXZlcnNlUGF0Y2goc3RydWN0dXJlZFBhdGNoKSB7XG4gIGlmIChBcnJheS5pc0FycmF5KHN0cnVjdHVyZWRQYXRjaCkpIHtcbiAgICByZXR1cm4gc3RydWN0dXJlZFBhdGNoLm1hcChyZXZlcnNlUGF0Y2gpLnJldmVyc2UoKTtcbiAgfVxuXG4gIHJldHVybiB7XG4gICAgLi4uc3RydWN0dXJlZFBhdGNoLFxuICAgIG9sZEZpbGVOYW1lOiBzdHJ1Y3R1cmVkUGF0Y2gubmV3RmlsZU5hbWUsXG4gICAgb2xkSGVhZGVyOiBzdHJ1Y3R1cmVkUGF0Y2gubmV3SGVhZGVyLFxuICAgIG5ld0ZpbGVOYW1lOiBzdHJ1Y3R1cmVkUGF0Y2gub2xkRmlsZU5hbWUsXG4gICAgbmV3SGVhZGVyOiBzdHJ1Y3R1cmVkUGF0Y2gub2xkSGVhZGVyLFxuICAgIGh1bmtzOiBzdHJ1Y3R1cmVkUGF0Y2guaHVua3MubWFwKGh1bmsgPT4ge1xuICAgICAgcmV0dXJuIHtcbiAgICAgICAgb2xkTGluZXM6IGh1bmsubmV3TGluZXMsXG4gICAgICAgIG9sZFN0YXJ0OiBodW5rLm5ld1N0YXJ0LFxuICAgICAgICBuZXdMaW5lczogaHVuay5vbGRMaW5lcyxcbiAgICAgICAgbmV3U3RhcnQ6IGh1bmsub2xkU3RhcnQsXG4gICAgICAgIGxpbmVzOiBodW5rLmxpbmVzLm1hcChsID0+IHtcbiAgICAgICAgICBpZiAobC5zdGFydHNXaXRoKCctJykpIHsgcmV0dXJuIGArJHtsLnNsaWNlKDEpfWA7IH1cbiAgICAgICAgICBpZiAobC5zdGFydHNXaXRoKCcrJykpIHsgcmV0dXJuIGAtJHtsLnNsaWNlKDEpfWA7IH1cbiAgICAgICAgICByZXR1cm4gbDtcbiAgICAgICAgfSlcbiAgICAgIH07XG4gICAgfSlcbiAgfTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7QUFBTyxTQUFTQSxZQUFZQSxDQUFDQyxlQUFlLEVBQUU7RUFDNUMsSUFBSUMsS0FBSyxDQUFDQyxPQUFPLENBQUNGLGVBQWUsQ0FBQyxFQUFFO0lBQ2xDLE9BQU9BLGVBQWUsQ0FBQ0csR0FBRyxDQUFDSixZQUFZLENBQUMsQ0FBQ0ssT0FBTyxDQUFDLENBQUM7RUFDcEQ7RUFFQTtJQUFBO0lBQUFDLGFBQUEsQ0FBQUEsYUFBQTtJQUFBO0lBQ0tMLGVBQWU7TUFDbEJNLFdBQVcsRUFBRU4sZUFBZSxDQUFDTyxXQUFXO01BQ3hDQyxTQUFTLEVBQUVSLGVBQWUsQ0FBQ1MsU0FBUztNQUNwQ0YsV0FBVyxFQUFFUCxlQUFlLENBQUNNLFdBQVc7TUFDeENHLFNBQVMsRUFBRVQsZUFBZSxDQUFDUSxTQUFTO01BQ3BDRSxLQUFLLEVBQUVWLGVBQWUsQ0FBQ1UsS0FBSyxDQUFDUCxHQUFHLENBQUMsVUFBQVEsSUFBSSxFQUFJO1FBQ3ZDLE9BQU87VUFDTEMsUUFBUSxFQUFFRCxJQUFJLENBQUNFLFFBQVE7VUFDdkJDLFFBQVEsRUFBRUgsSUFBSSxDQUFDSSxRQUFRO1VBQ3ZCRixRQUFRLEVBQUVGLElBQUksQ0FBQ0MsUUFBUTtVQUN2QkcsUUFBUSxFQUFFSixJQUFJLENBQUNHLFFBQVE7VUFDdkJFLEtBQUssRUFBRUwsSUFBSSxDQUFDSyxLQUFLLENBQUNiLEdBQUcsQ0FBQyxVQUFBYyxDQUFDLEVBQUk7WUFDekIsSUFBSUEsQ0FBQyxDQUFDQyxVQUFVLENBQUMsR0FBRyxDQUFDLEVBQUU7Y0FBRTtnQkFBQTtnQkFBQSxJQUFBQyxNQUFBO2dCQUFBO2dCQUFXRixDQUFDLENBQUNHLEtBQUssQ0FBQyxDQUFDLENBQUM7Y0FBQTtZQUFJO1lBQ2xELElBQUlILENBQUMsQ0FBQ0MsVUFBVSxDQUFDLEdBQUcsQ0FBQyxFQUFFO2NBQUU7Z0JBQUE7Z0JBQUEsSUFBQUMsTUFBQTtnQkFBQTtnQkFBV0YsQ0FBQyxDQUFDRyxLQUFLLENBQUMsQ0FBQyxDQUFDO2NBQUE7WUFBSTtZQUNsRCxPQUFPSCxDQUFDO1VBQ1YsQ0FBQztRQUNILENBQUM7TUFDSCxDQUFDO0lBQUM7RUFBQTtBQUVOIiwiaWdub3JlTGlzdCI6W119
+
+
+/***/ }),
+
+/***/ 6937:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.arrayEqual = arrayEqual;
+exports.arrayStartsWith = arrayStartsWith;
+/*istanbul ignore end*/
+function arrayEqual(a, b) {
+  if (a.length !== b.length) {
+    return false;
+  }
+  return arrayStartsWith(a, b);
+}
+function arrayStartsWith(array, start) {
+  if (start.length > array.length) {
+    return false;
+  }
+  for (var i = 0; i < start.length; i++) {
+    if (start[i] !== array[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJhcnJheUVxdWFsIiwiYSIsImIiLCJsZW5ndGgiLCJhcnJheVN0YXJ0c1dpdGgiLCJhcnJheSIsInN0YXJ0IiwiaSJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy91dGlsL2FycmF5LmpzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBmdW5jdGlvbiBhcnJheUVxdWFsKGEsIGIpIHtcbiAgaWYgKGEubGVuZ3RoICE9PSBiLmxlbmd0aCkge1xuICAgIHJldHVybiBmYWxzZTtcbiAgfVxuXG4gIHJldHVybiBhcnJheVN0YXJ0c1dpdGgoYSwgYik7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBhcnJheVN0YXJ0c1dpdGgoYXJyYXksIHN0YXJ0KSB7XG4gIGlmIChzdGFydC5sZW5ndGggPiBhcnJheS5sZW5ndGgpIHtcbiAgICByZXR1cm4gZmFsc2U7XG4gIH1cblxuICBmb3IgKGxldCBpID0gMDsgaSA8IHN0YXJ0Lmxlbmd0aDsgaSsrKSB7XG4gICAgaWYgKHN0YXJ0W2ldICE9PSBhcnJheVtpXSkge1xuICAgICAgcmV0dXJuIGZhbHNlO1xuICAgIH1cbiAgfVxuXG4gIHJldHVybiB0cnVlO1xufVxuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7QUFBTyxTQUFTQSxVQUFVQSxDQUFDQyxDQUFDLEVBQUVDLENBQUMsRUFBRTtFQUMvQixJQUFJRCxDQUFDLENBQUNFLE1BQU0sS0FBS0QsQ0FBQyxDQUFDQyxNQUFNLEVBQUU7SUFDekIsT0FBTyxLQUFLO0VBQ2Q7RUFFQSxPQUFPQyxlQUFlLENBQUNILENBQUMsRUFBRUMsQ0FBQyxDQUFDO0FBQzlCO0FBRU8sU0FBU0UsZUFBZUEsQ0FBQ0MsS0FBSyxFQUFFQyxLQUFLLEVBQUU7RUFDNUMsSUFBSUEsS0FBSyxDQUFDSCxNQUFNLEdBQUdFLEtBQUssQ0FBQ0YsTUFBTSxFQUFFO0lBQy9CLE9BQU8sS0FBSztFQUNkO0VBRUEsS0FBSyxJQUFJSSxDQUFDLEdBQUcsQ0FBQyxFQUFFQSxDQUFDLEdBQUdELEtBQUssQ0FBQ0gsTUFBTSxFQUFFSSxDQUFDLEVBQUUsRUFBRTtJQUNyQyxJQUFJRCxLQUFLLENBQUNDLENBQUMsQ0FBQyxLQUFLRixLQUFLLENBQUNFLENBQUMsQ0FBQyxFQUFFO01BQ3pCLE9BQU8sS0FBSztJQUNkO0VBQ0Y7RUFFQSxPQUFPLElBQUk7QUFDYiIsImlnbm9yZUxpc3QiOltdfQ==
+
+
+/***/ }),
+
+/***/ 7572:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = _default;
+/*istanbul ignore end*/
+// Iterator that traverses in the range of [min, max], stepping
+// by distance from a given start position. I.e. for [0, 4], with
+// start of 2, this will iterate 2, 3, 1, 4, 0.
+function
+/*istanbul ignore start*/
+_default
+/*istanbul ignore end*/
+(start, minLine, maxLine) {
+  var wantForward = true,
+    backwardExhausted = false,
+    forwardExhausted = false,
+    localOffset = 1;
+  return function iterator() {
+    if (wantForward && !forwardExhausted) {
+      if (backwardExhausted) {
+        localOffset++;
+      } else {
+        wantForward = false;
+      }
+
+      // Check if trying to fit beyond text length, and if not, check it fits
+      // after offset location (or desired location on first iteration)
+      if (start + localOffset <= maxLine) {
+        return start + localOffset;
+      }
+      forwardExhausted = true;
+    }
+    if (!backwardExhausted) {
+      if (!forwardExhausted) {
+        wantForward = true;
+      }
+
+      // Check if trying to fit before text beginning, and if not, check it fits
+      // before offset location
+      if (minLine <= start - localOffset) {
+        return start - localOffset++;
+      }
+      backwardExhausted = true;
+      return iterator();
+    }
+
+    // We tried to fit hunk before text beginning and beyond text length, then
+    // hunk can't fit on the text. Return undefined
+  };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfZGVmYXVsdCIsInN0YXJ0IiwibWluTGluZSIsIm1heExpbmUiLCJ3YW50Rm9yd2FyZCIsImJhY2t3YXJkRXhoYXVzdGVkIiwiZm9yd2FyZEV4aGF1c3RlZCIsImxvY2FsT2Zmc2V0IiwiaXRlcmF0b3IiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvdXRpbC9kaXN0YW5jZS1pdGVyYXRvci5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBJdGVyYXRvciB0aGF0IHRyYXZlcnNlcyBpbiB0aGUgcmFuZ2Ugb2YgW21pbiwgbWF4XSwgc3RlcHBpbmdcbi8vIGJ5IGRpc3RhbmNlIGZyb20gYSBnaXZlbiBzdGFydCBwb3NpdGlvbi4gSS5lLiBmb3IgWzAsIDRdLCB3aXRoXG4vLyBzdGFydCBvZiAyLCB0aGlzIHdpbGwgaXRlcmF0ZSAyLCAzLCAxLCA0LCAwLlxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24oc3RhcnQsIG1pbkxpbmUsIG1heExpbmUpIHtcbiAgbGV0IHdhbnRGb3J3YXJkID0gdHJ1ZSxcbiAgICAgIGJhY2t3YXJkRXhoYXVzdGVkID0gZmFsc2UsXG4gICAgICBmb3J3YXJkRXhoYXVzdGVkID0gZmFsc2UsXG4gICAgICBsb2NhbE9mZnNldCA9IDE7XG5cbiAgcmV0dXJuIGZ1bmN0aW9uIGl0ZXJhdG9yKCkge1xuICAgIGlmICh3YW50Rm9yd2FyZCAmJiAhZm9yd2FyZEV4aGF1c3RlZCkge1xuICAgICAgaWYgKGJhY2t3YXJkRXhoYXVzdGVkKSB7XG4gICAgICAgIGxvY2FsT2Zmc2V0Kys7XG4gICAgICB9IGVsc2Uge1xuICAgICAgICB3YW50Rm9yd2FyZCA9IGZhbHNlO1xuICAgICAgfVxuXG4gICAgICAvLyBDaGVjayBpZiB0cnlpbmcgdG8gZml0IGJleW9uZCB0ZXh0IGxlbmd0aCwgYW5kIGlmIG5vdCwgY2hlY2sgaXQgZml0c1xuICAgICAgLy8gYWZ0ZXIgb2Zmc2V0IGxvY2F0aW9uIChvciBkZXNpcmVkIGxvY2F0aW9uIG9uIGZpcnN0IGl0ZXJhdGlvbilcbiAgICAgIGlmIChzdGFydCArIGxvY2FsT2Zmc2V0IDw9IG1heExpbmUpIHtcbiAgICAgICAgcmV0dXJuIHN0YXJ0ICsgbG9jYWxPZmZzZXQ7XG4gICAgICB9XG5cbiAgICAgIGZvcndhcmRFeGhhdXN0ZWQgPSB0cnVlO1xuICAgIH1cblxuICAgIGlmICghYmFja3dhcmRFeGhhdXN0ZWQpIHtcbiAgICAgIGlmICghZm9yd2FyZEV4aGF1c3RlZCkge1xuICAgICAgICB3YW50Rm9yd2FyZCA9IHRydWU7XG4gICAgICB9XG5cbiAgICAgIC8vIENoZWNrIGlmIHRyeWluZyB0byBmaXQgYmVmb3JlIHRleHQgYmVnaW5uaW5nLCBhbmQgaWYgbm90LCBjaGVjayBpdCBmaXRzXG4gICAgICAvLyBiZWZvcmUgb2Zmc2V0IGxvY2F0aW9uXG4gICAgICBpZiAobWluTGluZSA8PSBzdGFydCAtIGxvY2FsT2Zmc2V0KSB7XG4gICAgICAgIHJldHVybiBzdGFydCAtIGxvY2FsT2Zmc2V0Kys7XG4gICAgICB9XG5cbiAgICAgIGJhY2t3YXJkRXhoYXVzdGVkID0gdHJ1ZTtcbiAgICAgIHJldHVybiBpdGVyYXRvcigpO1xuICAgIH1cblxuICAgIC8vIFdlIHRyaWVkIHRvIGZpdCBodW5rIGJlZm9yZSB0ZXh0IGJlZ2lubmluZyBhbmQgYmV5b25kIHRleHQgbGVuZ3RoLCB0aGVuXG4gICAgLy8gaHVuayBjYW4ndCBmaXQgb24gdGhlIHRleHQuIFJldHVybiB1bmRlZmluZWRcbiAgfTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7QUFBQTtBQUNBO0FBQ0E7QUFDZTtBQUFBO0FBQUFBO0FBQUFBO0FBQUEsQ0FBU0MsS0FBSyxFQUFFQyxPQUFPLEVBQUVDLE9BQU8sRUFBRTtFQUMvQyxJQUFJQyxXQUFXLEdBQUcsSUFBSTtJQUNsQkMsaUJBQWlCLEdBQUcsS0FBSztJQUN6QkMsZ0JBQWdCLEdBQUcsS0FBSztJQUN4QkMsV0FBVyxHQUFHLENBQUM7RUFFbkIsT0FBTyxTQUFTQyxRQUFRQSxDQUFBLEVBQUc7SUFDekIsSUFBSUosV0FBVyxJQUFJLENBQUNFLGdCQUFnQixFQUFFO01BQ3BDLElBQUlELGlCQUFpQixFQUFFO1FBQ3JCRSxXQUFXLEVBQUU7TUFDZixDQUFDLE1BQU07UUFDTEgsV0FBVyxHQUFHLEtBQUs7TUFDckI7O01BRUE7TUFDQTtNQUNBLElBQUlILEtBQUssR0FBR00sV0FBVyxJQUFJSixPQUFPLEVBQUU7UUFDbEMsT0FBT0YsS0FBSyxHQUFHTSxXQUFXO01BQzVCO01BRUFELGdCQUFnQixHQUFHLElBQUk7SUFDekI7SUFFQSxJQUFJLENBQUNELGlCQUFpQixFQUFFO01BQ3RCLElBQUksQ0FBQ0MsZ0JBQWdCLEVBQUU7UUFDckJGLFdBQVcsR0FBRyxJQUFJO01BQ3BCOztNQUVBO01BQ0E7TUFDQSxJQUFJRixPQUFPLElBQUlELEtBQUssR0FBR00sV0FBVyxFQUFFO1FBQ2xDLE9BQU9OLEtBQUssR0FBR00sV0FBVyxFQUFFO01BQzlCO01BRUFGLGlCQUFpQixHQUFHLElBQUk7TUFDeEIsT0FBT0csUUFBUSxDQUFDLENBQUM7SUFDbkI7O0lBRUE7SUFDQTtFQUNGLENBQUM7QUFDSCIsImlnbm9yZUxpc3QiOltdfQ==
+
+
+/***/ }),
+
+/***/ 4400:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.generateOptions = generateOptions;
+/*istanbul ignore end*/
+function generateOptions(options, defaults) {
+  if (typeof options === 'function') {
+    defaults.callback = options;
+  } else if (options) {
+    for (var name in options) {
+      /* istanbul ignore else */
+      if (options.hasOwnProperty(name)) {
+        defaults[name] = options[name];
+      }
+    }
+  }
+  return defaults;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJnZW5lcmF0ZU9wdGlvbnMiLCJvcHRpb25zIiwiZGVmYXVsdHMiLCJjYWxsYmFjayIsIm5hbWUiLCJoYXNPd25Qcm9wZXJ0eSJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy91dGlsL3BhcmFtcy5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZnVuY3Rpb24gZ2VuZXJhdGVPcHRpb25zKG9wdGlvbnMsIGRlZmF1bHRzKSB7XG4gIGlmICh0eXBlb2Ygb3B0aW9ucyA9PT0gJ2Z1bmN0aW9uJykge1xuICAgIGRlZmF1bHRzLmNhbGxiYWNrID0gb3B0aW9ucztcbiAgfSBlbHNlIGlmIChvcHRpb25zKSB7XG4gICAgZm9yIChsZXQgbmFtZSBpbiBvcHRpb25zKSB7XG4gICAgICAvKiBpc3RhbmJ1bCBpZ25vcmUgZWxzZSAqL1xuICAgICAgaWYgKG9wdGlvbnMuaGFzT3duUHJvcGVydHkobmFtZSkpIHtcbiAgICAgICAgZGVmYXVsdHNbbmFtZV0gPSBvcHRpb25zW25hbWVdO1xuICAgICAgfVxuICAgIH1cbiAgfVxuICByZXR1cm4gZGVmYXVsdHM7XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7O0FBQU8sU0FBU0EsZUFBZUEsQ0FBQ0MsT0FBTyxFQUFFQyxRQUFRLEVBQUU7RUFDakQsSUFBSSxPQUFPRCxPQUFPLEtBQUssVUFBVSxFQUFFO0lBQ2pDQyxRQUFRLENBQUNDLFFBQVEsR0FBR0YsT0FBTztFQUM3QixDQUFDLE1BQU0sSUFBSUEsT0FBTyxFQUFFO0lBQ2xCLEtBQUssSUFBSUcsSUFBSSxJQUFJSCxPQUFPLEVBQUU7TUFDeEI7TUFDQSxJQUFJQSxPQUFPLENBQUNJLGNBQWMsQ0FBQ0QsSUFBSSxDQUFDLEVBQUU7UUFDaENGLFFBQVEsQ0FBQ0UsSUFBSSxDQUFDLEdBQUdILE9BQU8sQ0FBQ0csSUFBSSxDQUFDO01BQ2hDO0lBQ0Y7RUFDRjtFQUNBLE9BQU9GLFFBQVE7QUFDakIiLCJpZ25vcmVMaXN0IjpbXX0=
+
+
+/***/ }),
+
+/***/ 8831:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*istanbul ignore start*/
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.hasOnlyUnixLineEndings = hasOnlyUnixLineEndings;
+exports.hasOnlyWinLineEndings = hasOnlyWinLineEndings;
+exports.longestCommonPrefix = longestCommonPrefix;
+exports.longestCommonSuffix = longestCommonSuffix;
+exports.maximumOverlap = maximumOverlap;
+exports.removePrefix = removePrefix;
+exports.removeSuffix = removeSuffix;
+exports.replacePrefix = replacePrefix;
+exports.replaceSuffix = replaceSuffix;
+/*istanbul ignore end*/
+function longestCommonPrefix(str1, str2) {
+  var i;
+  for (i = 0; i < str1.length && i < str2.length; i++) {
+    if (str1[i] != str2[i]) {
+      return str1.slice(0, i);
+    }
+  }
+  return str1.slice(0, i);
+}
+function longestCommonSuffix(str1, str2) {
+  var i;
+
+  // Unlike longestCommonPrefix, we need a special case to handle all scenarios
+  // where we return the empty string since str1.slice(-0) will return the
+  // entire string.
+  if (!str1 || !str2 || str1[str1.length - 1] != str2[str2.length - 1]) {
+    return '';
+  }
+  for (i = 0; i < str1.length && i < str2.length; i++) {
+    if (str1[str1.length - (i + 1)] != str2[str2.length - (i + 1)]) {
+      return str1.slice(-i);
+    }
+  }
+  return str1.slice(-i);
+}
+function replacePrefix(string, oldPrefix, newPrefix) {
+  if (string.slice(0, oldPrefix.length) != oldPrefix) {
+    throw Error(
+    /*istanbul ignore start*/
+    "string ".concat(
+    /*istanbul ignore end*/
+    JSON.stringify(string), " doesn't start with prefix ").concat(JSON.stringify(oldPrefix), "; this is a bug"));
+  }
+  return newPrefix + string.slice(oldPrefix.length);
+}
+function replaceSuffix(string, oldSuffix, newSuffix) {
+  if (!oldSuffix) {
+    return string + newSuffix;
+  }
+  if (string.slice(-oldSuffix.length) != oldSuffix) {
+    throw Error(
+    /*istanbul ignore start*/
+    "string ".concat(
+    /*istanbul ignore end*/
+    JSON.stringify(string), " doesn't end with suffix ").concat(JSON.stringify(oldSuffix), "; this is a bug"));
+  }
+  return string.slice(0, -oldSuffix.length) + newSuffix;
+}
+function removePrefix(string, oldPrefix) {
+  return replacePrefix(string, oldPrefix, '');
+}
+function removeSuffix(string, oldSuffix) {
+  return replaceSuffix(string, oldSuffix, '');
+}
+function maximumOverlap(string1, string2) {
+  return string2.slice(0, overlapCount(string1, string2));
+}
+
+// Nicked from https://stackoverflow.com/a/60422853/1709587
+function overlapCount(a, b) {
+  // Deal with cases where the strings differ in length
+  var startA = 0;
+  if (a.length > b.length) {
+    startA = a.length - b.length;
+  }
+  var endB = b.length;
+  if (a.length < b.length) {
+    endB = a.length;
+  }
+  // Create a back-reference for each index
+  //   that should be followed in case of a mismatch.
+  //   We only need B to make these references:
+  var map = Array(endB);
+  var k = 0; // Index that lags behind j
+  map[0] = 0;
+  for (var j = 1; j < endB; j++) {
+    if (b[j] == b[k]) {
+      map[j] = map[k]; // skip over the same character (optional optimisation)
+    } else {
+      map[j] = k;
+    }
+    while (k > 0 && b[j] != b[k]) {
+      k = map[k];
+    }
+    if (b[j] == b[k]) {
+      k++;
+    }
+  }
+  // Phase 2: use these references while iterating over A
+  k = 0;
+  for (var i = startA; i < a.length; i++) {
+    while (k > 0 && a[i] != b[k]) {
+      k = map[k];
+    }
+    if (a[i] == b[k]) {
+      k++;
+    }
+  }
+  return k;
+}
+
+/**
+ * Returns true if the string consistently uses Windows line endings.
+ */
+function hasOnlyWinLineEndings(string) {
+  return string.includes('\r\n') && !string.startsWith('\n') && !string.match(/[^\r]\n/);
+}
+
+/**
+ * Returns true if the string consistently uses Unix line endings.
+ */
+function hasOnlyUnixLineEndings(string) {
+  return !string.includes('\r\n') && string.includes('\n');
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJsb25nZXN0Q29tbW9uUHJlZml4Iiwic3RyMSIsInN0cjIiLCJpIiwibGVuZ3RoIiwic2xpY2UiLCJsb25nZXN0Q29tbW9uU3VmZml4IiwicmVwbGFjZVByZWZpeCIsInN0cmluZyIsIm9sZFByZWZpeCIsIm5ld1ByZWZpeCIsIkVycm9yIiwiY29uY2F0IiwiSlNPTiIsInN0cmluZ2lmeSIsInJlcGxhY2VTdWZmaXgiLCJvbGRTdWZmaXgiLCJuZXdTdWZmaXgiLCJyZW1vdmVQcmVmaXgiLCJyZW1vdmVTdWZmaXgiLCJtYXhpbXVtT3ZlcmxhcCIsInN0cmluZzEiLCJzdHJpbmcyIiwib3ZlcmxhcENvdW50IiwiYSIsImIiLCJzdGFydEEiLCJlbmRCIiwibWFwIiwiQXJyYXkiLCJrIiwiaiIsImhhc09ubHlXaW5MaW5lRW5kaW5ncyIsImluY2x1ZGVzIiwic3RhcnRzV2l0aCIsIm1hdGNoIiwiaGFzT25seVVuaXhMaW5lRW5kaW5ncyJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy91dGlsL3N0cmluZy5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZnVuY3Rpb24gbG9uZ2VzdENvbW1vblByZWZpeChzdHIxLCBzdHIyKSB7XG4gIGxldCBpO1xuICBmb3IgKGkgPSAwOyBpIDwgc3RyMS5sZW5ndGggJiYgaSA8IHN0cjIubGVuZ3RoOyBpKyspIHtcbiAgICBpZiAoc3RyMVtpXSAhPSBzdHIyW2ldKSB7XG4gICAgICByZXR1cm4gc3RyMS5zbGljZSgwLCBpKTtcbiAgICB9XG4gIH1cbiAgcmV0dXJuIHN0cjEuc2xpY2UoMCwgaSk7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBsb25nZXN0Q29tbW9uU3VmZml4KHN0cjEsIHN0cjIpIHtcbiAgbGV0IGk7XG5cbiAgLy8gVW5saWtlIGxvbmdlc3RDb21tb25QcmVmaXgsIHdlIG5lZWQgYSBzcGVjaWFsIGNhc2UgdG8gaGFuZGxlIGFsbCBzY2VuYXJpb3NcbiAgLy8gd2hlcmUgd2UgcmV0dXJuIHRoZSBlbXB0eSBzdHJpbmcgc2luY2Ugc3RyMS5zbGljZSgtMCkgd2lsbCByZXR1cm4gdGhlXG4gIC8vIGVudGlyZSBzdHJpbmcuXG4gIGlmICghc3RyMSB8fCAhc3RyMiB8fCBzdHIxW3N0cjEubGVuZ3RoIC0gMV0gIT0gc3RyMltzdHIyLmxlbmd0aCAtIDFdKSB7XG4gICAgcmV0dXJuICcnO1xuICB9XG5cbiAgZm9yIChpID0gMDsgaSA8IHN0cjEubGVuZ3RoICYmIGkgPCBzdHIyLmxlbmd0aDsgaSsrKSB7XG4gICAgaWYgKHN0cjFbc3RyMS5sZW5ndGggLSAoaSArIDEpXSAhPSBzdHIyW3N0cjIubGVuZ3RoIC0gKGkgKyAxKV0pIHtcbiAgICAgIHJldHVybiBzdHIxLnNsaWNlKC1pKTtcbiAgICB9XG4gIH1cbiAgcmV0dXJuIHN0cjEuc2xpY2UoLWkpO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gcmVwbGFjZVByZWZpeChzdHJpbmcsIG9sZFByZWZpeCwgbmV3UHJlZml4KSB7XG4gIGlmIChzdHJpbmcuc2xpY2UoMCwgb2xkUHJlZml4Lmxlbmd0aCkgIT0gb2xkUHJlZml4KSB7XG4gICAgdGhyb3cgRXJyb3IoYHN0cmluZyAke0pTT04uc3RyaW5naWZ5KHN0cmluZyl9IGRvZXNuJ3Qgc3RhcnQgd2l0aCBwcmVmaXggJHtKU09OLnN0cmluZ2lmeShvbGRQcmVmaXgpfTsgdGhpcyBpcyBhIGJ1Z2ApO1xuICB9XG4gIHJldHVybiBuZXdQcmVmaXggKyBzdHJpbmcuc2xpY2Uob2xkUHJlZml4Lmxlbmd0aCk7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiByZXBsYWNlU3VmZml4KHN0cmluZywgb2xkU3VmZml4LCBuZXdTdWZmaXgpIHtcbiAgaWYgKCFvbGRTdWZmaXgpIHtcbiAgICByZXR1cm4gc3RyaW5nICsgbmV3U3VmZml4O1xuICB9XG5cbiAgaWYgKHN0cmluZy5zbGljZSgtb2xkU3VmZml4Lmxlbmd0aCkgIT0gb2xkU3VmZml4KSB7XG4gICAgdGhyb3cgRXJyb3IoYHN0cmluZyAke0pTT04uc3RyaW5naWZ5KHN0cmluZyl9IGRvZXNuJ3QgZW5kIHdpdGggc3VmZml4ICR7SlNPTi5zdHJpbmdpZnkob2xkU3VmZml4KX07IHRoaXMgaXMgYSBidWdgKTtcbiAgfVxuICByZXR1cm4gc3RyaW5nLnNsaWNlKDAsIC1vbGRTdWZmaXgubGVuZ3RoKSArIG5ld1N1ZmZpeDtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIHJlbW92ZVByZWZpeChzdHJpbmcsIG9sZFByZWZpeCkge1xuICByZXR1cm4gcmVwbGFjZVByZWZpeChzdHJpbmcsIG9sZFByZWZpeCwgJycpO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gcmVtb3ZlU3VmZml4KHN0cmluZywgb2xkU3VmZml4KSB7XG4gIHJldHVybiByZXBsYWNlU3VmZml4KHN0cmluZywgb2xkU3VmZml4LCAnJyk7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBtYXhpbXVtT3ZlcmxhcChzdHJpbmcxLCBzdHJpbmcyKSB7XG4gIHJldHVybiBzdHJpbmcyLnNsaWNlKDAsIG92ZXJsYXBDb3VudChzdHJpbmcxLCBzdHJpbmcyKSk7XG59XG5cbi8vIE5pY2tlZCBmcm9tIGh0dHBzOi8vc3RhY2tvdmVyZmxvdy5jb20vYS82MDQyMjg1My8xNzA5NTg3XG5mdW5jdGlvbiBvdmVybGFwQ291bnQoYSwgYikge1xuICAvLyBEZWFsIHdpdGggY2FzZXMgd2hlcmUgdGhlIHN0cmluZ3MgZGlmZmVyIGluIGxlbmd0aFxuICBsZXQgc3RhcnRBID0gMDtcbiAgaWYgKGEubGVuZ3RoID4gYi5sZW5ndGgpIHsgc3RhcnRBID0gYS5sZW5ndGggLSBiLmxlbmd0aDsgfVxuICBsZXQgZW5kQiA9IGIubGVuZ3RoO1xuICBpZiAoYS5sZW5ndGggPCBiLmxlbmd0aCkgeyBlbmRCID0gYS5sZW5ndGg7IH1cbiAgLy8gQ3JlYXRlIGEgYmFjay1yZWZlcmVuY2UgZm9yIGVhY2ggaW5kZXhcbiAgLy8gICB0aGF0IHNob3VsZCBiZSBmb2xsb3dlZCBpbiBjYXNlIG9mIGEgbWlzbWF0Y2guXG4gIC8vICAgV2Ugb25seSBuZWVkIEIgdG8gbWFrZSB0aGVzZSByZWZlcmVuY2VzOlxuICBsZXQgbWFwID0gQXJyYXkoZW5kQik7XG4gIGxldCBrID0gMDsgLy8gSW5kZXggdGhhdCBsYWdzIGJlaGluZCBqXG4gIG1hcFswXSA9IDA7XG4gIGZvciAobGV0IGogPSAxOyBqIDwgZW5kQjsgaisrKSB7XG4gICAgICBpZiAoYltqXSA9PSBiW2tdKSB7XG4gICAgICAgICAgbWFwW2pdID0gbWFwW2tdOyAvLyBza2lwIG92ZXIgdGhlIHNhbWUgY2hhcmFjdGVyIChvcHRpb25hbCBvcHRpbWlzYXRpb24pXG4gICAgICB9IGVsc2Uge1xuICAgICAgICAgIG1hcFtqXSA9IGs7XG4gICAgICB9XG4gICAgICB3aGlsZSAoayA+IDAgJiYgYltqXSAhPSBiW2tdKSB7IGsgPSBtYXBba107IH1cbiAgICAgIGlmIChiW2pdID09IGJba10pIHsgaysrOyB9XG4gIH1cbiAgLy8gUGhhc2UgMjogdXNlIHRoZXNlIHJlZmVyZW5jZXMgd2hpbGUgaXRlcmF0aW5nIG92ZXIgQVxuICBrID0gMDtcbiAgZm9yIChsZXQgaSA9IHN0YXJ0QTsgaSA8IGEubGVuZ3RoOyBpKyspIHtcbiAgICAgIHdoaWxlIChrID4gMCAmJiBhW2ldICE9IGJba10pIHsgayA9IG1hcFtrXTsgfVxuICAgICAgaWYgKGFbaV0gPT0gYltrXSkgeyBrKys7IH1cbiAgfVxuICByZXR1cm4gaztcbn1cblxuXG4vKipcbiAqIFJldHVybnMgdHJ1ZSBpZiB0aGUgc3RyaW5nIGNvbnNpc3RlbnRseSB1c2VzIFdpbmRvd3MgbGluZSBlbmRpbmdzLlxuICovXG5leHBvcnQgZnVuY3Rpb24gaGFzT25seVdpbkxpbmVFbmRpbmdzKHN0cmluZykge1xuICByZXR1cm4gc3RyaW5nLmluY2x1ZGVzKCdcXHJcXG4nKSAmJiAhc3RyaW5nLnN0YXJ0c1dpdGgoJ1xcbicpICYmICFzdHJpbmcubWF0Y2goL1teXFxyXVxcbi8pO1xufVxuXG4vKipcbiAqIFJldHVybnMgdHJ1ZSBpZiB0aGUgc3RyaW5nIGNvbnNpc3RlbnRseSB1c2VzIFVuaXggbGluZSBlbmRpbmdzLlxuICovXG5leHBvcnQgZnVuY3Rpb24gaGFzT25seVVuaXhMaW5lRW5kaW5ncyhzdHJpbmcpIHtcbiAgcmV0dXJuICFzdHJpbmcuaW5jbHVkZXMoJ1xcclxcbicpICYmIHN0cmluZy5pbmNsdWRlcygnXFxuJyk7XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBTyxTQUFTQSxtQkFBbUJBLENBQUNDLElBQUksRUFBRUMsSUFBSSxFQUFFO0VBQzlDLElBQUlDLENBQUM7RUFDTCxLQUFLQSxDQUFDLEdBQUcsQ0FBQyxFQUFFQSxDQUFDLEdBQUdGLElBQUksQ0FBQ0csTUFBTSxJQUFJRCxDQUFDLEdBQUdELElBQUksQ0FBQ0UsTUFBTSxFQUFFRCxDQUFDLEVBQUUsRUFBRTtJQUNuRCxJQUFJRixJQUFJLENBQUNFLENBQUMsQ0FBQyxJQUFJRCxJQUFJLENBQUNDLENBQUMsQ0FBQyxFQUFFO01BQ3RCLE9BQU9GLElBQUksQ0FBQ0ksS0FBSyxDQUFDLENBQUMsRUFBRUYsQ0FBQyxDQUFDO0lBQ3pCO0VBQ0Y7RUFDQSxPQUFPRixJQUFJLENBQUNJLEtBQUssQ0FBQyxDQUFDLEVBQUVGLENBQUMsQ0FBQztBQUN6QjtBQUVPLFNBQVNHLG1CQUFtQkEsQ0FBQ0wsSUFBSSxFQUFFQyxJQUFJLEVBQUU7RUFDOUMsSUFBSUMsQ0FBQzs7RUFFTDtFQUNBO0VBQ0E7RUFDQSxJQUFJLENBQUNGLElBQUksSUFBSSxDQUFDQyxJQUFJLElBQUlELElBQUksQ0FBQ0EsSUFBSSxDQUFDRyxNQUFNLEdBQUcsQ0FBQyxDQUFDLElBQUlGLElBQUksQ0FBQ0EsSUFBSSxDQUFDRSxNQUFNLEdBQUcsQ0FBQyxDQUFDLEVBQUU7SUFDcEUsT0FBTyxFQUFFO0VBQ1g7RUFFQSxLQUFLRCxDQUFDLEdBQUcsQ0FBQyxFQUFFQSxDQUFDLEdBQUdGLElBQUksQ0FBQ0csTUFBTSxJQUFJRCxDQUFDLEdBQUdELElBQUksQ0FBQ0UsTUFBTSxFQUFFRCxDQUFDLEVBQUUsRUFBRTtJQUNuRCxJQUFJRixJQUFJ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
+
+
+/***/ }),
+
+/***/ 5560:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var wrappy = __nccwpck_require__(8264)
+module.exports = wrappy(once)
+module.exports.strict = wrappy(onceStrict)
+
+once.proto = once(function () {
+  Object.defineProperty(Function.prototype, 'once', {
+    value: function () {
+      return once(this)
+    },
+    configurable: true
+  })
+
+  Object.defineProperty(Function.prototype, 'onceStrict', {
+    value: function () {
+      return onceStrict(this)
+    },
+    configurable: true
+  })
+})
+
+function once (fn) {
+  var f = function () {
+    if (f.called) return f.value
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  f.called = false
+  return f
+}
+
+function onceStrict (fn) {
+  var f = function () {
+    if (f.called)
+      throw new Error(f.onceError)
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  var name = fn.name || 'Function wrapped with `once`'
+  f.onceError = name + " shouldn't be called more than once"
+  f.called = false
+  return f
+}
+
 
 /***/ }),
 
@@ -25626,6 +33459,114 @@ module.exports = {
 
 /***/ }),
 
+/***/ 3843:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+function getUserAgent() {
+  if (typeof navigator === "object" && "userAgent" in navigator) {
+    return navigator.userAgent;
+  }
+
+  if (typeof process === "object" && process.version !== undefined) {
+    return `Node.js/${process.version.substr(1)} (${process.platform}; ${process.arch})`;
+  }
+
+  return "<environment undetectable>";
+}
+
+exports.getUserAgent = getUserAgent;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 8264:
+/***/ ((module) => {
+
+// Returns a wrapper function that returns a wrapped callback
+// The wrapper function should do some stuff, and return a
+// presumably different callback function.
+// This makes sure that own properties are retained, so that
+// decorations and such are not lost along the way.
+module.exports = wrappy
+function wrappy (fn, cb) {
+  if (fn && cb) return wrappy(fn)(cb)
+
+  if (typeof fn !== 'function')
+    throw new TypeError('need wrapper function')
+
+  Object.keys(fn).forEach(function (k) {
+    wrapper[k] = fn[k]
+  })
+
+  return wrapper
+
+  function wrapper() {
+    var args = new Array(arguments.length)
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i]
+    }
+    var ret = fn.apply(this, args)
+    var cb = args[args.length-1]
+    if (typeof ret === 'function' && ret !== cb) {
+      Object.keys(cb).forEach(function (k) {
+        ret[k] = cb[k]
+      })
+    }
+    return ret
+  }
+}
+
+
+/***/ }),
+
+/***/ 7242:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.COMMENT_FOOTER = exports.MAX_GITHUB_COMMENT_BODY_SIZE = exports.GET_COMMENTS_QUERY = exports.REMOVE_COMMENT_QUERY = exports.MINIMIZE_COMMENT_QUERY = void 0;
+exports.MINIMIZE_COMMENT_QUERY = `
+  mutation minimizeComment($id: ID!) {
+    minimizeComment(input: { classifier: OUTDATED, subjectId: $id }) {
+      clientMutationId
+    }
+  }
+`;
+exports.REMOVE_COMMENT_QUERY = `
+  mutation ($id: ID!) {
+    deleteIssueComment(input: { id: $id }) {
+      clientMutationId
+    }
+  }
+`;
+exports.GET_COMMENTS_QUERY = `
+  query comments($owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+      pullRequest(number: $number) {
+        comments(last: 100, orderBy: { field: UPDATED_AT, direction: DESC }) {
+          nodes {
+            id
+            body
+            isMinimized
+          }
+        }
+      }
+    }
+  }
+`;
+exports.MAX_GITHUB_COMMENT_BODY_SIZE = 65536;
+exports.COMMENT_FOOTER = '###### Generated via `terra-pr-commenter` GHA';
+
+
+/***/ }),
+
 /***/ 1730:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -25657,25 +33598,293 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
-const wait_1 = __nccwpck_require__(910);
+const fs = __importStar(__nccwpck_require__(9896));
+const utils_1 = __nccwpck_require__(1798);
+const diff = __importStar(__nccwpck_require__(2823));
+const yaml = __importStar(__nccwpck_require__(8815));
+const github = __importStar(__nccwpck_require__(3228));
+const constants_1 = __nccwpck_require__(7242);
+const pull_request_1 = __nccwpck_require__(5964);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
     try {
-        const ms = core.getInput('milliseconds');
-        // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-        core.debug(`Waiting ${ms} milliseconds ...`);
-        // Log the current timestamp, wait, then log the new timestamp
-        core.debug(new Date().toTimeString());
-        await (0, wait_1.wait)(parseInt(ms, 10));
-        core.debug(new Date().toTimeString());
-        // Set outputs for other workflow steps to use
-        core.setOutput('time', new Date().toTimeString());
+        // Define action inputs
+        const tfPlanLookupDir = core.getInput('tf-plan-lookup-dir');
+        const tfPlanLookupName = core.getInput('tf-plan-lookup-name');
+        const githubtoken = core.getInput('github-token');
+        const expandComment = core.getBooleanInput('expand-comment');
+        const headingPlanVariableName = core.getInput('heading-plan-variable-name');
+        const commentHeader = core.getInput('comment-header');
+        const removePreviousComments = core.getBooleanInput('remove-previous-comments');
+        const octokit = github.getOctokit(githubtoken);
+        const context = github.context;
+        // todo(): add input validation
+        // Find TF plan JSON files
+        // todo(): simplify this function and allow customizing max-depth
+        const tfPlanFiles = (0, utils_1.findTFPlans)(tfPlanLookupDir, tfPlanLookupName, 2);
+        const planComments = [];
+        // Go through TF plans and create comment bodies
+        for (const tfPlan of tfPlanFiles) {
+            core.info(`Parsing TF plan: ${tfPlan}`);
+            const planContent = fs.readFileSync(tfPlan);
+            const parsedContent = JSON.parse(planContent.toString());
+            let resolvedCommentHeader = commentHeader;
+            const planChanges = {
+                CreateResourcesCount: 0,
+                UpdateResourcesCount: 0,
+                DestroyResourcesCount: 0,
+                ReplaceResourcesCount: 0,
+                ImportResourcesCount: 0,
+                ResouceChangeBody: []
+            };
+            // If 'heading-plan-variable-name' is passed - use this variable for resolving heading value
+            if (headingPlanVariableName !== '') {
+                // Check if passed variable actually exists in the plan
+                if ('variables' in parsedContent &&
+                    headingPlanVariableName in parsedContent['variables']) {
+                    resolvedCommentHeader =
+                        parsedContent['variables'][headingPlanVariableName]['value'];
+                }
+                else {
+                    core.warning(`Passed variable ${headingPlanVariableName} doesn't exist in the plan. Defaulting to ${resolvedCommentHeader}`);
+                }
+            }
+            let resourceChanges = [];
+            try {
+                resourceChanges = parsedContent['resource_changes'];
+                // Parse resource changes
+                for (const resourceChange of resourceChanges) {
+                    const resourceAddress = resourceChange['address'];
+                    const resourceChangeDetails = resourceChange['change'];
+                    const resourceChangeActions = resourceChangeDetails['actions'];
+                    const beforeChanges = resourceChangeDetails['before']
+                        ? resourceChangeDetails['before']
+                        : {};
+                    const afterChanges = resourceChangeDetails['after']
+                        ? resourceChangeDetails['after']
+                        : {};
+                    const beforeSensitiveParams = resourceChangeDetails['before_sensitive']
+                        ? resourceChangeDetails['before_sensitive']
+                        : {};
+                    const afterSensitiveParams = resourceChangeDetails['after_sensitive']
+                        ? resourceChangeDetails['after_sensitive']
+                        : {};
+                    // To prevent exposing sensitive data:
+                    // 1. Remove sensitive field if there was no change for it
+                    // 2. Mask sensitive field if there was a change
+                    for (const sensitiveParamKey in beforeSensitiveParams) {
+                        if (beforeChanges[sensitiveParamKey] ===
+                            afterChanges[sensitiveParamKey]) {
+                            delete beforeChanges[sensitiveParamKey];
+                            delete afterChanges[sensitiveParamKey];
+                        }
+                        else {
+                            if (sensitiveParamKey in beforeChanges) {
+                                beforeChanges[sensitiveParamKey] = '(OLD_SENSITIVE_VALUE)';
+                            }
+                            if (sensitiveParamKey in afterChanges) {
+                                afterChanges[sensitiveParamKey] = '(NEW_SENSITIVE_VALUE)';
+                            }
+                        }
+                    }
+                    for (const sensitiveParamKey in afterSensitiveParams) {
+                        if (beforeChanges[sensitiveParamKey] ===
+                            afterChanges[sensitiveParamKey]) {
+                            delete beforeChanges[sensitiveParamKey];
+                            delete afterChanges[sensitiveParamKey];
+                        }
+                        else {
+                            if (sensitiveParamKey in beforeChanges) {
+                                beforeChanges[sensitiveParamKey] = '(OLD_SENSITIVE_VALUE)';
+                            }
+                            if (sensitiveParamKey in afterChanges) {
+                                afterChanges[sensitiveParamKey] = '(NEW_SENSITIVE_VALUE)';
+                            }
+                        }
+                    }
+                    // Resolve resource change action
+                    let overallAction = '';
+                    let noChanges = true;
+                    switch (resourceChangeActions[0]) {
+                        case 'no-op':
+                            if ('importing' in resourceChangeDetails) {
+                                planChanges.ImportResourcesCount += 1;
+                                overallAction = 'Import';
+                                noChanges = false;
+                            }
+                            else {
+                                continue;
+                            }
+                            break;
+                        case 'create':
+                            noChanges = false;
+                            overallAction = 'Create';
+                            planChanges.CreateResourcesCount += 1;
+                            break;
+                        case 'delete':
+                            noChanges = false;
+                            if (resourceChangeActions.includes('delete') &&
+                                resourceChangeActions.includes('create')) {
+                                planChanges.CreateResourcesCount += 1;
+                                planChanges.DestroyResourcesCount += 1;
+                                planChanges.ReplaceResourcesCount += 1;
+                                overallAction = 'Replace';
+                            }
+                            else {
+                                planChanges.DestroyResourcesCount += 1;
+                                overallAction = 'Destroy';
+                            }
+                            break;
+                        case 'update':
+                            noChanges = false;
+                            planChanges.UpdateResourcesCount += 1;
+                            overallAction = 'Update';
+                            break;
+                    }
+                    if (noChanges) {
+                        continue;
+                    }
+                    // Create a diff from before and after changes
+                    const beforeYaml = yaml.stringify(beforeChanges);
+                    const afterYaml = yaml.stringify(afterChanges);
+                    let changeDiff = '';
+                    if (overallAction === 'Create' ||
+                        overallAction === 'Update' ||
+                        overallAction === 'Import') {
+                        changeDiff = diff.createPatch(resourceAddress, beforeYaml, afterYaml, undefined, overallAction);
+                    }
+                    else {
+                        changeDiff = diff.createPatch(resourceAddress, beforeYaml, afterYaml, overallAction, undefined);
+                    }
+                    // Sanitize diff to be more readable
+                    // 1. Remove lines without changes (that don't start with '+' or '-')
+                    changeDiff = changeDiff.replace(/^(?![+-]).*\n?/gm, '');
+                    // 2. Remove lines that only has '-{}' or '+{}'
+                    changeDiff = changeDiff.replace(/^-{}\n?/gm, '');
+                    changeDiff = changeDiff.replace(/^\+{}\n?/gm, '');
+                    // 3. Add diff heading
+                    changeDiff = `
+Resource: ${resourceAddress}
+===================================================================
+${changeDiff}
+`;
+                    planChanges.ResouceChangeBody.push({
+                        Address: resourceAddress,
+                        ChangeDif: changeDiff,
+                        Action: overallAction
+                    });
+                }
+            }
+            catch (error) {
+                if (error instanceof Error)
+                    core.setFailed(`TF plan ${tfPlan} is invalid: ${error}`);
+                return;
+            }
+            if (planChanges.ResouceChangeBody.length === 0) {
+                continue;
+            }
+            // Create change content for comment body
+            let resourcesToCreateContent = `
+#### Resources to create:
+
+`;
+            let resourcesToDestroyContent = `
+#### Resources to destroy:
+
+`;
+            let resourcesToUpdateContent = `
+#### Resources to update:
+
+`;
+            let resourcesToReplaceContent = `
+#### Resources to replace:
+
+`;
+            let resourcesToImportContent = `
+#### Resources to import:
+
+`;
+            for (const resourceChangeBody of planChanges.ResouceChangeBody) {
+                switch (resourceChangeBody.Action) {
+                    case 'Import':
+                        resourcesToImportContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                        break;
+                    case 'Create':
+                        resourcesToCreateContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                        break;
+                    case 'Update':
+                        resourcesToUpdateContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                        break;
+                    case 'Destroy':
+                        resourcesToDestroyContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                        break;
+                    case 'Replace':
+                        resourcesToReplaceContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                        break;
+                }
+            }
+            // Create comment
+            const commentBody = `
+<b>${resolvedCommentHeader}<b>
+
+![Create](https://img.shields.io/badge/Create-${planChanges.CreateResourcesCount}-brightgreen) ![Update](https://img.shields.io/badge/Update-${planChanges.UpdateResourcesCount}-yellow) ![Replace](https://img.shields.io/badge/Replace-${planChanges.ReplaceResourcesCount}-orange) ![Destroy](https://img.shields.io/badge/Destroy-${planChanges.DestroyResourcesCount}-red) ![Import](https://img.shields.io/badge/Import-${planChanges.ImportResourcesCount}-blue)
+<details${expandComment ? ' open' : ''}>
+<summary>
+<b>Resource changes:</b>
+</summary>
+
+${planChanges.CreateResourcesCount > planChanges.ReplaceResourcesCount ? resourcesToCreateContent : ''}
+${planChanges.DestroyResourcesCount > planChanges.ReplaceResourcesCount ? resourcesToDestroyContent : ''}
+${planChanges.UpdateResourcesCount > 0 ? resourcesToUpdateContent : ''}
+${planChanges.ReplaceResourcesCount > 0 ? resourcesToReplaceContent : ''}
+${planChanges.ImportResourcesCount > 0 ? resourcesToImportContent : ''}
+</details>
+
+${constants_1.COMMENT_FOOTER}
+`;
+            // todo(): handle cases when comments are too large instead of failing the action.
+            // In theory - it shouldn't happen as the output is already compressed quite a lot
+            // and reaching the '65536' characters limit shouldn't really happen
+            if (commentBody.length > constants_1.MAX_GITHUB_COMMENT_BODY_SIZE) {
+                core.setFailed(`Comment body size is too large for GitHub comment: ${commentBody.length} > ${constants_1.MAX_GITHUB_COMMENT_BODY_SIZE}`);
+                return;
+            }
+            planComments.push(commentBody);
+        }
+        if (planComments.length === 0) {
+            // todo(): allow disabling this comment
+            planComments.push(`
+\`\`\`No changes. Your infrastructure matches the configuration.\`\`\`
+
+###### Generated via \`terra-pr-commenter\` GHA
+`);
+        }
+        // Remove previous comments that were created by this action
+        await (0, pull_request_1.RemoveCommentsByLookupText)(octokit, context, constants_1.COMMENT_FOOTER);
+        // Create a comment for each plan
+        for (const planComment of planComments) {
+            await (0, pull_request_1.CreatePRComment)(octokit, context, planComment);
+        }
     }
     catch (error) {
-        // Fail the workflow run if an error occurs
         if (error instanceof Error)
             core.setFailed(error.message);
     }
@@ -25684,26 +33893,149 @@ async function run() {
 
 /***/ }),
 
-/***/ 910:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 5964:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = wait;
-/**
- * Wait for a number of milliseconds.
- * @param milliseconds The number of milliseconds to wait.
- * @returns {Promise<string>} Resolves with 'done!' after the wait is over.
- */
-async function wait(milliseconds) {
-    return new Promise(resolve => {
-        if (isNaN(milliseconds)) {
-            throw new Error('milliseconds not a number');
-        }
-        setTimeout(() => resolve('done!'), milliseconds);
+exports.QueryCommentsByLookupText = exports.RemoveCommentsByLookupText = exports.CreatePRComment = void 0;
+const constants_1 = __nccwpck_require__(7242);
+const core = __importStar(__nccwpck_require__(7484));
+const CreatePRComment = async (octokit, context, commentBody) => {
+    await octokit.rest.issues.createComment({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        body: commentBody
     });
-}
+};
+exports.CreatePRComment = CreatePRComment;
+const RemoveCommentsByLookupText = async (octokit, context, lookupText) => {
+    const targetComments = await (0, exports.QueryCommentsByLookupText)(octokit, context, lookupText);
+    targetComments.forEach(async (comment) => {
+        try {
+            await octokit.graphql(constants_1.REMOVE_COMMENT_QUERY, {
+                id: comment.id
+            });
+        }
+        catch (error) {
+            core.warning(`Failed to remove the comment ${comment.id} for PR #${context.issue.number}`);
+        }
+    });
+};
+exports.RemoveCommentsByLookupText = RemoveCommentsByLookupText;
+const QueryCommentsByLookupText = async (octokit, context, lookupText) => {
+    const issueCommentsResponse = await octokit.graphql(constants_1.GET_COMMENTS_QUERY, {
+        owner: context.repo.owner,
+        name: context.repo.repo,
+        number: context.issue.number
+    });
+    core.info(`Successfully retrieved all comments in PR #${context.issue.number}.`);
+    const issueComments = issueCommentsResponse.repository.pullRequest.comments.nodes;
+    const filteredComments = issueComments.filter(comment => comment.body.includes(lookupText));
+    if (filteredComments.length === 0) {
+        core.info(`No comments containing lookup text '${lookupText}' were found. Skipping the deletion`);
+        return [];
+    }
+    else {
+        core.info(`${filteredComments.length} comments will be removed from PR #${context.issue.number}`);
+    }
+    return filteredComments;
+};
+exports.QueryCommentsByLookupText = QueryCommentsByLookupText;
+
+
+/***/ }),
+
+/***/ 1798:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findTFPlans = void 0;
+const fs = __importStar(__nccwpck_require__(9896));
+const path = __importStar(__nccwpck_require__(6928));
+/**
+ * Iteratively searches for all files with the specified name, starting from a lookup directory.
+ * @param lookupDir The directory to start the search from.
+ * @param fileName The name of the file to look for.
+ * @returns An array of paths to the found files, or an empty array if no files were found.
+ */
+const findTFPlans = (lookupDir, planName, maxDepth) => {
+    const dirsToCheck = [
+        { dir: lookupDir, depth: 0 }
+    ];
+    const foundPaths = [];
+    while (dirsToCheck.length > 0) {
+        const { dir: currentDir, depth } = dirsToCheck.shift();
+        if (depth > maxDepth)
+            continue;
+        const entries = fs.readdirSync(currentDir);
+        for (const entry of entries) {
+            const fullPath = path.join(currentDir, entry);
+            const stat = fs.statSync(fullPath);
+            if (stat.isDirectory()) {
+                // Add subdirectory to the queue with an incremented depth
+                dirsToCheck.push({ dir: fullPath, depth: depth + 1 });
+            }
+            else if (entry === planName) {
+                // Add the path to the found paths array
+                foundPaths.push(fullPath);
+            }
+        }
+    }
+    // Return the array of found paths
+    return foundPaths;
+};
+exports.findTFPlans = findTFPlans;
 
 
 /***/ }),
@@ -27569,6 +35901,8566 @@ function parseParams (str) {
 }
 
 module.exports = parseParams
+
+
+/***/ }),
+
+/***/ 7349:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var Scalar = __nccwpck_require__(3301);
+var YAMLMap = __nccwpck_require__(4454);
+var YAMLSeq = __nccwpck_require__(2223);
+var resolveBlockMap = __nccwpck_require__(7103);
+var resolveBlockSeq = __nccwpck_require__(334);
+var resolveFlowCollection = __nccwpck_require__(3142);
+
+function resolveCollection(CN, ctx, token, onError, tagName, tag) {
+    const coll = token.type === 'block-map'
+        ? resolveBlockMap.resolveBlockMap(CN, ctx, token, onError, tag)
+        : token.type === 'block-seq'
+            ? resolveBlockSeq.resolveBlockSeq(CN, ctx, token, onError, tag)
+            : resolveFlowCollection.resolveFlowCollection(CN, ctx, token, onError, tag);
+    const Coll = coll.constructor;
+    // If we got a tagName matching the class, or the tag name is '!',
+    // then use the tagName from the node class used to create it.
+    if (tagName === '!' || tagName === Coll.tagName) {
+        coll.tag = Coll.tagName;
+        return coll;
+    }
+    if (tagName)
+        coll.tag = tagName;
+    return coll;
+}
+function composeCollection(CN, ctx, token, props, onError) {
+    const tagToken = props.tag;
+    const tagName = !tagToken
+        ? null
+        : ctx.directives.tagName(tagToken.source, msg => onError(tagToken, 'TAG_RESOLVE_FAILED', msg));
+    if (token.type === 'block-seq') {
+        const { anchor, newlineAfterProp: nl } = props;
+        const lastProp = anchor && tagToken
+            ? anchor.offset > tagToken.offset
+                ? anchor
+                : tagToken
+            : (anchor ?? tagToken);
+        if (lastProp && (!nl || nl.offset < lastProp.offset)) {
+            const message = 'Missing newline after block sequence props';
+            onError(lastProp, 'MISSING_CHAR', message);
+        }
+    }
+    const expType = token.type === 'block-map'
+        ? 'map'
+        : token.type === 'block-seq'
+            ? 'seq'
+            : token.start.source === '{'
+                ? 'map'
+                : 'seq';
+    // shortcut: check if it's a generic YAMLMap or YAMLSeq
+    // before jumping into the custom tag logic.
+    if (!tagToken ||
+        !tagName ||
+        tagName === '!' ||
+        (tagName === YAMLMap.YAMLMap.tagName && expType === 'map') ||
+        (tagName === YAMLSeq.YAMLSeq.tagName && expType === 'seq')) {
+        return resolveCollection(CN, ctx, token, onError, tagName);
+    }
+    let tag = ctx.schema.tags.find(t => t.tag === tagName && t.collection === expType);
+    if (!tag) {
+        const kt = ctx.schema.knownTags[tagName];
+        if (kt && kt.collection === expType) {
+            ctx.schema.tags.push(Object.assign({}, kt, { default: false }));
+            tag = kt;
+        }
+        else {
+            if (kt?.collection) {
+                onError(tagToken, 'BAD_COLLECTION_TYPE', `${kt.tag} used for ${expType} collection, but expects ${kt.collection}`, true);
+            }
+            else {
+                onError(tagToken, 'TAG_RESOLVE_FAILED', `Unresolved tag: ${tagName}`, true);
+            }
+            return resolveCollection(CN, ctx, token, onError, tagName);
+        }
+    }
+    const coll = resolveCollection(CN, ctx, token, onError, tagName, tag);
+    const res = tag.resolve?.(coll, msg => onError(tagToken, 'TAG_RESOLVE_FAILED', msg), ctx.options) ?? coll;
+    const node = identity.isNode(res)
+        ? res
+        : new Scalar.Scalar(res);
+    node.range = coll.range;
+    node.tag = tagName;
+    if (tag?.format)
+        node.format = tag.format;
+    return node;
+}
+
+exports.composeCollection = composeCollection;
+
+
+/***/ }),
+
+/***/ 3683:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Document = __nccwpck_require__(3021);
+var composeNode = __nccwpck_require__(5937);
+var resolveEnd = __nccwpck_require__(7788);
+var resolveProps = __nccwpck_require__(4631);
+
+function composeDoc(options, directives, { offset, start, value, end }, onError) {
+    const opts = Object.assign({ _directives: directives }, options);
+    const doc = new Document.Document(undefined, opts);
+    const ctx = {
+        atKey: false,
+        atRoot: true,
+        directives: doc.directives,
+        options: doc.options,
+        schema: doc.schema
+    };
+    const props = resolveProps.resolveProps(start, {
+        indicator: 'doc-start',
+        next: value ?? end?.[0],
+        offset,
+        onError,
+        parentIndent: 0,
+        startOnNewline: true
+    });
+    if (props.found) {
+        doc.directives.docStart = true;
+        if (value &&
+            (value.type === 'block-map' || value.type === 'block-seq') &&
+            !props.hasNewline)
+            onError(props.end, 'MISSING_CHAR', 'Block collection cannot start on same line with directives-end marker');
+    }
+    // @ts-expect-error If Contents is set, let's trust the user
+    doc.contents = value
+        ? composeNode.composeNode(ctx, value, props, onError)
+        : composeNode.composeEmptyNode(ctx, props.end, start, null, props, onError);
+    const contentEnd = doc.contents.range[2];
+    const re = resolveEnd.resolveEnd(end, contentEnd, false, onError);
+    if (re.comment)
+        doc.comment = re.comment;
+    doc.range = [offset, contentEnd, re.offset];
+    return doc;
+}
+
+exports.composeDoc = composeDoc;
+
+
+/***/ }),
+
+/***/ 5937:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Alias = __nccwpck_require__(4065);
+var identity = __nccwpck_require__(1127);
+var composeCollection = __nccwpck_require__(7349);
+var composeScalar = __nccwpck_require__(5413);
+var resolveEnd = __nccwpck_require__(7788);
+var utilEmptyScalarPosition = __nccwpck_require__(2599);
+
+const CN = { composeNode, composeEmptyNode };
+function composeNode(ctx, token, props, onError) {
+    const atKey = ctx.atKey;
+    const { spaceBefore, comment, anchor, tag } = props;
+    let node;
+    let isSrcToken = true;
+    switch (token.type) {
+        case 'alias':
+            node = composeAlias(ctx, token, onError);
+            if (anchor || tag)
+                onError(token, 'ALIAS_PROPS', 'An alias node must not specify any properties');
+            break;
+        case 'scalar':
+        case 'single-quoted-scalar':
+        case 'double-quoted-scalar':
+        case 'block-scalar':
+            node = composeScalar.composeScalar(ctx, token, tag, onError);
+            if (anchor)
+                node.anchor = anchor.source.substring(1);
+            break;
+        case 'block-map':
+        case 'block-seq':
+        case 'flow-collection':
+            node = composeCollection.composeCollection(CN, ctx, token, props, onError);
+            if (anchor)
+                node.anchor = anchor.source.substring(1);
+            break;
+        default: {
+            const message = token.type === 'error'
+                ? token.message
+                : `Unsupported token (type: ${token.type})`;
+            onError(token, 'UNEXPECTED_TOKEN', message);
+            node = composeEmptyNode(ctx, token.offset, undefined, null, props, onError);
+            isSrcToken = false;
+        }
+    }
+    if (anchor && node.anchor === '')
+        onError(anchor, 'BAD_ALIAS', 'Anchor cannot be an empty string');
+    if (atKey &&
+        ctx.options.stringKeys &&
+        (!identity.isScalar(node) ||
+            typeof node.value !== 'string' ||
+            (node.tag && node.tag !== 'tag:yaml.org,2002:str'))) {
+        const msg = 'With stringKeys, all keys must be strings';
+        onError(tag ?? token, 'NON_STRING_KEY', msg);
+    }
+    if (spaceBefore)
+        node.spaceBefore = true;
+    if (comment) {
+        if (token.type === 'scalar' && token.source === '')
+            node.comment = comment;
+        else
+            node.commentBefore = comment;
+    }
+    // @ts-expect-error Type checking misses meaning of isSrcToken
+    if (ctx.options.keepSourceTokens && isSrcToken)
+        node.srcToken = token;
+    return node;
+}
+function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor, tag, end }, onError) {
+    const token = {
+        type: 'scalar',
+        offset: utilEmptyScalarPosition.emptyScalarPosition(offset, before, pos),
+        indent: -1,
+        source: ''
+    };
+    const node = composeScalar.composeScalar(ctx, token, tag, onError);
+    if (anchor) {
+        node.anchor = anchor.source.substring(1);
+        if (node.anchor === '')
+            onError(anchor, 'BAD_ALIAS', 'Anchor cannot be an empty string');
+    }
+    if (spaceBefore)
+        node.spaceBefore = true;
+    if (comment) {
+        node.comment = comment;
+        node.range[2] = end;
+    }
+    return node;
+}
+function composeAlias({ options }, { offset, source, end }, onError) {
+    const alias = new Alias.Alias(source.substring(1));
+    if (alias.source === '')
+        onError(offset, 'BAD_ALIAS', 'Alias cannot be an empty string');
+    if (alias.source.endsWith(':'))
+        onError(offset + source.length - 1, 'BAD_ALIAS', 'Alias ending in : is ambiguous', true);
+    const valueEnd = offset + source.length;
+    const re = resolveEnd.resolveEnd(end, valueEnd, options.strict, onError);
+    alias.range = [offset, valueEnd, re.offset];
+    if (re.comment)
+        alias.comment = re.comment;
+    return alias;
+}
+
+exports.composeEmptyNode = composeEmptyNode;
+exports.composeNode = composeNode;
+
+
+/***/ }),
+
+/***/ 5413:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var Scalar = __nccwpck_require__(3301);
+var resolveBlockScalar = __nccwpck_require__(8913);
+var resolveFlowScalar = __nccwpck_require__(6842);
+
+function composeScalar(ctx, token, tagToken, onError) {
+    const { value, type, comment, range } = token.type === 'block-scalar'
+        ? resolveBlockScalar.resolveBlockScalar(ctx, token, onError)
+        : resolveFlowScalar.resolveFlowScalar(token, ctx.options.strict, onError);
+    const tagName = tagToken
+        ? ctx.directives.tagName(tagToken.source, msg => onError(tagToken, 'TAG_RESOLVE_FAILED', msg))
+        : null;
+    let tag;
+    if (ctx.options.stringKeys && ctx.atKey) {
+        tag = ctx.schema[identity.SCALAR];
+    }
+    else if (tagName)
+        tag = findScalarTagByName(ctx.schema, value, tagName, tagToken, onError);
+    else if (token.type === 'scalar')
+        tag = findScalarTagByTest(ctx, value, token, onError);
+    else
+        tag = ctx.schema[identity.SCALAR];
+    let scalar;
+    try {
+        const res = tag.resolve(value, msg => onError(tagToken ?? token, 'TAG_RESOLVE_FAILED', msg), ctx.options);
+        scalar = identity.isScalar(res) ? res : new Scalar.Scalar(res);
+    }
+    catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        onError(tagToken ?? token, 'TAG_RESOLVE_FAILED', msg);
+        scalar = new Scalar.Scalar(value);
+    }
+    scalar.range = range;
+    scalar.source = value;
+    if (type)
+        scalar.type = type;
+    if (tagName)
+        scalar.tag = tagName;
+    if (tag.format)
+        scalar.format = tag.format;
+    if (comment)
+        scalar.comment = comment;
+    return scalar;
+}
+function findScalarTagByName(schema, value, tagName, tagToken, onError) {
+    if (tagName === '!')
+        return schema[identity.SCALAR]; // non-specific tag
+    const matchWithTest = [];
+    for (const tag of schema.tags) {
+        if (!tag.collection && tag.tag === tagName) {
+            if (tag.default && tag.test)
+                matchWithTest.push(tag);
+            else
+                return tag;
+        }
+    }
+    for (const tag of matchWithTest)
+        if (tag.test?.test(value))
+            return tag;
+    const kt = schema.knownTags[tagName];
+    if (kt && !kt.collection) {
+        // Ensure that the known tag is available for stringifying,
+        // but does not get used by default.
+        schema.tags.push(Object.assign({}, kt, { default: false, test: undefined }));
+        return kt;
+    }
+    onError(tagToken, 'TAG_RESOLVE_FAILED', `Unresolved tag: ${tagName}`, tagName !== 'tag:yaml.org,2002:str');
+    return schema[identity.SCALAR];
+}
+function findScalarTagByTest({ atKey, directives, schema }, value, token, onError) {
+    const tag = schema.tags.find(tag => (tag.default === true || (atKey && tag.default === 'key')) &&
+        tag.test?.test(value)) || schema[identity.SCALAR];
+    if (schema.compat) {
+        const compat = schema.compat.find(tag => tag.default && tag.test?.test(value)) ??
+            schema[identity.SCALAR];
+        if (tag.tag !== compat.tag) {
+            const ts = directives.tagString(tag.tag);
+            const cs = directives.tagString(compat.tag);
+            const msg = `Value may be parsed as either ${ts} or ${cs}`;
+            onError(token, 'TAG_RESOLVE_FAILED', msg, true);
+        }
+    }
+    return tag;
+}
+
+exports.composeScalar = composeScalar;
+
+
+/***/ }),
+
+/***/ 9984:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var directives = __nccwpck_require__(1342);
+var Document = __nccwpck_require__(3021);
+var errors = __nccwpck_require__(1464);
+var identity = __nccwpck_require__(1127);
+var composeDoc = __nccwpck_require__(3683);
+var resolveEnd = __nccwpck_require__(7788);
+
+function getErrorPos(src) {
+    if (typeof src === 'number')
+        return [src, src + 1];
+    if (Array.isArray(src))
+        return src.length === 2 ? src : [src[0], src[1]];
+    const { offset, source } = src;
+    return [offset, offset + (typeof source === 'string' ? source.length : 1)];
+}
+function parsePrelude(prelude) {
+    let comment = '';
+    let atComment = false;
+    let afterEmptyLine = false;
+    for (let i = 0; i < prelude.length; ++i) {
+        const source = prelude[i];
+        switch (source[0]) {
+            case '#':
+                comment +=
+                    (comment === '' ? '' : afterEmptyLine ? '\n\n' : '\n') +
+                        (source.substring(1) || ' ');
+                atComment = true;
+                afterEmptyLine = false;
+                break;
+            case '%':
+                if (prelude[i + 1]?.[0] !== '#')
+                    i += 1;
+                atComment = false;
+                break;
+            default:
+                // This may be wrong after doc-end, but in that case it doesn't matter
+                if (!atComment)
+                    afterEmptyLine = true;
+                atComment = false;
+        }
+    }
+    return { comment, afterEmptyLine };
+}
+/**
+ * Compose a stream of CST nodes into a stream of YAML Documents.
+ *
+ * ```ts
+ * import { Composer, Parser } from 'yaml'
+ *
+ * const src: string = ...
+ * const tokens = new Parser().parse(src)
+ * const docs = new Composer().compose(tokens)
+ * ```
+ */
+class Composer {
+    constructor(options = {}) {
+        this.doc = null;
+        this.atDirectives = false;
+        this.prelude = [];
+        this.errors = [];
+        this.warnings = [];
+        this.onError = (source, code, message, warning) => {
+            const pos = getErrorPos(source);
+            if (warning)
+                this.warnings.push(new errors.YAMLWarning(pos, code, message));
+            else
+                this.errors.push(new errors.YAMLParseError(pos, code, message));
+        };
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        this.directives = new directives.Directives({ version: options.version || '1.2' });
+        this.options = options;
+    }
+    decorate(doc, afterDoc) {
+        const { comment, afterEmptyLine } = parsePrelude(this.prelude);
+        //console.log({ dc: doc.comment, prelude, comment })
+        if (comment) {
+            const dc = doc.contents;
+            if (afterDoc) {
+                doc.comment = doc.comment ? `${doc.comment}\n${comment}` : comment;
+            }
+            else if (afterEmptyLine || doc.directives.docStart || !dc) {
+                doc.commentBefore = comment;
+            }
+            else if (identity.isCollection(dc) && !dc.flow && dc.items.length > 0) {
+                let it = dc.items[0];
+                if (identity.isPair(it))
+                    it = it.key;
+                const cb = it.commentBefore;
+                it.commentBefore = cb ? `${comment}\n${cb}` : comment;
+            }
+            else {
+                const cb = dc.commentBefore;
+                dc.commentBefore = cb ? `${comment}\n${cb}` : comment;
+            }
+        }
+        if (afterDoc) {
+            Array.prototype.push.apply(doc.errors, this.errors);
+            Array.prototype.push.apply(doc.warnings, this.warnings);
+        }
+        else {
+            doc.errors = this.errors;
+            doc.warnings = this.warnings;
+        }
+        this.prelude = [];
+        this.errors = [];
+        this.warnings = [];
+    }
+    /**
+     * Current stream status information.
+     *
+     * Mostly useful at the end of input for an empty stream.
+     */
+    streamInfo() {
+        return {
+            comment: parsePrelude(this.prelude).comment,
+            directives: this.directives,
+            errors: this.errors,
+            warnings: this.warnings
+        };
+    }
+    /**
+     * Compose tokens into documents.
+     *
+     * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
+     * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
+     */
+    *compose(tokens, forceDoc = false, endOffset = -1) {
+        for (const token of tokens)
+            yield* this.next(token);
+        yield* this.end(forceDoc, endOffset);
+    }
+    /** Advance the composer by one CST token. */
+    *next(token) {
+        if (process.env.LOG_STREAM)
+            console.dir(token, { depth: null });
+        switch (token.type) {
+            case 'directive':
+                this.directives.add(token.source, (offset, message, warning) => {
+                    const pos = getErrorPos(token);
+                    pos[0] += offset;
+                    this.onError(pos, 'BAD_DIRECTIVE', message, warning);
+                });
+                this.prelude.push(token.source);
+                this.atDirectives = true;
+                break;
+            case 'document': {
+                const doc = composeDoc.composeDoc(this.options, this.directives, token, this.onError);
+                if (this.atDirectives && !doc.directives.docStart)
+                    this.onError(token, 'MISSING_CHAR', 'Missing directives-end/doc-start indicator line');
+                this.decorate(doc, false);
+                if (this.doc)
+                    yield this.doc;
+                this.doc = doc;
+                this.atDirectives = false;
+                break;
+            }
+            case 'byte-order-mark':
+            case 'space':
+                break;
+            case 'comment':
+            case 'newline':
+                this.prelude.push(token.source);
+                break;
+            case 'error': {
+                const msg = token.source
+                    ? `${token.message}: ${JSON.stringify(token.source)}`
+                    : token.message;
+                const error = new errors.YAMLParseError(getErrorPos(token), 'UNEXPECTED_TOKEN', msg);
+                if (this.atDirectives || !this.doc)
+                    this.errors.push(error);
+                else
+                    this.doc.errors.push(error);
+                break;
+            }
+            case 'doc-end': {
+                if (!this.doc) {
+                    const msg = 'Unexpected doc-end without preceding document';
+                    this.errors.push(new errors.YAMLParseError(getErrorPos(token), 'UNEXPECTED_TOKEN', msg));
+                    break;
+                }
+                this.doc.directives.docEnd = true;
+                const end = resolveEnd.resolveEnd(token.end, token.offset + token.source.length, this.doc.options.strict, this.onError);
+                this.decorate(this.doc, true);
+                if (end.comment) {
+                    const dc = this.doc.comment;
+                    this.doc.comment = dc ? `${dc}\n${end.comment}` : end.comment;
+                }
+                this.doc.range[2] = end.offset;
+                break;
+            }
+            default:
+                this.errors.push(new errors.YAMLParseError(getErrorPos(token), 'UNEXPECTED_TOKEN', `Unsupported token ${token.type}`));
+        }
+    }
+    /**
+     * Call at end of input to yield any remaining document.
+     *
+     * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
+     * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
+     */
+    *end(forceDoc = false, endOffset = -1) {
+        if (this.doc) {
+            this.decorate(this.doc, true);
+            yield this.doc;
+            this.doc = null;
+        }
+        else if (forceDoc) {
+            const opts = Object.assign({ _directives: this.directives }, this.options);
+            const doc = new Document.Document(undefined, opts);
+            if (this.atDirectives)
+                this.onError(endOffset, 'MISSING_CHAR', 'Missing directives-end indicator line');
+            doc.range = [0, endOffset, endOffset];
+            this.decorate(doc, false);
+            yield doc;
+        }
+    }
+}
+
+exports.Composer = Composer;
+
+
+/***/ }),
+
+/***/ 7103:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Pair = __nccwpck_require__(7165);
+var YAMLMap = __nccwpck_require__(4454);
+var resolveProps = __nccwpck_require__(4631);
+var utilContainsNewline = __nccwpck_require__(9499);
+var utilFlowIndentCheck = __nccwpck_require__(4051);
+var utilMapIncludes = __nccwpck_require__(1187);
+
+const startColMsg = 'All mapping items must start at the same column';
+function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError, tag) {
+    const NodeClass = tag?.nodeClass ?? YAMLMap.YAMLMap;
+    const map = new NodeClass(ctx.schema);
+    if (ctx.atRoot)
+        ctx.atRoot = false;
+    let offset = bm.offset;
+    let commentEnd = null;
+    for (const collItem of bm.items) {
+        const { start, key, sep, value } = collItem;
+        // key properties
+        const keyProps = resolveProps.resolveProps(start, {
+            indicator: 'explicit-key-ind',
+            next: key ?? sep?.[0],
+            offset,
+            onError,
+            parentIndent: bm.indent,
+            startOnNewline: true
+        });
+        const implicitKey = !keyProps.found;
+        if (implicitKey) {
+            if (key) {
+                if (key.type === 'block-seq')
+                    onError(offset, 'BLOCK_AS_IMPLICIT_KEY', 'A block sequence may not be used as an implicit map key');
+                else if ('indent' in key && key.indent !== bm.indent)
+                    onError(offset, 'BAD_INDENT', startColMsg);
+            }
+            if (!keyProps.anchor && !keyProps.tag && !sep) {
+                commentEnd = keyProps.end;
+                if (keyProps.comment) {
+                    if (map.comment)
+                        map.comment += '\n' + keyProps.comment;
+                    else
+                        map.comment = keyProps.comment;
+                }
+                continue;
+            }
+            if (keyProps.newlineAfterProp || utilContainsNewline.containsNewline(key)) {
+                onError(key ?? start[start.length - 1], 'MULTILINE_IMPLICIT_KEY', 'Implicit keys need to be on a single line');
+            }
+        }
+        else if (keyProps.found?.indent !== bm.indent) {
+            onError(offset, 'BAD_INDENT', startColMsg);
+        }
+        // key value
+        ctx.atKey = true;
+        const keyStart = keyProps.end;
+        const keyNode = key
+            ? composeNode(ctx, key, keyProps, onError)
+            : composeEmptyNode(ctx, keyStart, start, null, keyProps, onError);
+        if (ctx.schema.compat)
+            utilFlowIndentCheck.flowIndentCheck(bm.indent, key, onError);
+        ctx.atKey = false;
+        if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
+            onError(keyStart, 'DUPLICATE_KEY', 'Map keys must be unique');
+        // value properties
+        const valueProps = resolveProps.resolveProps(sep ?? [], {
+            indicator: 'map-value-ind',
+            next: value,
+            offset: keyNode.range[2],
+            onError,
+            parentIndent: bm.indent,
+            startOnNewline: !key || key.type === 'block-scalar'
+        });
+        offset = valueProps.end;
+        if (valueProps.found) {
+            if (implicitKey) {
+                if (value?.type === 'block-map' && !valueProps.hasNewline)
+                    onError(offset, 'BLOCK_AS_IMPLICIT_KEY', 'Nested mappings are not allowed in compact mappings');
+                if (ctx.options.strict &&
+                    keyProps.start < valueProps.found.offset - 1024)
+                    onError(keyNode.range, 'KEY_OVER_1024_CHARS', 'The : indicator must be at most 1024 chars after the start of an implicit block mapping key');
+            }
+            // value value
+            const valueNode = value
+                ? composeNode(ctx, value, valueProps, onError)
+                : composeEmptyNode(ctx, offset, sep, null, valueProps, onError);
+            if (ctx.schema.compat)
+                utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
+            offset = valueNode.range[2];
+            const pair = new Pair.Pair(keyNode, valueNode);
+            if (ctx.options.keepSourceTokens)
+                pair.srcToken = collItem;
+            map.items.push(pair);
+        }
+        else {
+            // key with no value
+            if (implicitKey)
+                onError(keyNode.range, 'MISSING_CHAR', 'Implicit map keys need to be followed by map values');
+            if (valueProps.comment) {
+                if (keyNode.comment)
+                    keyNode.comment += '\n' + valueProps.comment;
+                else
+                    keyNode.comment = valueProps.comment;
+            }
+            const pair = new Pair.Pair(keyNode);
+            if (ctx.options.keepSourceTokens)
+                pair.srcToken = collItem;
+            map.items.push(pair);
+        }
+    }
+    if (commentEnd && commentEnd < offset)
+        onError(commentEnd, 'IMPOSSIBLE', 'Map comment with trailing content');
+    map.range = [bm.offset, offset, commentEnd ?? offset];
+    return map;
+}
+
+exports.resolveBlockMap = resolveBlockMap;
+
+
+/***/ }),
+
+/***/ 8913:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+
+function resolveBlockScalar(ctx, scalar, onError) {
+    const start = scalar.offset;
+    const header = parseBlockScalarHeader(scalar, ctx.options.strict, onError);
+    if (!header)
+        return { value: '', type: null, comment: '', range: [start, start, start] };
+    const type = header.mode === '>' ? Scalar.Scalar.BLOCK_FOLDED : Scalar.Scalar.BLOCK_LITERAL;
+    const lines = scalar.source ? splitLines(scalar.source) : [];
+    // determine the end of content & start of chomping
+    let chompStart = lines.length;
+    for (let i = lines.length - 1; i >= 0; --i) {
+        const content = lines[i][1];
+        if (content === '' || content === '\r')
+            chompStart = i;
+        else
+            break;
+    }
+    // shortcut for empty contents
+    if (chompStart === 0) {
+        const value = header.chomp === '+' && lines.length > 0
+            ? '\n'.repeat(Math.max(1, lines.length - 1))
+            : '';
+        let end = start + header.length;
+        if (scalar.source)
+            end += scalar.source.length;
+        return { value, type, comment: header.comment, range: [start, end, end] };
+    }
+    // find the indentation level to trim from start
+    let trimIndent = scalar.indent + header.indent;
+    let offset = scalar.offset + header.length;
+    let contentStart = 0;
+    for (let i = 0; i < chompStart; ++i) {
+        const [indent, content] = lines[i];
+        if (content === '' || content === '\r') {
+            if (header.indent === 0 && indent.length > trimIndent)
+                trimIndent = indent.length;
+        }
+        else {
+            if (indent.length < trimIndent) {
+                const message = 'Block scalars with more-indented leading empty lines must use an explicit indentation indicator';
+                onError(offset + indent.length, 'MISSING_CHAR', message);
+            }
+            if (header.indent === 0)
+                trimIndent = indent.length;
+            contentStart = i;
+            if (trimIndent === 0 && !ctx.atRoot) {
+                const message = 'Block scalar values in collections must be indented';
+                onError(offset, 'BAD_INDENT', message);
+            }
+            break;
+        }
+        offset += indent.length + content.length + 1;
+    }
+    // include trailing more-indented empty lines in content
+    for (let i = lines.length - 1; i >= chompStart; --i) {
+        if (lines[i][0].length > trimIndent)
+            chompStart = i + 1;
+    }
+    let value = '';
+    let sep = '';
+    let prevMoreIndented = false;
+    // leading whitespace is kept intact
+    for (let i = 0; i < contentStart; ++i)
+        value += lines[i][0].slice(trimIndent) + '\n';
+    for (let i = contentStart; i < chompStart; ++i) {
+        let [indent, content] = lines[i];
+        offset += indent.length + content.length + 1;
+        const crlf = content[content.length - 1] === '\r';
+        if (crlf)
+            content = content.slice(0, -1);
+        /* istanbul ignore if already caught in lexer */
+        if (content && indent.length < trimIndent) {
+            const src = header.indent
+                ? 'explicit indentation indicator'
+                : 'first line';
+            const message = `Block scalar lines must not be less indented than their ${src}`;
+            onError(offset - content.length - (crlf ? 2 : 1), 'BAD_INDENT', message);
+            indent = '';
+        }
+        if (type === Scalar.Scalar.BLOCK_LITERAL) {
+            value += sep + indent.slice(trimIndent) + content;
+            sep = '\n';
+        }
+        else if (indent.length > trimIndent || content[0] === '\t') {
+            // more-indented content within a folded block
+            if (sep === ' ')
+                sep = '\n';
+            else if (!prevMoreIndented && sep === '\n')
+                sep = '\n\n';
+            value += sep + indent.slice(trimIndent) + content;
+            sep = '\n';
+            prevMoreIndented = true;
+        }
+        else if (content === '') {
+            // empty line
+            if (sep === '\n')
+                value += '\n';
+            else
+                sep = '\n';
+        }
+        else {
+            value += sep + content;
+            sep = ' ';
+            prevMoreIndented = false;
+        }
+    }
+    switch (header.chomp) {
+        case '-':
+            break;
+        case '+':
+            for (let i = chompStart; i < lines.length; ++i)
+                value += '\n' + lines[i][0].slice(trimIndent);
+            if (value[value.length - 1] !== '\n')
+                value += '\n';
+            break;
+        default:
+            value += '\n';
+    }
+    const end = start + header.length + scalar.source.length;
+    return { value, type, comment: header.comment, range: [start, end, end] };
+}
+function parseBlockScalarHeader({ offset, props }, strict, onError) {
+    /* istanbul ignore if should not happen */
+    if (props[0].type !== 'block-scalar-header') {
+        onError(props[0], 'IMPOSSIBLE', 'Block scalar header not found');
+        return null;
+    }
+    const { source } = props[0];
+    const mode = source[0];
+    let indent = 0;
+    let chomp = '';
+    let error = -1;
+    for (let i = 1; i < source.length; ++i) {
+        const ch = source[i];
+        if (!chomp && (ch === '-' || ch === '+'))
+            chomp = ch;
+        else {
+            const n = Number(ch);
+            if (!indent && n)
+                indent = n;
+            else if (error === -1)
+                error = offset + i;
+        }
+    }
+    if (error !== -1)
+        onError(error, 'UNEXPECTED_TOKEN', `Block scalar header includes extra characters: ${source}`);
+    let hasSpace = false;
+    let comment = '';
+    let length = source.length;
+    for (let i = 1; i < props.length; ++i) {
+        const token = props[i];
+        switch (token.type) {
+            case 'space':
+                hasSpace = true;
+            // fallthrough
+            case 'newline':
+                length += token.source.length;
+                break;
+            case 'comment':
+                if (strict && !hasSpace) {
+                    const message = 'Comments must be separated from other tokens by white space characters';
+                    onError(token, 'MISSING_CHAR', message);
+                }
+                length += token.source.length;
+                comment = token.source.substring(1);
+                break;
+            case 'error':
+                onError(token, 'UNEXPECTED_TOKEN', token.message);
+                length += token.source.length;
+                break;
+            /* istanbul ignore next should not happen */
+            default: {
+                const message = `Unexpected token in block scalar header: ${token.type}`;
+                onError(token, 'UNEXPECTED_TOKEN', message);
+                const ts = token.source;
+                if (ts && typeof ts === 'string')
+                    length += ts.length;
+            }
+        }
+    }
+    return { mode, indent, chomp, comment, length };
+}
+/** @returns Array of lines split up as `[indent, content]` */
+function splitLines(source) {
+    const split = source.split(/\n( *)/);
+    const first = split[0];
+    const m = first.match(/^( *)/);
+    const line0 = m?.[1]
+        ? [m[1], first.slice(m[1].length)]
+        : ['', first];
+    const lines = [line0];
+    for (let i = 1; i < split.length; i += 2)
+        lines.push([split[i], split[i + 1]]);
+    return lines;
+}
+
+exports.resolveBlockScalar = resolveBlockScalar;
+
+
+/***/ }),
+
+/***/ 334:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var YAMLSeq = __nccwpck_require__(2223);
+var resolveProps = __nccwpck_require__(4631);
+var utilFlowIndentCheck = __nccwpck_require__(4051);
+
+function resolveBlockSeq({ composeNode, composeEmptyNode }, ctx, bs, onError, tag) {
+    const NodeClass = tag?.nodeClass ?? YAMLSeq.YAMLSeq;
+    const seq = new NodeClass(ctx.schema);
+    if (ctx.atRoot)
+        ctx.atRoot = false;
+    if (ctx.atKey)
+        ctx.atKey = false;
+    let offset = bs.offset;
+    let commentEnd = null;
+    for (const { start, value } of bs.items) {
+        const props = resolveProps.resolveProps(start, {
+            indicator: 'seq-item-ind',
+            next: value,
+            offset,
+            onError,
+            parentIndent: bs.indent,
+            startOnNewline: true
+        });
+        if (!props.found) {
+            if (props.anchor || props.tag || value) {
+                if (value && value.type === 'block-seq')
+                    onError(props.end, 'BAD_INDENT', 'All sequence items must start at the same column');
+                else
+                    onError(offset, 'MISSING_CHAR', 'Sequence item without - indicator');
+            }
+            else {
+                commentEnd = props.end;
+                if (props.comment)
+                    seq.comment = props.comment;
+                continue;
+            }
+        }
+        const node = value
+            ? composeNode(ctx, value, props, onError)
+            : composeEmptyNode(ctx, props.end, start, null, props, onError);
+        if (ctx.schema.compat)
+            utilFlowIndentCheck.flowIndentCheck(bs.indent, value, onError);
+        offset = node.range[2];
+        seq.items.push(node);
+    }
+    seq.range = [bs.offset, offset, commentEnd ?? offset];
+    return seq;
+}
+
+exports.resolveBlockSeq = resolveBlockSeq;
+
+
+/***/ }),
+
+/***/ 7788:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+function resolveEnd(end, offset, reqSpace, onError) {
+    let comment = '';
+    if (end) {
+        let hasSpace = false;
+        let sep = '';
+        for (const token of end) {
+            const { source, type } = token;
+            switch (type) {
+                case 'space':
+                    hasSpace = true;
+                    break;
+                case 'comment': {
+                    if (reqSpace && !hasSpace)
+                        onError(token, 'MISSING_CHAR', 'Comments must be separated from other tokens by white space characters');
+                    const cb = source.substring(1) || ' ';
+                    if (!comment)
+                        comment = cb;
+                    else
+                        comment += sep + cb;
+                    sep = '';
+                    break;
+                }
+                case 'newline':
+                    if (comment)
+                        sep += source;
+                    hasSpace = true;
+                    break;
+                default:
+                    onError(token, 'UNEXPECTED_TOKEN', `Unexpected ${type} at node end`);
+            }
+            offset += source.length;
+        }
+    }
+    return { comment, offset };
+}
+
+exports.resolveEnd = resolveEnd;
+
+
+/***/ }),
+
+/***/ 3142:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var Pair = __nccwpck_require__(7165);
+var YAMLMap = __nccwpck_require__(4454);
+var YAMLSeq = __nccwpck_require__(2223);
+var resolveEnd = __nccwpck_require__(7788);
+var resolveProps = __nccwpck_require__(4631);
+var utilContainsNewline = __nccwpck_require__(9499);
+var utilMapIncludes = __nccwpck_require__(1187);
+
+const blockMsg = 'Block collections are not allowed within flow collections';
+const isBlock = (token) => token && (token.type === 'block-map' || token.type === 'block-seq');
+function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onError, tag) {
+    const isMap = fc.start.source === '{';
+    const fcName = isMap ? 'flow map' : 'flow sequence';
+    const NodeClass = (tag?.nodeClass ?? (isMap ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq));
+    const coll = new NodeClass(ctx.schema);
+    coll.flow = true;
+    const atRoot = ctx.atRoot;
+    if (atRoot)
+        ctx.atRoot = false;
+    if (ctx.atKey)
+        ctx.atKey = false;
+    let offset = fc.offset + fc.start.source.length;
+    for (let i = 0; i < fc.items.length; ++i) {
+        const collItem = fc.items[i];
+        const { start, key, sep, value } = collItem;
+        const props = resolveProps.resolveProps(start, {
+            flow: fcName,
+            indicator: 'explicit-key-ind',
+            next: key ?? sep?.[0],
+            offset,
+            onError,
+            parentIndent: fc.indent,
+            startOnNewline: false
+        });
+        if (!props.found) {
+            if (!props.anchor && !props.tag && !sep && !value) {
+                if (i === 0 && props.comma)
+                    onError(props.comma, 'UNEXPECTED_TOKEN', `Unexpected , in ${fcName}`);
+                else if (i < fc.items.length - 1)
+                    onError(props.start, 'UNEXPECTED_TOKEN', `Unexpected empty item in ${fcName}`);
+                if (props.comment) {
+                    if (coll.comment)
+                        coll.comment += '\n' + props.comment;
+                    else
+                        coll.comment = props.comment;
+                }
+                offset = props.end;
+                continue;
+            }
+            if (!isMap && ctx.options.strict && utilContainsNewline.containsNewline(key))
+                onError(key, // checked by containsNewline()
+                'MULTILINE_IMPLICIT_KEY', 'Implicit keys of flow sequence pairs need to be on a single line');
+        }
+        if (i === 0) {
+            if (props.comma)
+                onError(props.comma, 'UNEXPECTED_TOKEN', `Unexpected , in ${fcName}`);
+        }
+        else {
+            if (!props.comma)
+                onError(props.start, 'MISSING_CHAR', `Missing , between ${fcName} items`);
+            if (props.comment) {
+                let prevItemComment = '';
+                loop: for (const st of start) {
+                    switch (st.type) {
+                        case 'comma':
+                        case 'space':
+                            break;
+                        case 'comment':
+                            prevItemComment = st.source.substring(1);
+                            break loop;
+                        default:
+                            break loop;
+                    }
+                }
+                if (prevItemComment) {
+                    let prev = coll.items[coll.items.length - 1];
+                    if (identity.isPair(prev))
+                        prev = prev.value ?? prev.key;
+                    if (prev.comment)
+                        prev.comment += '\n' + prevItemComment;
+                    else
+                        prev.comment = prevItemComment;
+                    props.comment = props.comment.substring(prevItemComment.length + 1);
+                }
+            }
+        }
+        if (!isMap && !sep && !props.found) {
+            // item is a value in a seq
+            // → key & sep are empty, start does not include ? or :
+            const valueNode = value
+                ? composeNode(ctx, value, props, onError)
+                : composeEmptyNode(ctx, props.end, sep, null, props, onError);
+            coll.items.push(valueNode);
+            offset = valueNode.range[2];
+            if (isBlock(value))
+                onError(valueNode.range, 'BLOCK_IN_FLOW', blockMsg);
+        }
+        else {
+            // item is a key+value pair
+            // key value
+            ctx.atKey = true;
+            const keyStart = props.end;
+            const keyNode = key
+                ? composeNode(ctx, key, props, onError)
+                : composeEmptyNode(ctx, keyStart, start, null, props, onError);
+            if (isBlock(key))
+                onError(keyNode.range, 'BLOCK_IN_FLOW', blockMsg);
+            ctx.atKey = false;
+            // value properties
+            const valueProps = resolveProps.resolveProps(sep ?? [], {
+                flow: fcName,
+                indicator: 'map-value-ind',
+                next: value,
+                offset: keyNode.range[2],
+                onError,
+                parentIndent: fc.indent,
+                startOnNewline: false
+            });
+            if (valueProps.found) {
+                if (!isMap && !props.found && ctx.options.strict) {
+                    if (sep)
+                        for (const st of sep) {
+                            if (st === valueProps.found)
+                                break;
+                            if (st.type === 'newline') {
+                                onError(st, 'MULTILINE_IMPLICIT_KEY', 'Implicit keys of flow sequence pairs need to be on a single line');
+                                break;
+                            }
+                        }
+                    if (props.start < valueProps.found.offset - 1024)
+                        onError(valueProps.found, 'KEY_OVER_1024_CHARS', 'The : indicator must be at most 1024 chars after the start of an implicit flow sequence key');
+                }
+            }
+            else if (value) {
+                if ('source' in value && value.source && value.source[0] === ':')
+                    onError(value, 'MISSING_CHAR', `Missing space after : in ${fcName}`);
+                else
+                    onError(valueProps.start, 'MISSING_CHAR', `Missing , or : between ${fcName} items`);
+            }
+            // value value
+            const valueNode = value
+                ? composeNode(ctx, value, valueProps, onError)
+                : valueProps.found
+                    ? composeEmptyNode(ctx, valueProps.end, sep, null, valueProps, onError)
+                    : null;
+            if (valueNode) {
+                if (isBlock(value))
+                    onError(valueNode.range, 'BLOCK_IN_FLOW', blockMsg);
+            }
+            else if (valueProps.comment) {
+                if (keyNode.comment)
+                    keyNode.comment += '\n' + valueProps.comment;
+                else
+                    keyNode.comment = valueProps.comment;
+            }
+            const pair = new Pair.Pair(keyNode, valueNode);
+            if (ctx.options.keepSourceTokens)
+                pair.srcToken = collItem;
+            if (isMap) {
+                const map = coll;
+                if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
+                    onError(keyStart, 'DUPLICATE_KEY', 'Map keys must be unique');
+                map.items.push(pair);
+            }
+            else {
+                const map = new YAMLMap.YAMLMap(ctx.schema);
+                map.flow = true;
+                map.items.push(pair);
+                const endRange = (valueNode ?? keyNode).range;
+                map.range = [keyNode.range[0], endRange[1], endRange[2]];
+                coll.items.push(map);
+            }
+            offset = valueNode ? valueNode.range[2] : valueProps.end;
+        }
+    }
+    const expectedEnd = isMap ? '}' : ']';
+    const [ce, ...ee] = fc.end;
+    let cePos = offset;
+    if (ce && ce.source === expectedEnd)
+        cePos = ce.offset + ce.source.length;
+    else {
+        const name = fcName[0].toUpperCase() + fcName.substring(1);
+        const msg = atRoot
+            ? `${name} must end with a ${expectedEnd}`
+            : `${name} in block collection must be sufficiently indented and end with a ${expectedEnd}`;
+        onError(offset, atRoot ? 'MISSING_CHAR' : 'BAD_INDENT', msg);
+        if (ce && ce.source.length !== 1)
+            ee.unshift(ce);
+    }
+    if (ee.length > 0) {
+        const end = resolveEnd.resolveEnd(ee, cePos, ctx.options.strict, onError);
+        if (end.comment) {
+            if (coll.comment)
+                coll.comment += '\n' + end.comment;
+            else
+                coll.comment = end.comment;
+        }
+        coll.range = [fc.offset, cePos, end.offset];
+    }
+    else {
+        coll.range = [fc.offset, cePos, cePos];
+    }
+    return coll;
+}
+
+exports.resolveFlowCollection = resolveFlowCollection;
+
+
+/***/ }),
+
+/***/ 6842:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+var resolveEnd = __nccwpck_require__(7788);
+
+function resolveFlowScalar(scalar, strict, onError) {
+    const { offset, type, source, end } = scalar;
+    let _type;
+    let value;
+    const _onError = (rel, code, msg) => onError(offset + rel, code, msg);
+    switch (type) {
+        case 'scalar':
+            _type = Scalar.Scalar.PLAIN;
+            value = plainValue(source, _onError);
+            break;
+        case 'single-quoted-scalar':
+            _type = Scalar.Scalar.QUOTE_SINGLE;
+            value = singleQuotedValue(source, _onError);
+            break;
+        case 'double-quoted-scalar':
+            _type = Scalar.Scalar.QUOTE_DOUBLE;
+            value = doubleQuotedValue(source, _onError);
+            break;
+        /* istanbul ignore next should not happen */
+        default:
+            onError(scalar, 'UNEXPECTED_TOKEN', `Expected a flow scalar value, but found: ${type}`);
+            return {
+                value: '',
+                type: null,
+                comment: '',
+                range: [offset, offset + source.length, offset + source.length]
+            };
+    }
+    const valueEnd = offset + source.length;
+    const re = resolveEnd.resolveEnd(end, valueEnd, strict, onError);
+    return {
+        value,
+        type: _type,
+        comment: re.comment,
+        range: [offset, valueEnd, re.offset]
+    };
+}
+function plainValue(source, onError) {
+    let badChar = '';
+    switch (source[0]) {
+        /* istanbul ignore next should not happen */
+        case '\t':
+            badChar = 'a tab character';
+            break;
+        case ',':
+            badChar = 'flow indicator character ,';
+            break;
+        case '%':
+            badChar = 'directive indicator character %';
+            break;
+        case '|':
+        case '>': {
+            badChar = `block scalar indicator ${source[0]}`;
+            break;
+        }
+        case '@':
+        case '`': {
+            badChar = `reserved character ${source[0]}`;
+            break;
+        }
+    }
+    if (badChar)
+        onError(0, 'BAD_SCALAR_START', `Plain value cannot start with ${badChar}`);
+    return foldLines(source);
+}
+function singleQuotedValue(source, onError) {
+    if (source[source.length - 1] !== "'" || source.length === 1)
+        onError(source.length, 'MISSING_CHAR', "Missing closing 'quote");
+    return foldLines(source.slice(1, -1)).replace(/''/g, "'");
+}
+function foldLines(source) {
+    /**
+     * The negative lookbehind here and in the `re` RegExp is to
+     * prevent causing a polynomial search time in certain cases.
+     *
+     * The try-catch is for Safari, which doesn't support this yet:
+     * https://caniuse.com/js-regexp-lookbehind
+     */
+    let first, line;
+    try {
+        first = new RegExp('(.*?)(?<![ \t])[ \t]*\r?\n', 'sy');
+        line = new RegExp('[ \t]*(.*?)(?:(?<![ \t])[ \t]*)?\r?\n', 'sy');
+    }
+    catch {
+        first = /(.*?)[ \t]*\r?\n/sy;
+        line = /[ \t]*(.*?)[ \t]*\r?\n/sy;
+    }
+    let match = first.exec(source);
+    if (!match)
+        return source;
+    let res = match[1];
+    let sep = ' ';
+    let pos = first.lastIndex;
+    line.lastIndex = pos;
+    while ((match = line.exec(source))) {
+        if (match[1] === '') {
+            if (sep === '\n')
+                res += sep;
+            else
+                sep = '\n';
+        }
+        else {
+            res += sep + match[1];
+            sep = ' ';
+        }
+        pos = line.lastIndex;
+    }
+    const last = /[ \t]*(.*)/sy;
+    last.lastIndex = pos;
+    match = last.exec(source);
+    return res + sep + (match?.[1] ?? '');
+}
+function doubleQuotedValue(source, onError) {
+    let res = '';
+    for (let i = 1; i < source.length - 1; ++i) {
+        const ch = source[i];
+        if (ch === '\r' && source[i + 1] === '\n')
+            continue;
+        if (ch === '\n') {
+            const { fold, offset } = foldNewline(source, i);
+            res += fold;
+            i = offset;
+        }
+        else if (ch === '\\') {
+            let next = source[++i];
+            const cc = escapeCodes[next];
+            if (cc)
+                res += cc;
+            else if (next === '\n') {
+                // skip escaped newlines, but still trim the following line
+                next = source[i + 1];
+                while (next === ' ' || next === '\t')
+                    next = source[++i + 1];
+            }
+            else if (next === '\r' && source[i + 1] === '\n') {
+                // skip escaped CRLF newlines, but still trim the following line
+                next = source[++i + 1];
+                while (next === ' ' || next === '\t')
+                    next = source[++i + 1];
+            }
+            else if (next === 'x' || next === 'u' || next === 'U') {
+                const length = { x: 2, u: 4, U: 8 }[next];
+                res += parseCharCode(source, i + 1, length, onError);
+                i += length;
+            }
+            else {
+                const raw = source.substr(i - 1, 2);
+                onError(i - 1, 'BAD_DQ_ESCAPE', `Invalid escape sequence ${raw}`);
+                res += raw;
+            }
+        }
+        else if (ch === ' ' || ch === '\t') {
+            // trim trailing whitespace
+            const wsStart = i;
+            let next = source[i + 1];
+            while (next === ' ' || next === '\t')
+                next = source[++i + 1];
+            if (next !== '\n' && !(next === '\r' && source[i + 2] === '\n'))
+                res += i > wsStart ? source.slice(wsStart, i + 1) : ch;
+        }
+        else {
+            res += ch;
+        }
+    }
+    if (source[source.length - 1] !== '"' || source.length === 1)
+        onError(source.length, 'MISSING_CHAR', 'Missing closing "quote');
+    return res;
+}
+/**
+ * Fold a single newline into a space, multiple newlines to N - 1 newlines.
+ * Presumes `source[offset] === '\n'`
+ */
+function foldNewline(source, offset) {
+    let fold = '';
+    let ch = source[offset + 1];
+    while (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+        if (ch === '\r' && source[offset + 2] !== '\n')
+            break;
+        if (ch === '\n')
+            fold += '\n';
+        offset += 1;
+        ch = source[offset + 1];
+    }
+    if (!fold)
+        fold = ' ';
+    return { fold, offset };
+}
+const escapeCodes = {
+    '0': '\0', // null character
+    a: '\x07', // bell character
+    b: '\b', // backspace
+    e: '\x1b', // escape character
+    f: '\f', // form feed
+    n: '\n', // line feed
+    r: '\r', // carriage return
+    t: '\t', // horizontal tab
+    v: '\v', // vertical tab
+    N: '\u0085', // Unicode next line
+    _: '\u00a0', // Unicode non-breaking space
+    L: '\u2028', // Unicode line separator
+    P: '\u2029', // Unicode paragraph separator
+    ' ': ' ',
+    '"': '"',
+    '/': '/',
+    '\\': '\\',
+    '\t': '\t'
+};
+function parseCharCode(source, offset, length, onError) {
+    const cc = source.substr(offset, length);
+    const ok = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
+    const code = ok ? parseInt(cc, 16) : NaN;
+    if (isNaN(code)) {
+        const raw = source.substr(offset - 2, length + 2);
+        onError(offset - 2, 'BAD_DQ_ESCAPE', `Invalid escape sequence ${raw}`);
+        return raw;
+    }
+    return String.fromCodePoint(code);
+}
+
+exports.resolveFlowScalar = resolveFlowScalar;
+
+
+/***/ }),
+
+/***/ 4631:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+function resolveProps(tokens, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
+    let spaceBefore = false;
+    let atNewline = startOnNewline;
+    let hasSpace = startOnNewline;
+    let comment = '';
+    let commentSep = '';
+    let hasNewline = false;
+    let reqSpace = false;
+    let tab = null;
+    let anchor = null;
+    let tag = null;
+    let newlineAfterProp = null;
+    let comma = null;
+    let found = null;
+    let start = null;
+    for (const token of tokens) {
+        if (reqSpace) {
+            if (token.type !== 'space' &&
+                token.type !== 'newline' &&
+                token.type !== 'comma')
+                onError(token.offset, 'MISSING_CHAR', 'Tags and anchors must be separated from the next token by white space');
+            reqSpace = false;
+        }
+        if (tab) {
+            if (atNewline && token.type !== 'comment' && token.type !== 'newline') {
+                onError(tab, 'TAB_AS_INDENT', 'Tabs are not allowed as indentation');
+            }
+            tab = null;
+        }
+        switch (token.type) {
+            case 'space':
+                // At the doc level, tabs at line start may be parsed
+                // as leading white space rather than indentation.
+                // In a flow collection, only the parser handles indent.
+                if (!flow &&
+                    (indicator !== 'doc-start' || next?.type !== 'flow-collection') &&
+                    token.source.includes('\t')) {
+                    tab = token;
+                }
+                hasSpace = true;
+                break;
+            case 'comment': {
+                if (!hasSpace)
+                    onError(token, 'MISSING_CHAR', 'Comments must be separated from other tokens by white space characters');
+                const cb = token.source.substring(1) || ' ';
+                if (!comment)
+                    comment = cb;
+                else
+                    comment += commentSep + cb;
+                commentSep = '';
+                atNewline = false;
+                break;
+            }
+            case 'newline':
+                if (atNewline) {
+                    if (comment)
+                        comment += token.source;
+                    else
+                        spaceBefore = true;
+                }
+                else
+                    commentSep += token.source;
+                atNewline = true;
+                hasNewline = true;
+                if (anchor || tag)
+                    newlineAfterProp = token;
+                hasSpace = true;
+                break;
+            case 'anchor':
+                if (anchor)
+                    onError(token, 'MULTIPLE_ANCHORS', 'A node can have at most one anchor');
+                if (token.source.endsWith(':'))
+                    onError(token.offset + token.source.length - 1, 'BAD_ALIAS', 'Anchor ending in : is ambiguous', true);
+                anchor = token;
+                if (start === null)
+                    start = token.offset;
+                atNewline = false;
+                hasSpace = false;
+                reqSpace = true;
+                break;
+            case 'tag': {
+                if (tag)
+                    onError(token, 'MULTIPLE_TAGS', 'A node can have at most one tag');
+                tag = token;
+                if (start === null)
+                    start = token.offset;
+                atNewline = false;
+                hasSpace = false;
+                reqSpace = true;
+                break;
+            }
+            case indicator:
+                // Could here handle preceding comments differently
+                if (anchor || tag)
+                    onError(token, 'BAD_PROP_ORDER', `Anchors and tags must be after the ${token.source} indicator`);
+                if (found)
+                    onError(token, 'UNEXPECTED_TOKEN', `Unexpected ${token.source} in ${flow ?? 'collection'}`);
+                found = token;
+                atNewline =
+                    indicator === 'seq-item-ind' || indicator === 'explicit-key-ind';
+                hasSpace = false;
+                break;
+            case 'comma':
+                if (flow) {
+                    if (comma)
+                        onError(token, 'UNEXPECTED_TOKEN', `Unexpected , in ${flow}`);
+                    comma = token;
+                    atNewline = false;
+                    hasSpace = false;
+                    break;
+                }
+            // else fallthrough
+            default:
+                onError(token, 'UNEXPECTED_TOKEN', `Unexpected ${token.type} token`);
+                atNewline = false;
+                hasSpace = false;
+        }
+    }
+    const last = tokens[tokens.length - 1];
+    const end = last ? last.offset + last.source.length : offset;
+    if (reqSpace &&
+        next &&
+        next.type !== 'space' &&
+        next.type !== 'newline' &&
+        next.type !== 'comma' &&
+        (next.type !== 'scalar' || next.source !== '')) {
+        onError(next.offset, 'MISSING_CHAR', 'Tags and anchors must be separated from the next token by white space');
+    }
+    if (tab &&
+        ((atNewline && tab.indent <= parentIndent) ||
+            next?.type === 'block-map' ||
+            next?.type === 'block-seq'))
+        onError(tab, 'TAB_AS_INDENT', 'Tabs are not allowed as indentation');
+    return {
+        comma,
+        found,
+        spaceBefore,
+        comment,
+        hasNewline,
+        anchor,
+        tag,
+        newlineAfterProp,
+        end,
+        start: start ?? end
+    };
+}
+
+exports.resolveProps = resolveProps;
+
+
+/***/ }),
+
+/***/ 9499:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+function containsNewline(key) {
+    if (!key)
+        return null;
+    switch (key.type) {
+        case 'alias':
+        case 'scalar':
+        case 'double-quoted-scalar':
+        case 'single-quoted-scalar':
+            if (key.source.includes('\n'))
+                return true;
+            if (key.end)
+                for (const st of key.end)
+                    if (st.type === 'newline')
+                        return true;
+            return false;
+        case 'flow-collection':
+            for (const it of key.items) {
+                for (const st of it.start)
+                    if (st.type === 'newline')
+                        return true;
+                if (it.sep)
+                    for (const st of it.sep)
+                        if (st.type === 'newline')
+                            return true;
+                if (containsNewline(it.key) || containsNewline(it.value))
+                    return true;
+            }
+            return false;
+        default:
+            return true;
+    }
+}
+
+exports.containsNewline = containsNewline;
+
+
+/***/ }),
+
+/***/ 2599:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+function emptyScalarPosition(offset, before, pos) {
+    if (before) {
+        if (pos === null)
+            pos = before.length;
+        for (let i = pos - 1; i >= 0; --i) {
+            let st = before[i];
+            switch (st.type) {
+                case 'space':
+                case 'comment':
+                case 'newline':
+                    offset -= st.source.length;
+                    continue;
+            }
+            // Technically, an empty scalar is immediately after the last non-empty
+            // node, but it's more useful to place it after any whitespace.
+            st = before[++i];
+            while (st?.type === 'space') {
+                offset += st.source.length;
+                st = before[++i];
+            }
+            break;
+        }
+    }
+    return offset;
+}
+
+exports.emptyScalarPosition = emptyScalarPosition;
+
+
+/***/ }),
+
+/***/ 4051:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var utilContainsNewline = __nccwpck_require__(9499);
+
+function flowIndentCheck(indent, fc, onError) {
+    if (fc?.type === 'flow-collection') {
+        const end = fc.end[0];
+        if (end.indent === indent &&
+            (end.source === ']' || end.source === '}') &&
+            utilContainsNewline.containsNewline(fc)) {
+            const msg = 'Flow end indicator should be more indented than parent';
+            onError(end, 'BAD_INDENT', msg, true);
+        }
+    }
+}
+
+exports.flowIndentCheck = flowIndentCheck;
+
+
+/***/ }),
+
+/***/ 1187:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+
+function mapIncludes(ctx, items, search) {
+    const { uniqueKeys } = ctx.options;
+    if (uniqueKeys === false)
+        return false;
+    const isEqual = typeof uniqueKeys === 'function'
+        ? uniqueKeys
+        : (a, b) => a === b || (identity.isScalar(a) && identity.isScalar(b) && a.value === b.value);
+    return items.some(pair => isEqual(pair.key, search));
+}
+
+exports.mapIncludes = mapIncludes;
+
+
+/***/ }),
+
+/***/ 3021:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Alias = __nccwpck_require__(4065);
+var Collection = __nccwpck_require__(101);
+var identity = __nccwpck_require__(1127);
+var Pair = __nccwpck_require__(7165);
+var toJS = __nccwpck_require__(6424);
+var Schema = __nccwpck_require__(5840);
+var stringifyDocument = __nccwpck_require__(6829);
+var anchors = __nccwpck_require__(1596);
+var applyReviver = __nccwpck_require__(3661);
+var createNode = __nccwpck_require__(2404);
+var directives = __nccwpck_require__(1342);
+
+class Document {
+    constructor(value, replacer, options) {
+        /** A comment before this Document */
+        this.commentBefore = null;
+        /** A comment immediately after this Document */
+        this.comment = null;
+        /** Errors encountered during parsing. */
+        this.errors = [];
+        /** Warnings encountered during parsing. */
+        this.warnings = [];
+        Object.defineProperty(this, identity.NODE_TYPE, { value: identity.DOC });
+        let _replacer = null;
+        if (typeof replacer === 'function' || Array.isArray(replacer)) {
+            _replacer = replacer;
+        }
+        else if (options === undefined && replacer) {
+            options = replacer;
+            replacer = undefined;
+        }
+        const opt = Object.assign({
+            intAsBigInt: false,
+            keepSourceTokens: false,
+            logLevel: 'warn',
+            prettyErrors: true,
+            strict: true,
+            stringKeys: false,
+            uniqueKeys: true,
+            version: '1.2'
+        }, options);
+        this.options = opt;
+        let { version } = opt;
+        if (options?._directives) {
+            this.directives = options._directives.atDocument();
+            if (this.directives.yaml.explicit)
+                version = this.directives.yaml.version;
+        }
+        else
+            this.directives = new directives.Directives({ version });
+        this.setSchema(version, options);
+        // @ts-expect-error We can't really know that this matches Contents.
+        this.contents =
+            value === undefined ? null : this.createNode(value, _replacer, options);
+    }
+    /**
+     * Create a deep copy of this Document and its contents.
+     *
+     * Custom Node values that inherit from `Object` still refer to their original instances.
+     */
+    clone() {
+        const copy = Object.create(Document.prototype, {
+            [identity.NODE_TYPE]: { value: identity.DOC }
+        });
+        copy.commentBefore = this.commentBefore;
+        copy.comment = this.comment;
+        copy.errors = this.errors.slice();
+        copy.warnings = this.warnings.slice();
+        copy.options = Object.assign({}, this.options);
+        if (this.directives)
+            copy.directives = this.directives.clone();
+        copy.schema = this.schema.clone();
+        // @ts-expect-error We can't really know that this matches Contents.
+        copy.contents = identity.isNode(this.contents)
+            ? this.contents.clone(copy.schema)
+            : this.contents;
+        if (this.range)
+            copy.range = this.range.slice();
+        return copy;
+    }
+    /** Adds a value to the document. */
+    add(value) {
+        if (assertCollection(this.contents))
+            this.contents.add(value);
+    }
+    /** Adds a value to the document. */
+    addIn(path, value) {
+        if (assertCollection(this.contents))
+            this.contents.addIn(path, value);
+    }
+    /**
+     * Create a new `Alias` node, ensuring that the target `node` has the required anchor.
+     *
+     * If `node` already has an anchor, `name` is ignored.
+     * Otherwise, the `node.anchor` value will be set to `name`,
+     * or if an anchor with that name is already present in the document,
+     * `name` will be used as a prefix for a new unique anchor.
+     * If `name` is undefined, the generated anchor will use 'a' as a prefix.
+     */
+    createAlias(node, name) {
+        if (!node.anchor) {
+            const prev = anchors.anchorNames(this);
+            node.anchor =
+                // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                !name || prev.has(name) ? anchors.findNewAnchor(name || 'a', prev) : name;
+        }
+        return new Alias.Alias(node.anchor);
+    }
+    createNode(value, replacer, options) {
+        let _replacer = undefined;
+        if (typeof replacer === 'function') {
+            value = replacer.call({ '': value }, '', value);
+            _replacer = replacer;
+        }
+        else if (Array.isArray(replacer)) {
+            const keyToStr = (v) => typeof v === 'number' || v instanceof String || v instanceof Number;
+            const asStr = replacer.filter(keyToStr).map(String);
+            if (asStr.length > 0)
+                replacer = replacer.concat(asStr);
+            _replacer = replacer;
+        }
+        else if (options === undefined && replacer) {
+            options = replacer;
+            replacer = undefined;
+        }
+        const { aliasDuplicateObjects, anchorPrefix, flow, keepUndefined, onTagObj, tag } = options ?? {};
+        const { onAnchor, setAnchors, sourceObjects } = anchors.createNodeAnchors(this, 
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        anchorPrefix || 'a');
+        const ctx = {
+            aliasDuplicateObjects: aliasDuplicateObjects ?? true,
+            keepUndefined: keepUndefined ?? false,
+            onAnchor,
+            onTagObj,
+            replacer: _replacer,
+            schema: this.schema,
+            sourceObjects
+        };
+        const node = createNode.createNode(value, tag, ctx);
+        if (flow && identity.isCollection(node))
+            node.flow = true;
+        setAnchors();
+        return node;
+    }
+    /**
+     * Convert a key and a value into a `Pair` using the current schema,
+     * recursively wrapping all values as `Scalar` or `Collection` nodes.
+     */
+    createPair(key, value, options = {}) {
+        const k = this.createNode(key, null, options);
+        const v = this.createNode(value, null, options);
+        return new Pair.Pair(k, v);
+    }
+    /**
+     * Removes a value from the document.
+     * @returns `true` if the item was found and removed.
+     */
+    delete(key) {
+        return assertCollection(this.contents) ? this.contents.delete(key) : false;
+    }
+    /**
+     * Removes a value from the document.
+     * @returns `true` if the item was found and removed.
+     */
+    deleteIn(path) {
+        if (Collection.isEmptyPath(path)) {
+            if (this.contents == null)
+                return false;
+            // @ts-expect-error Presumed impossible if Strict extends false
+            this.contents = null;
+            return true;
+        }
+        return assertCollection(this.contents)
+            ? this.contents.deleteIn(path)
+            : false;
+    }
+    /**
+     * Returns item at `key`, or `undefined` if not found. By default unwraps
+     * scalar values from their surrounding node; to disable set `keepScalar` to
+     * `true` (collections are always returned intact).
+     */
+    get(key, keepScalar) {
+        return identity.isCollection(this.contents)
+            ? this.contents.get(key, keepScalar)
+            : undefined;
+    }
+    /**
+     * Returns item at `path`, or `undefined` if not found. By default unwraps
+     * scalar values from their surrounding node; to disable set `keepScalar` to
+     * `true` (collections are always returned intact).
+     */
+    getIn(path, keepScalar) {
+        if (Collection.isEmptyPath(path))
+            return !keepScalar && identity.isScalar(this.contents)
+                ? this.contents.value
+                : this.contents;
+        return identity.isCollection(this.contents)
+            ? this.contents.getIn(path, keepScalar)
+            : undefined;
+    }
+    /**
+     * Checks if the document includes a value with the key `key`.
+     */
+    has(key) {
+        return identity.isCollection(this.contents) ? this.contents.has(key) : false;
+    }
+    /**
+     * Checks if the document includes a value at `path`.
+     */
+    hasIn(path) {
+        if (Collection.isEmptyPath(path))
+            return this.contents !== undefined;
+        return identity.isCollection(this.contents) ? this.contents.hasIn(path) : false;
+    }
+    /**
+     * Sets a value in this document. For `!!set`, `value` needs to be a
+     * boolean to add/remove the item from the set.
+     */
+    set(key, value) {
+        if (this.contents == null) {
+            // @ts-expect-error We can't really know that this matches Contents.
+            this.contents = Collection.collectionFromPath(this.schema, [key], value);
+        }
+        else if (assertCollection(this.contents)) {
+            this.contents.set(key, value);
+        }
+    }
+    /**
+     * Sets a value in this document. For `!!set`, `value` needs to be a
+     * boolean to add/remove the item from the set.
+     */
+    setIn(path, value) {
+        if (Collection.isEmptyPath(path)) {
+            // @ts-expect-error We can't really know that this matches Contents.
+            this.contents = value;
+        }
+        else if (this.contents == null) {
+            // @ts-expect-error We can't really know that this matches Contents.
+            this.contents = Collection.collectionFromPath(this.schema, Array.from(path), value);
+        }
+        else if (assertCollection(this.contents)) {
+            this.contents.setIn(path, value);
+        }
+    }
+    /**
+     * Change the YAML version and schema used by the document.
+     * A `null` version disables support for directives, explicit tags, anchors, and aliases.
+     * It also requires the `schema` option to be given as a `Schema` instance value.
+     *
+     * Overrides all previously set schema options.
+     */
+    setSchema(version, options = {}) {
+        if (typeof version === 'number')
+            version = String(version);
+        let opt;
+        switch (version) {
+            case '1.1':
+                if (this.directives)
+                    this.directives.yaml.version = '1.1';
+                else
+                    this.directives = new directives.Directives({ version: '1.1' });
+                opt = { resolveKnownTags: false, schema: 'yaml-1.1' };
+                break;
+            case '1.2':
+            case 'next':
+                if (this.directives)
+                    this.directives.yaml.version = version;
+                else
+                    this.directives = new directives.Directives({ version });
+                opt = { resolveKnownTags: true, schema: 'core' };
+                break;
+            case null:
+                if (this.directives)
+                    delete this.directives;
+                opt = null;
+                break;
+            default: {
+                const sv = JSON.stringify(version);
+                throw new Error(`Expected '1.1', '1.2' or null as first argument, but found: ${sv}`);
+            }
+        }
+        // Not using `instanceof Schema` to allow for duck typing
+        if (options.schema instanceof Object)
+            this.schema = options.schema;
+        else if (opt)
+            this.schema = new Schema.Schema(Object.assign(opt, options));
+        else
+            throw new Error(`With a null YAML version, the { schema: Schema } option is required`);
+    }
+    // json & jsonArg are only used from toJSON()
+    toJS({ json, jsonArg, mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
+        const ctx = {
+            anchors: new Map(),
+            doc: this,
+            keep: !json,
+            mapAsMap: mapAsMap === true,
+            mapKeyWarned: false,
+            maxAliasCount: typeof maxAliasCount === 'number' ? maxAliasCount : 100
+        };
+        const res = toJS.toJS(this.contents, jsonArg ?? '', ctx);
+        if (typeof onAnchor === 'function')
+            for (const { count, res } of ctx.anchors.values())
+                onAnchor(res, count);
+        return typeof reviver === 'function'
+            ? applyReviver.applyReviver(reviver, { '': res }, '', res)
+            : res;
+    }
+    /**
+     * A JSON representation of the document `contents`.
+     *
+     * @param jsonArg Used by `JSON.stringify` to indicate the array index or
+     *   property name.
+     */
+    toJSON(jsonArg, onAnchor) {
+        return this.toJS({ json: true, jsonArg, mapAsMap: false, onAnchor });
+    }
+    /** A YAML representation of the document. */
+    toString(options = {}) {
+        if (this.errors.length > 0)
+            throw new Error('Document with errors cannot be stringified');
+        if ('indent' in options &&
+            (!Number.isInteger(options.indent) || Number(options.indent) <= 0)) {
+            const s = JSON.stringify(options.indent);
+            throw new Error(`"indent" option must be a positive integer, not ${s}`);
+        }
+        return stringifyDocument.stringifyDocument(this, options);
+    }
+}
+function assertCollection(contents) {
+    if (identity.isCollection(contents))
+        return true;
+    throw new Error('Expected a YAML collection as document contents');
+}
+
+exports.Document = Document;
+
+
+/***/ }),
+
+/***/ 1596:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var visit = __nccwpck_require__(204);
+
+/**
+ * Verify that the input string is a valid anchor.
+ *
+ * Will throw on errors.
+ */
+function anchorIsValid(anchor) {
+    if (/[\x00-\x19\s,[\]{}]/.test(anchor)) {
+        const sa = JSON.stringify(anchor);
+        const msg = `Anchor must not contain whitespace or control characters: ${sa}`;
+        throw new Error(msg);
+    }
+    return true;
+}
+function anchorNames(root) {
+    const anchors = new Set();
+    visit.visit(root, {
+        Value(_key, node) {
+            if (node.anchor)
+                anchors.add(node.anchor);
+        }
+    });
+    return anchors;
+}
+/** Find a new anchor name with the given `prefix` and a one-indexed suffix. */
+function findNewAnchor(prefix, exclude) {
+    for (let i = 1; true; ++i) {
+        const name = `${prefix}${i}`;
+        if (!exclude.has(name))
+            return name;
+    }
+}
+function createNodeAnchors(doc, prefix) {
+    const aliasObjects = [];
+    const sourceObjects = new Map();
+    let prevAnchors = null;
+    return {
+        onAnchor: (source) => {
+            aliasObjects.push(source);
+            if (!prevAnchors)
+                prevAnchors = anchorNames(doc);
+            const anchor = findNewAnchor(prefix, prevAnchors);
+            prevAnchors.add(anchor);
+            return anchor;
+        },
+        /**
+         * With circular references, the source node is only resolved after all
+         * of its child nodes are. This is why anchors are set only after all of
+         * the nodes have been created.
+         */
+        setAnchors: () => {
+            for (const source of aliasObjects) {
+                const ref = sourceObjects.get(source);
+                if (typeof ref === 'object' &&
+                    ref.anchor &&
+                    (identity.isScalar(ref.node) || identity.isCollection(ref.node))) {
+                    ref.node.anchor = ref.anchor;
+                }
+                else {
+                    const error = new Error('Failed to resolve repeated object (this should not happen)');
+                    error.source = source;
+                    throw error;
+                }
+            }
+        },
+        sourceObjects
+    };
+}
+
+exports.anchorIsValid = anchorIsValid;
+exports.anchorNames = anchorNames;
+exports.createNodeAnchors = createNodeAnchors;
+exports.findNewAnchor = findNewAnchor;
+
+
+/***/ }),
+
+/***/ 3661:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+/**
+ * Applies the JSON.parse reviver algorithm as defined in the ECMA-262 spec,
+ * in section 24.5.1.1 "Runtime Semantics: InternalizeJSONProperty" of the
+ * 2021 edition: https://tc39.es/ecma262/#sec-json.parse
+ *
+ * Includes extensions for handling Map and Set objects.
+ */
+function applyReviver(reviver, obj, key, val) {
+    if (val && typeof val === 'object') {
+        if (Array.isArray(val)) {
+            for (let i = 0, len = val.length; i < len; ++i) {
+                const v0 = val[i];
+                const v1 = applyReviver(reviver, val, String(i), v0);
+                // eslint-disable-next-line @typescript-eslint/no-array-delete
+                if (v1 === undefined)
+                    delete val[i];
+                else if (v1 !== v0)
+                    val[i] = v1;
+            }
+        }
+        else if (val instanceof Map) {
+            for (const k of Array.from(val.keys())) {
+                const v0 = val.get(k);
+                const v1 = applyReviver(reviver, val, k, v0);
+                if (v1 === undefined)
+                    val.delete(k);
+                else if (v1 !== v0)
+                    val.set(k, v1);
+            }
+        }
+        else if (val instanceof Set) {
+            for (const v0 of Array.from(val)) {
+                const v1 = applyReviver(reviver, val, v0, v0);
+                if (v1 === undefined)
+                    val.delete(v0);
+                else if (v1 !== v0) {
+                    val.delete(v0);
+                    val.add(v1);
+                }
+            }
+        }
+        else {
+            for (const [k, v0] of Object.entries(val)) {
+                const v1 = applyReviver(reviver, val, k, v0);
+                if (v1 === undefined)
+                    delete val[k];
+                else if (v1 !== v0)
+                    val[k] = v1;
+            }
+        }
+    }
+    return reviver.call(obj, key, val);
+}
+
+exports.applyReviver = applyReviver;
+
+
+/***/ }),
+
+/***/ 2404:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Alias = __nccwpck_require__(4065);
+var identity = __nccwpck_require__(1127);
+var Scalar = __nccwpck_require__(3301);
+
+const defaultTagPrefix = 'tag:yaml.org,2002:';
+function findTagObject(value, tagName, tags) {
+    if (tagName) {
+        const match = tags.filter(t => t.tag === tagName);
+        const tagObj = match.find(t => !t.format) ?? match[0];
+        if (!tagObj)
+            throw new Error(`Tag ${tagName} not found`);
+        return tagObj;
+    }
+    return tags.find(t => t.identify?.(value) && !t.format);
+}
+function createNode(value, tagName, ctx) {
+    if (identity.isDocument(value))
+        value = value.contents;
+    if (identity.isNode(value))
+        return value;
+    if (identity.isPair(value)) {
+        const map = ctx.schema[identity.MAP].createNode?.(ctx.schema, null, ctx);
+        map.items.push(value);
+        return map;
+    }
+    if (value instanceof String ||
+        value instanceof Number ||
+        value instanceof Boolean ||
+        (typeof BigInt !== 'undefined' && value instanceof BigInt) // not supported everywhere
+    ) {
+        // https://tc39.es/ecma262/#sec-serializejsonproperty
+        value = value.valueOf();
+    }
+    const { aliasDuplicateObjects, onAnchor, onTagObj, schema, sourceObjects } = ctx;
+    // Detect duplicate references to the same object & use Alias nodes for all
+    // after first. The `ref` wrapper allows for circular references to resolve.
+    let ref = undefined;
+    if (aliasDuplicateObjects && value && typeof value === 'object') {
+        ref = sourceObjects.get(value);
+        if (ref) {
+            if (!ref.anchor)
+                ref.anchor = onAnchor(value);
+            return new Alias.Alias(ref.anchor);
+        }
+        else {
+            ref = { anchor: null, node: null };
+            sourceObjects.set(value, ref);
+        }
+    }
+    if (tagName?.startsWith('!!'))
+        tagName = defaultTagPrefix + tagName.slice(2);
+    let tagObj = findTagObject(value, tagName, schema.tags);
+    if (!tagObj) {
+        if (value && typeof value.toJSON === 'function') {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            value = value.toJSON();
+        }
+        if (!value || typeof value !== 'object') {
+            const node = new Scalar.Scalar(value);
+            if (ref)
+                ref.node = node;
+            return node;
+        }
+        tagObj =
+            value instanceof Map
+                ? schema[identity.MAP]
+                : Symbol.iterator in Object(value)
+                    ? schema[identity.SEQ]
+                    : schema[identity.MAP];
+    }
+    if (onTagObj) {
+        onTagObj(tagObj);
+        delete ctx.onTagObj;
+    }
+    const node = tagObj?.createNode
+        ? tagObj.createNode(ctx.schema, value, ctx)
+        : typeof tagObj?.nodeClass?.from === 'function'
+            ? tagObj.nodeClass.from(ctx.schema, value, ctx)
+            : new Scalar.Scalar(value);
+    if (tagName)
+        node.tag = tagName;
+    else if (!tagObj.default)
+        node.tag = tagObj.tag;
+    if (ref)
+        ref.node = node;
+    return node;
+}
+
+exports.createNode = createNode;
+
+
+/***/ }),
+
+/***/ 1342:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var visit = __nccwpck_require__(204);
+
+const escapeChars = {
+    '!': '%21',
+    ',': '%2C',
+    '[': '%5B',
+    ']': '%5D',
+    '{': '%7B',
+    '}': '%7D'
+};
+const escapeTagName = (tn) => tn.replace(/[!,[\]{}]/g, ch => escapeChars[ch]);
+class Directives {
+    constructor(yaml, tags) {
+        /**
+         * The directives-end/doc-start marker `---`. If `null`, a marker may still be
+         * included in the document's stringified representation.
+         */
+        this.docStart = null;
+        /** The doc-end marker `...`.  */
+        this.docEnd = false;
+        this.yaml = Object.assign({}, Directives.defaultYaml, yaml);
+        this.tags = Object.assign({}, Directives.defaultTags, tags);
+    }
+    clone() {
+        const copy = new Directives(this.yaml, this.tags);
+        copy.docStart = this.docStart;
+        return copy;
+    }
+    /**
+     * During parsing, get a Directives instance for the current document and
+     * update the stream state according to the current version's spec.
+     */
+    atDocument() {
+        const res = new Directives(this.yaml, this.tags);
+        switch (this.yaml.version) {
+            case '1.1':
+                this.atNextDocument = true;
+                break;
+            case '1.2':
+                this.atNextDocument = false;
+                this.yaml = {
+                    explicit: Directives.defaultYaml.explicit,
+                    version: '1.2'
+                };
+                this.tags = Object.assign({}, Directives.defaultTags);
+                break;
+        }
+        return res;
+    }
+    /**
+     * @param onError - May be called even if the action was successful
+     * @returns `true` on success
+     */
+    add(line, onError) {
+        if (this.atNextDocument) {
+            this.yaml = { explicit: Directives.defaultYaml.explicit, version: '1.1' };
+            this.tags = Object.assign({}, Directives.defaultTags);
+            this.atNextDocument = false;
+        }
+        const parts = line.trim().split(/[ \t]+/);
+        const name = parts.shift();
+        switch (name) {
+            case '%TAG': {
+                if (parts.length !== 2) {
+                    onError(0, '%TAG directive should contain exactly two parts');
+                    if (parts.length < 2)
+                        return false;
+                }
+                const [handle, prefix] = parts;
+                this.tags[handle] = prefix;
+                return true;
+            }
+            case '%YAML': {
+                this.yaml.explicit = true;
+                if (parts.length !== 1) {
+                    onError(0, '%YAML directive should contain exactly one part');
+                    return false;
+                }
+                const [version] = parts;
+                if (version === '1.1' || version === '1.2') {
+                    this.yaml.version = version;
+                    return true;
+                }
+                else {
+                    const isValid = /^\d+\.\d+$/.test(version);
+                    onError(6, `Unsupported YAML version ${version}`, isValid);
+                    return false;
+                }
+            }
+            default:
+                onError(0, `Unknown directive ${name}`, true);
+                return false;
+        }
+    }
+    /**
+     * Resolves a tag, matching handles to those defined in %TAG directives.
+     *
+     * @returns Resolved tag, which may also be the non-specific tag `'!'` or a
+     *   `'!local'` tag, or `null` if unresolvable.
+     */
+    tagName(source, onError) {
+        if (source === '!')
+            return '!'; // non-specific tag
+        if (source[0] !== '!') {
+            onError(`Not a valid tag: ${source}`);
+            return null;
+        }
+        if (source[1] === '<') {
+            const verbatim = source.slice(2, -1);
+            if (verbatim === '!' || verbatim === '!!') {
+                onError(`Verbatim tags aren't resolved, so ${source} is invalid.`);
+                return null;
+            }
+            if (source[source.length - 1] !== '>')
+                onError('Verbatim tags must end with a >');
+            return verbatim;
+        }
+        const [, handle, suffix] = source.match(/^(.*!)([^!]*)$/s);
+        if (!suffix)
+            onError(`The ${source} tag has no suffix`);
+        const prefix = this.tags[handle];
+        if (prefix) {
+            try {
+                return prefix + decodeURIComponent(suffix);
+            }
+            catch (error) {
+                onError(String(error));
+                return null;
+            }
+        }
+        if (handle === '!')
+            return source; // local tag
+        onError(`Could not resolve tag: ${source}`);
+        return null;
+    }
+    /**
+     * Given a fully resolved tag, returns its printable string form,
+     * taking into account current tag prefixes and defaults.
+     */
+    tagString(tag) {
+        for (const [handle, prefix] of Object.entries(this.tags)) {
+            if (tag.startsWith(prefix))
+                return handle + escapeTagName(tag.substring(prefix.length));
+        }
+        return tag[0] === '!' ? tag : `!<${tag}>`;
+    }
+    toString(doc) {
+        const lines = this.yaml.explicit
+            ? [`%YAML ${this.yaml.version || '1.2'}`]
+            : [];
+        const tagEntries = Object.entries(this.tags);
+        let tagNames;
+        if (doc && tagEntries.length > 0 && identity.isNode(doc.contents)) {
+            const tags = {};
+            visit.visit(doc.contents, (_key, node) => {
+                if (identity.isNode(node) && node.tag)
+                    tags[node.tag] = true;
+            });
+            tagNames = Object.keys(tags);
+        }
+        else
+            tagNames = [];
+        for (const [handle, prefix] of tagEntries) {
+            if (handle === '!!' && prefix === 'tag:yaml.org,2002:')
+                continue;
+            if (!doc || tagNames.some(tn => tn.startsWith(prefix)))
+                lines.push(`%TAG ${handle} ${prefix}`);
+        }
+        return lines.join('\n');
+    }
+}
+Directives.defaultYaml = { explicit: false, version: '1.2' };
+Directives.defaultTags = { '!!': 'tag:yaml.org,2002:' };
+
+exports.Directives = Directives;
+
+
+/***/ }),
+
+/***/ 1464:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+class YAMLError extends Error {
+    constructor(name, pos, code, message) {
+        super();
+        this.name = name;
+        this.code = code;
+        this.message = message;
+        this.pos = pos;
+    }
+}
+class YAMLParseError extends YAMLError {
+    constructor(pos, code, message) {
+        super('YAMLParseError', pos, code, message);
+    }
+}
+class YAMLWarning extends YAMLError {
+    constructor(pos, code, message) {
+        super('YAMLWarning', pos, code, message);
+    }
+}
+const prettifyError = (src, lc) => (error) => {
+    if (error.pos[0] === -1)
+        return;
+    error.linePos = error.pos.map(pos => lc.linePos(pos));
+    const { line, col } = error.linePos[0];
+    error.message += ` at line ${line}, column ${col}`;
+    let ci = col - 1;
+    let lineStr = src
+        .substring(lc.lineStarts[line - 1], lc.lineStarts[line])
+        .replace(/[\n\r]+$/, '');
+    // Trim to max 80 chars, keeping col position near the middle
+    if (ci >= 60 && lineStr.length > 80) {
+        const trimStart = Math.min(ci - 39, lineStr.length - 79);
+        lineStr = '…' + lineStr.substring(trimStart);
+        ci -= trimStart - 1;
+    }
+    if (lineStr.length > 80)
+        lineStr = lineStr.substring(0, 79) + '…';
+    // Include previous line in context if pointing at line start
+    if (line > 1 && /^ *$/.test(lineStr.substring(0, ci))) {
+        // Regexp won't match if start is trimmed
+        let prev = src.substring(lc.lineStarts[line - 2], lc.lineStarts[line - 1]);
+        if (prev.length > 80)
+            prev = prev.substring(0, 79) + '…\n';
+        lineStr = prev + lineStr;
+    }
+    if (/[^ ]/.test(lineStr)) {
+        let count = 1;
+        const end = error.linePos[1];
+        if (end && end.line === line && end.col > col) {
+            count = Math.max(1, Math.min(end.col - col, 80 - ci));
+        }
+        const pointer = ' '.repeat(ci) + '^'.repeat(count);
+        error.message += `:\n\n${lineStr}\n${pointer}\n`;
+    }
+};
+
+exports.YAMLError = YAMLError;
+exports.YAMLParseError = YAMLParseError;
+exports.YAMLWarning = YAMLWarning;
+exports.prettifyError = prettifyError;
+
+
+/***/ }),
+
+/***/ 8815:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var composer = __nccwpck_require__(9984);
+var Document = __nccwpck_require__(3021);
+var Schema = __nccwpck_require__(5840);
+var errors = __nccwpck_require__(1464);
+var Alias = __nccwpck_require__(4065);
+var identity = __nccwpck_require__(1127);
+var Pair = __nccwpck_require__(7165);
+var Scalar = __nccwpck_require__(3301);
+var YAMLMap = __nccwpck_require__(4454);
+var YAMLSeq = __nccwpck_require__(2223);
+var cst = __nccwpck_require__(3461);
+var lexer = __nccwpck_require__(361);
+var lineCounter = __nccwpck_require__(6628);
+var parser = __nccwpck_require__(3456);
+var publicApi = __nccwpck_require__(4047);
+var visit = __nccwpck_require__(204);
+
+
+
+exports.Composer = composer.Composer;
+exports.Document = Document.Document;
+exports.Schema = Schema.Schema;
+exports.YAMLError = errors.YAMLError;
+exports.YAMLParseError = errors.YAMLParseError;
+exports.YAMLWarning = errors.YAMLWarning;
+exports.Alias = Alias.Alias;
+exports.isAlias = identity.isAlias;
+exports.isCollection = identity.isCollection;
+exports.isDocument = identity.isDocument;
+exports.isMap = identity.isMap;
+exports.isNode = identity.isNode;
+exports.isPair = identity.isPair;
+exports.isScalar = identity.isScalar;
+exports.isSeq = identity.isSeq;
+exports.Pair = Pair.Pair;
+exports.Scalar = Scalar.Scalar;
+exports.YAMLMap = YAMLMap.YAMLMap;
+exports.YAMLSeq = YAMLSeq.YAMLSeq;
+exports.CST = cst;
+exports.Lexer = lexer.Lexer;
+exports.LineCounter = lineCounter.LineCounter;
+exports.Parser = parser.Parser;
+exports.parse = publicApi.parse;
+exports.parseAllDocuments = publicApi.parseAllDocuments;
+exports.parseDocument = publicApi.parseDocument;
+exports.stringify = publicApi.stringify;
+exports.visit = visit.visit;
+exports.visitAsync = visit.visitAsync;
+
+
+/***/ }),
+
+/***/ 7249:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+function debug(logLevel, ...messages) {
+    if (logLevel === 'debug')
+        console.log(...messages);
+}
+function warn(logLevel, warning) {
+    if (logLevel === 'debug' || logLevel === 'warn') {
+        if (typeof process !== 'undefined' && process.emitWarning)
+            process.emitWarning(warning);
+        else
+            console.warn(warning);
+    }
+}
+
+exports.debug = debug;
+exports.warn = warn;
+
+
+/***/ }),
+
+/***/ 4065:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var anchors = __nccwpck_require__(1596);
+var visit = __nccwpck_require__(204);
+var identity = __nccwpck_require__(1127);
+var Node = __nccwpck_require__(6673);
+var toJS = __nccwpck_require__(6424);
+
+class Alias extends Node.NodeBase {
+    constructor(source) {
+        super(identity.ALIAS);
+        this.source = source;
+        Object.defineProperty(this, 'tag', {
+            set() {
+                throw new Error('Alias nodes cannot have tags');
+            }
+        });
+    }
+    /**
+     * Resolve the value of this alias within `doc`, finding the last
+     * instance of the `source` anchor before this node.
+     */
+    resolve(doc) {
+        let found = undefined;
+        visit.visit(doc, {
+            Node: (_key, node) => {
+                if (node === this)
+                    return visit.visit.BREAK;
+                if (node.anchor === this.source)
+                    found = node;
+            }
+        });
+        return found;
+    }
+    toJSON(_arg, ctx) {
+        if (!ctx)
+            return { source: this.source };
+        const { anchors, doc, maxAliasCount } = ctx;
+        const source = this.resolve(doc);
+        if (!source) {
+            const msg = `Unresolved alias (the anchor must be set before the alias): ${this.source}`;
+            throw new ReferenceError(msg);
+        }
+        let data = anchors.get(source);
+        if (!data) {
+            // Resolve anchors for Node.prototype.toJS()
+            toJS.toJS(source, null, ctx);
+            data = anchors.get(source);
+        }
+        /* istanbul ignore if */
+        if (!data || data.res === undefined) {
+            const msg = 'This should not happen: Alias anchor was not resolved?';
+            throw new ReferenceError(msg);
+        }
+        if (maxAliasCount >= 0) {
+            data.count += 1;
+            if (data.aliasCount === 0)
+                data.aliasCount = getAliasCount(doc, source, anchors);
+            if (data.count * data.aliasCount > maxAliasCount) {
+                const msg = 'Excessive alias count indicates a resource exhaustion attack';
+                throw new ReferenceError(msg);
+            }
+        }
+        return data.res;
+    }
+    toString(ctx, _onComment, _onChompKeep) {
+        const src = `*${this.source}`;
+        if (ctx) {
+            anchors.anchorIsValid(this.source);
+            if (ctx.options.verifyAliasOrder && !ctx.anchors.has(this.source)) {
+                const msg = `Unresolved alias (the anchor must be set before the alias): ${this.source}`;
+                throw new Error(msg);
+            }
+            if (ctx.implicitKey)
+                return `${src} `;
+        }
+        return src;
+    }
+}
+function getAliasCount(doc, node, anchors) {
+    if (identity.isAlias(node)) {
+        const source = node.resolve(doc);
+        const anchor = anchors && source && anchors.get(source);
+        return anchor ? anchor.count * anchor.aliasCount : 0;
+    }
+    else if (identity.isCollection(node)) {
+        let count = 0;
+        for (const item of node.items) {
+            const c = getAliasCount(doc, item, anchors);
+            if (c > count)
+                count = c;
+        }
+        return count;
+    }
+    else if (identity.isPair(node)) {
+        const kc = getAliasCount(doc, node.key, anchors);
+        const vc = getAliasCount(doc, node.value, anchors);
+        return Math.max(kc, vc);
+    }
+    return 1;
+}
+
+exports.Alias = Alias;
+
+
+/***/ }),
+
+/***/ 101:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var createNode = __nccwpck_require__(2404);
+var identity = __nccwpck_require__(1127);
+var Node = __nccwpck_require__(6673);
+
+function collectionFromPath(schema, path, value) {
+    let v = value;
+    for (let i = path.length - 1; i >= 0; --i) {
+        const k = path[i];
+        if (typeof k === 'number' && Number.isInteger(k) && k >= 0) {
+            const a = [];
+            a[k] = v;
+            v = a;
+        }
+        else {
+            v = new Map([[k, v]]);
+        }
+    }
+    return createNode.createNode(v, undefined, {
+        aliasDuplicateObjects: false,
+        keepUndefined: false,
+        onAnchor: () => {
+            throw new Error('This should not happen, please report a bug.');
+        },
+        schema,
+        sourceObjects: new Map()
+    });
+}
+// Type guard is intentionally a little wrong so as to be more useful,
+// as it does not cover untypable empty non-string iterables (e.g. []).
+const isEmptyPath = (path) => path == null ||
+    (typeof path === 'object' && !!path[Symbol.iterator]().next().done);
+class Collection extends Node.NodeBase {
+    constructor(type, schema) {
+        super(type);
+        Object.defineProperty(this, 'schema', {
+            value: schema,
+            configurable: true,
+            enumerable: false,
+            writable: true
+        });
+    }
+    /**
+     * Create a copy of this collection.
+     *
+     * @param schema - If defined, overwrites the original's schema
+     */
+    clone(schema) {
+        const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
+        if (schema)
+            copy.schema = schema;
+        copy.items = copy.items.map(it => identity.isNode(it) || identity.isPair(it) ? it.clone(schema) : it);
+        if (this.range)
+            copy.range = this.range.slice();
+        return copy;
+    }
+    /**
+     * Adds a value to the collection. For `!!map` and `!!omap` the value must
+     * be a Pair instance or a `{ key, value }` object, which may not have a key
+     * that already exists in the map.
+     */
+    addIn(path, value) {
+        if (isEmptyPath(path))
+            this.add(value);
+        else {
+            const [key, ...rest] = path;
+            const node = this.get(key, true);
+            if (identity.isCollection(node))
+                node.addIn(rest, value);
+            else if (node === undefined && this.schema)
+                this.set(key, collectionFromPath(this.schema, rest, value));
+            else
+                throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+        }
+    }
+    /**
+     * Removes a value from the collection.
+     * @returns `true` if the item was found and removed.
+     */
+    deleteIn(path) {
+        const [key, ...rest] = path;
+        if (rest.length === 0)
+            return this.delete(key);
+        const node = this.get(key, true);
+        if (identity.isCollection(node))
+            return node.deleteIn(rest);
+        else
+            throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+    }
+    /**
+     * Returns item at `key`, or `undefined` if not found. By default unwraps
+     * scalar values from their surrounding node; to disable set `keepScalar` to
+     * `true` (collections are always returned intact).
+     */
+    getIn(path, keepScalar) {
+        const [key, ...rest] = path;
+        const node = this.get(key, true);
+        if (rest.length === 0)
+            return !keepScalar && identity.isScalar(node) ? node.value : node;
+        else
+            return identity.isCollection(node) ? node.getIn(rest, keepScalar) : undefined;
+    }
+    hasAllNullValues(allowScalar) {
+        return this.items.every(node => {
+            if (!identity.isPair(node))
+                return false;
+            const n = node.value;
+            return (n == null ||
+                (allowScalar &&
+                    identity.isScalar(n) &&
+                    n.value == null &&
+                    !n.commentBefore &&
+                    !n.comment &&
+                    !n.tag));
+        });
+    }
+    /**
+     * Checks if the collection includes a value with the key `key`.
+     */
+    hasIn(path) {
+        const [key, ...rest] = path;
+        if (rest.length === 0)
+            return this.has(key);
+        const node = this.get(key, true);
+        return identity.isCollection(node) ? node.hasIn(rest) : false;
+    }
+    /**
+     * Sets a value in this collection. For `!!set`, `value` needs to be a
+     * boolean to add/remove the item from the set.
+     */
+    setIn(path, value) {
+        const [key, ...rest] = path;
+        if (rest.length === 0) {
+            this.set(key, value);
+        }
+        else {
+            const node = this.get(key, true);
+            if (identity.isCollection(node))
+                node.setIn(rest, value);
+            else if (node === undefined && this.schema)
+                this.set(key, collectionFromPath(this.schema, rest, value));
+            else
+                throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+        }
+    }
+}
+
+exports.Collection = Collection;
+exports.collectionFromPath = collectionFromPath;
+exports.isEmptyPath = isEmptyPath;
+
+
+/***/ }),
+
+/***/ 6673:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var applyReviver = __nccwpck_require__(3661);
+var identity = __nccwpck_require__(1127);
+var toJS = __nccwpck_require__(6424);
+
+class NodeBase {
+    constructor(type) {
+        Object.defineProperty(this, identity.NODE_TYPE, { value: type });
+    }
+    /** Create a copy of this node.  */
+    clone() {
+        const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
+        if (this.range)
+            copy.range = this.range.slice();
+        return copy;
+    }
+    /** A plain JavaScript representation of this node. */
+    toJS(doc, { mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
+        if (!identity.isDocument(doc))
+            throw new TypeError('A document argument is required');
+        const ctx = {
+            anchors: new Map(),
+            doc,
+            keep: true,
+            mapAsMap: mapAsMap === true,
+            mapKeyWarned: false,
+            maxAliasCount: typeof maxAliasCount === 'number' ? maxAliasCount : 100
+        };
+        const res = toJS.toJS(this, '', ctx);
+        if (typeof onAnchor === 'function')
+            for (const { count, res } of ctx.anchors.values())
+                onAnchor(res, count);
+        return typeof reviver === 'function'
+            ? applyReviver.applyReviver(reviver, { '': res }, '', res)
+            : res;
+    }
+}
+
+exports.NodeBase = NodeBase;
+
+
+/***/ }),
+
+/***/ 7165:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var createNode = __nccwpck_require__(2404);
+var stringifyPair = __nccwpck_require__(9748);
+var addPairToJSMap = __nccwpck_require__(7104);
+var identity = __nccwpck_require__(1127);
+
+function createPair(key, value, ctx) {
+    const k = createNode.createNode(key, undefined, ctx);
+    const v = createNode.createNode(value, undefined, ctx);
+    return new Pair(k, v);
+}
+class Pair {
+    constructor(key, value = null) {
+        Object.defineProperty(this, identity.NODE_TYPE, { value: identity.PAIR });
+        this.key = key;
+        this.value = value;
+    }
+    clone(schema) {
+        let { key, value } = this;
+        if (identity.isNode(key))
+            key = key.clone(schema);
+        if (identity.isNode(value))
+            value = value.clone(schema);
+        return new Pair(key, value);
+    }
+    toJSON(_, ctx) {
+        const pair = ctx?.mapAsMap ? new Map() : {};
+        return addPairToJSMap.addPairToJSMap(ctx, pair, this);
+    }
+    toString(ctx, onComment, onChompKeep) {
+        return ctx?.doc
+            ? stringifyPair.stringifyPair(this, ctx, onComment, onChompKeep)
+            : JSON.stringify(this);
+    }
+}
+
+exports.Pair = Pair;
+exports.createPair = createPair;
+
+
+/***/ }),
+
+/***/ 3301:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var Node = __nccwpck_require__(6673);
+var toJS = __nccwpck_require__(6424);
+
+const isScalarValue = (value) => !value || (typeof value !== 'function' && typeof value !== 'object');
+class Scalar extends Node.NodeBase {
+    constructor(value) {
+        super(identity.SCALAR);
+        this.value = value;
+    }
+    toJSON(arg, ctx) {
+        return ctx?.keep ? this.value : toJS.toJS(this.value, arg, ctx);
+    }
+    toString() {
+        return String(this.value);
+    }
+}
+Scalar.BLOCK_FOLDED = 'BLOCK_FOLDED';
+Scalar.BLOCK_LITERAL = 'BLOCK_LITERAL';
+Scalar.PLAIN = 'PLAIN';
+Scalar.QUOTE_DOUBLE = 'QUOTE_DOUBLE';
+Scalar.QUOTE_SINGLE = 'QUOTE_SINGLE';
+
+exports.Scalar = Scalar;
+exports.isScalarValue = isScalarValue;
+
+
+/***/ }),
+
+/***/ 4454:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var stringifyCollection = __nccwpck_require__(1212);
+var addPairToJSMap = __nccwpck_require__(7104);
+var Collection = __nccwpck_require__(101);
+var identity = __nccwpck_require__(1127);
+var Pair = __nccwpck_require__(7165);
+var Scalar = __nccwpck_require__(3301);
+
+function findPair(items, key) {
+    const k = identity.isScalar(key) ? key.value : key;
+    for (const it of items) {
+        if (identity.isPair(it)) {
+            if (it.key === key || it.key === k)
+                return it;
+            if (identity.isScalar(it.key) && it.key.value === k)
+                return it;
+        }
+    }
+    return undefined;
+}
+class YAMLMap extends Collection.Collection {
+    static get tagName() {
+        return 'tag:yaml.org,2002:map';
+    }
+    constructor(schema) {
+        super(identity.MAP, schema);
+        this.items = [];
+    }
+    /**
+     * A generic collection parsing method that can be extended
+     * to other node classes that inherit from YAMLMap
+     */
+    static from(schema, obj, ctx) {
+        const { keepUndefined, replacer } = ctx;
+        const map = new this(schema);
+        const add = (key, value) => {
+            if (typeof replacer === 'function')
+                value = replacer.call(obj, key, value);
+            else if (Array.isArray(replacer) && !replacer.includes(key))
+                return;
+            if (value !== undefined || keepUndefined)
+                map.items.push(Pair.createPair(key, value, ctx));
+        };
+        if (obj instanceof Map) {
+            for (const [key, value] of obj)
+                add(key, value);
+        }
+        else if (obj && typeof obj === 'object') {
+            for (const key of Object.keys(obj))
+                add(key, obj[key]);
+        }
+        if (typeof schema.sortMapEntries === 'function') {
+            map.items.sort(schema.sortMapEntries);
+        }
+        return map;
+    }
+    /**
+     * Adds a value to the collection.
+     *
+     * @param overwrite - If not set `true`, using a key that is already in the
+     *   collection will throw. Otherwise, overwrites the previous value.
+     */
+    add(pair, overwrite) {
+        let _pair;
+        if (identity.isPair(pair))
+            _pair = pair;
+        else if (!pair || typeof pair !== 'object' || !('key' in pair)) {
+            // In TypeScript, this never happens.
+            _pair = new Pair.Pair(pair, pair?.value);
+        }
+        else
+            _pair = new Pair.Pair(pair.key, pair.value);
+        const prev = findPair(this.items, _pair.key);
+        const sortEntries = this.schema?.sortMapEntries;
+        if (prev) {
+            if (!overwrite)
+                throw new Error(`Key ${_pair.key} already set`);
+            // For scalars, keep the old node & its comments and anchors
+            if (identity.isScalar(prev.value) && Scalar.isScalarValue(_pair.value))
+                prev.value.value = _pair.value;
+            else
+                prev.value = _pair.value;
+        }
+        else if (sortEntries) {
+            const i = this.items.findIndex(item => sortEntries(_pair, item) < 0);
+            if (i === -1)
+                this.items.push(_pair);
+            else
+                this.items.splice(i, 0, _pair);
+        }
+        else {
+            this.items.push(_pair);
+        }
+    }
+    delete(key) {
+        const it = findPair(this.items, key);
+        if (!it)
+            return false;
+        const del = this.items.splice(this.items.indexOf(it), 1);
+        return del.length > 0;
+    }
+    get(key, keepScalar) {
+        const it = findPair(this.items, key);
+        const node = it?.value;
+        return (!keepScalar && identity.isScalar(node) ? node.value : node) ?? undefined;
+    }
+    has(key) {
+        return !!findPair(this.items, key);
+    }
+    set(key, value) {
+        this.add(new Pair.Pair(key, value), true);
+    }
+    /**
+     * @param ctx - Conversion context, originally set in Document#toJS()
+     * @param {Class} Type - If set, forces the returned collection type
+     * @returns Instance of Type, Map, or Object
+     */
+    toJSON(_, ctx, Type) {
+        const map = Type ? new Type() : ctx?.mapAsMap ? new Map() : {};
+        if (ctx?.onCreate)
+            ctx.onCreate(map);
+        for (const item of this.items)
+            addPairToJSMap.addPairToJSMap(ctx, map, item);
+        return map;
+    }
+    toString(ctx, onComment, onChompKeep) {
+        if (!ctx)
+            return JSON.stringify(this);
+        for (const item of this.items) {
+            if (!identity.isPair(item))
+                throw new Error(`Map items must all be pairs; found ${JSON.stringify(item)} instead`);
+        }
+        if (!ctx.allNullValues && this.hasAllNullValues(false))
+            ctx = Object.assign({}, ctx, { allNullValues: true });
+        return stringifyCollection.stringifyCollection(this, ctx, {
+            blockItemPrefix: '',
+            flowChars: { start: '{', end: '}' },
+            itemIndent: ctx.indent || '',
+            onChompKeep,
+            onComment
+        });
+    }
+}
+
+exports.YAMLMap = YAMLMap;
+exports.findPair = findPair;
+
+
+/***/ }),
+
+/***/ 2223:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var createNode = __nccwpck_require__(2404);
+var stringifyCollection = __nccwpck_require__(1212);
+var Collection = __nccwpck_require__(101);
+var identity = __nccwpck_require__(1127);
+var Scalar = __nccwpck_require__(3301);
+var toJS = __nccwpck_require__(6424);
+
+class YAMLSeq extends Collection.Collection {
+    static get tagName() {
+        return 'tag:yaml.org,2002:seq';
+    }
+    constructor(schema) {
+        super(identity.SEQ, schema);
+        this.items = [];
+    }
+    add(value) {
+        this.items.push(value);
+    }
+    /**
+     * Removes a value from the collection.
+     *
+     * `key` must contain a representation of an integer for this to succeed.
+     * It may be wrapped in a `Scalar`.
+     *
+     * @returns `true` if the item was found and removed.
+     */
+    delete(key) {
+        const idx = asItemIndex(key);
+        if (typeof idx !== 'number')
+            return false;
+        const del = this.items.splice(idx, 1);
+        return del.length > 0;
+    }
+    get(key, keepScalar) {
+        const idx = asItemIndex(key);
+        if (typeof idx !== 'number')
+            return undefined;
+        const it = this.items[idx];
+        return !keepScalar && identity.isScalar(it) ? it.value : it;
+    }
+    /**
+     * Checks if the collection includes a value with the key `key`.
+     *
+     * `key` must contain a representation of an integer for this to succeed.
+     * It may be wrapped in a `Scalar`.
+     */
+    has(key) {
+        const idx = asItemIndex(key);
+        return typeof idx === 'number' && idx < this.items.length;
+    }
+    /**
+     * Sets a value in this collection. For `!!set`, `value` needs to be a
+     * boolean to add/remove the item from the set.
+     *
+     * If `key` does not contain a representation of an integer, this will throw.
+     * It may be wrapped in a `Scalar`.
+     */
+    set(key, value) {
+        const idx = asItemIndex(key);
+        if (typeof idx !== 'number')
+            throw new Error(`Expected a valid index, not ${key}.`);
+        const prev = this.items[idx];
+        if (identity.isScalar(prev) && Scalar.isScalarValue(value))
+            prev.value = value;
+        else
+            this.items[idx] = value;
+    }
+    toJSON(_, ctx) {
+        const seq = [];
+        if (ctx?.onCreate)
+            ctx.onCreate(seq);
+        let i = 0;
+        for (const item of this.items)
+            seq.push(toJS.toJS(item, String(i++), ctx));
+        return seq;
+    }
+    toString(ctx, onComment, onChompKeep) {
+        if (!ctx)
+            return JSON.stringify(this);
+        return stringifyCollection.stringifyCollection(this, ctx, {
+            blockItemPrefix: '- ',
+            flowChars: { start: '[', end: ']' },
+            itemIndent: (ctx.indent || '') + '  ',
+            onChompKeep,
+            onComment
+        });
+    }
+    static from(schema, obj, ctx) {
+        const { replacer } = ctx;
+        const seq = new this(schema);
+        if (obj && Symbol.iterator in Object(obj)) {
+            let i = 0;
+            for (let it of obj) {
+                if (typeof replacer === 'function') {
+                    const key = obj instanceof Set ? it : String(i++);
+                    it = replacer.call(obj, key, it);
+                }
+                seq.items.push(createNode.createNode(it, undefined, ctx));
+            }
+        }
+        return seq;
+    }
+}
+function asItemIndex(key) {
+    let idx = identity.isScalar(key) ? key.value : key;
+    if (idx && typeof idx === 'string')
+        idx = Number(idx);
+    return typeof idx === 'number' && Number.isInteger(idx) && idx >= 0
+        ? idx
+        : null;
+}
+
+exports.YAMLSeq = YAMLSeq;
+
+
+/***/ }),
+
+/***/ 7104:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var log = __nccwpck_require__(7249);
+var merge = __nccwpck_require__(452);
+var stringify = __nccwpck_require__(2148);
+var identity = __nccwpck_require__(1127);
+var toJS = __nccwpck_require__(6424);
+
+function addPairToJSMap(ctx, map, { key, value }) {
+    if (identity.isNode(key) && key.addToJSMap)
+        key.addToJSMap(ctx, map, value);
+    // TODO: Should drop this special case for bare << handling
+    else if (merge.isMergeKey(ctx, key))
+        merge.addMergeToJSMap(ctx, map, value);
+    else {
+        const jsKey = toJS.toJS(key, '', ctx);
+        if (map instanceof Map) {
+            map.set(jsKey, toJS.toJS(value, jsKey, ctx));
+        }
+        else if (map instanceof Set) {
+            map.add(jsKey);
+        }
+        else {
+            const stringKey = stringifyKey(key, jsKey, ctx);
+            const jsValue = toJS.toJS(value, stringKey, ctx);
+            if (stringKey in map)
+                Object.defineProperty(map, stringKey, {
+                    value: jsValue,
+                    writable: true,
+                    enumerable: true,
+                    configurable: true
+                });
+            else
+                map[stringKey] = jsValue;
+        }
+    }
+    return map;
+}
+function stringifyKey(key, jsKey, ctx) {
+    if (jsKey === null)
+        return '';
+    if (typeof jsKey !== 'object')
+        return String(jsKey);
+    if (identity.isNode(key) && ctx?.doc) {
+        const strCtx = stringify.createStringifyContext(ctx.doc, {});
+        strCtx.anchors = new Set();
+        for (const node of ctx.anchors.keys())
+            strCtx.anchors.add(node.anchor);
+        strCtx.inFlow = true;
+        strCtx.inStringifyKey = true;
+        const strKey = key.toString(strCtx);
+        if (!ctx.mapKeyWarned) {
+            let jsonStr = JSON.stringify(strKey);
+            if (jsonStr.length > 40)
+                jsonStr = jsonStr.substring(0, 36) + '..."';
+            log.warn(ctx.doc.options.logLevel, `Keys with collection values will be stringified due to JS Object restrictions: ${jsonStr}. Set mapAsMap: true to use object keys.`);
+            ctx.mapKeyWarned = true;
+        }
+        return strKey;
+    }
+    return JSON.stringify(jsKey);
+}
+
+exports.addPairToJSMap = addPairToJSMap;
+
+
+/***/ }),
+
+/***/ 1127:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+const ALIAS = Symbol.for('yaml.alias');
+const DOC = Symbol.for('yaml.document');
+const MAP = Symbol.for('yaml.map');
+const PAIR = Symbol.for('yaml.pair');
+const SCALAR = Symbol.for('yaml.scalar');
+const SEQ = Symbol.for('yaml.seq');
+const NODE_TYPE = Symbol.for('yaml.node.type');
+const isAlias = (node) => !!node && typeof node === 'object' && node[NODE_TYPE] === ALIAS;
+const isDocument = (node) => !!node && typeof node === 'object' && node[NODE_TYPE] === DOC;
+const isMap = (node) => !!node && typeof node === 'object' && node[NODE_TYPE] === MAP;
+const isPair = (node) => !!node && typeof node === 'object' && node[NODE_TYPE] === PAIR;
+const isScalar = (node) => !!node && typeof node === 'object' && node[NODE_TYPE] === SCALAR;
+const isSeq = (node) => !!node && typeof node === 'object' && node[NODE_TYPE] === SEQ;
+function isCollection(node) {
+    if (node && typeof node === 'object')
+        switch (node[NODE_TYPE]) {
+            case MAP:
+            case SEQ:
+                return true;
+        }
+    return false;
+}
+function isNode(node) {
+    if (node && typeof node === 'object')
+        switch (node[NODE_TYPE]) {
+            case ALIAS:
+            case MAP:
+            case SCALAR:
+            case SEQ:
+                return true;
+        }
+    return false;
+}
+const hasAnchor = (node) => (isScalar(node) || isCollection(node)) && !!node.anchor;
+
+exports.ALIAS = ALIAS;
+exports.DOC = DOC;
+exports.MAP = MAP;
+exports.NODE_TYPE = NODE_TYPE;
+exports.PAIR = PAIR;
+exports.SCALAR = SCALAR;
+exports.SEQ = SEQ;
+exports.hasAnchor = hasAnchor;
+exports.isAlias = isAlias;
+exports.isCollection = isCollection;
+exports.isDocument = isDocument;
+exports.isMap = isMap;
+exports.isNode = isNode;
+exports.isPair = isPair;
+exports.isScalar = isScalar;
+exports.isSeq = isSeq;
+
+
+/***/ }),
+
+/***/ 6424:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+
+/**
+ * Recursively convert any node or its contents to native JavaScript
+ *
+ * @param value - The input value
+ * @param arg - If `value` defines a `toJSON()` method, use this
+ *   as its first argument
+ * @param ctx - Conversion context, originally set in Document#toJS(). If
+ *   `{ keep: true }` is not set, output should be suitable for JSON
+ *   stringification.
+ */
+function toJS(value, arg, ctx) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    if (Array.isArray(value))
+        return value.map((v, i) => toJS(v, String(i), ctx));
+    if (value && typeof value.toJSON === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        if (!ctx || !identity.hasAnchor(value))
+            return value.toJSON(arg, ctx);
+        const data = { aliasCount: 0, count: 1, res: undefined };
+        ctx.anchors.set(value, data);
+        ctx.onCreate = res => {
+            data.res = res;
+            delete ctx.onCreate;
+        };
+        const res = value.toJSON(arg, ctx);
+        if (ctx.onCreate)
+            ctx.onCreate(res);
+        return res;
+    }
+    if (typeof value === 'bigint' && !ctx?.keep)
+        return Number(value);
+    return value;
+}
+
+exports.toJS = toJS;
+
+
+/***/ }),
+
+/***/ 110:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var resolveBlockScalar = __nccwpck_require__(8913);
+var resolveFlowScalar = __nccwpck_require__(6842);
+var errors = __nccwpck_require__(1464);
+var stringifyString = __nccwpck_require__(3069);
+
+function resolveAsScalar(token, strict = true, onError) {
+    if (token) {
+        const _onError = (pos, code, message) => {
+            const offset = typeof pos === 'number' ? pos : Array.isArray(pos) ? pos[0] : pos.offset;
+            if (onError)
+                onError(offset, code, message);
+            else
+                throw new errors.YAMLParseError([offset, offset + 1], code, message);
+        };
+        switch (token.type) {
+            case 'scalar':
+            case 'single-quoted-scalar':
+            case 'double-quoted-scalar':
+                return resolveFlowScalar.resolveFlowScalar(token, strict, _onError);
+            case 'block-scalar':
+                return resolveBlockScalar.resolveBlockScalar({ options: { strict } }, token, _onError);
+        }
+    }
+    return null;
+}
+/**
+ * Create a new scalar token with `value`
+ *
+ * Values that represent an actual string but may be parsed as a different type should use a `type` other than `'PLAIN'`,
+ * as this function does not support any schema operations and won't check for such conflicts.
+ *
+ * @param value The string representation of the value, which will have its content properly indented.
+ * @param context.end Comments and whitespace after the end of the value, or after the block scalar header. If undefined, a newline will be added.
+ * @param context.implicitKey Being within an implicit key may affect the resolved type of the token's value.
+ * @param context.indent The indent level of the token.
+ * @param context.inFlow Is this scalar within a flow collection? This may affect the resolved type of the token's value.
+ * @param context.offset The offset position of the token.
+ * @param context.type The preferred type of the scalar token. If undefined, the previous type of the `token` will be used, defaulting to `'PLAIN'`.
+ */
+function createScalarToken(value, context) {
+    const { implicitKey = false, indent, inFlow = false, offset = -1, type = 'PLAIN' } = context;
+    const source = stringifyString.stringifyString({ type, value }, {
+        implicitKey,
+        indent: indent > 0 ? ' '.repeat(indent) : '',
+        inFlow,
+        options: { blockQuote: true, lineWidth: -1 }
+    });
+    const end = context.end ?? [
+        { type: 'newline', offset: -1, indent, source: '\n' }
+    ];
+    switch (source[0]) {
+        case '|':
+        case '>': {
+            const he = source.indexOf('\n');
+            const head = source.substring(0, he);
+            const body = source.substring(he + 1) + '\n';
+            const props = [
+                { type: 'block-scalar-header', offset, indent, source: head }
+            ];
+            if (!addEndtoBlockProps(props, end))
+                props.push({ type: 'newline', offset: -1, indent, source: '\n' });
+            return { type: 'block-scalar', offset, indent, props, source: body };
+        }
+        case '"':
+            return { type: 'double-quoted-scalar', offset, indent, source, end };
+        case "'":
+            return { type: 'single-quoted-scalar', offset, indent, source, end };
+        default:
+            return { type: 'scalar', offset, indent, source, end };
+    }
+}
+/**
+ * Set the value of `token` to the given string `value`, overwriting any previous contents and type that it may have.
+ *
+ * Best efforts are made to retain any comments previously associated with the `token`,
+ * though all contents within a collection's `items` will be overwritten.
+ *
+ * Values that represent an actual string but may be parsed as a different type should use a `type` other than `'PLAIN'`,
+ * as this function does not support any schema operations and won't check for such conflicts.
+ *
+ * @param token Any token. If it does not include an `indent` value, the value will be stringified as if it were an implicit key.
+ * @param value The string representation of the value, which will have its content properly indented.
+ * @param context.afterKey In most cases, values after a key should have an additional level of indentation.
+ * @param context.implicitKey Being within an implicit key may affect the resolved type of the token's value.
+ * @param context.inFlow Being within a flow collection may affect the resolved type of the token's value.
+ * @param context.type The preferred type of the scalar token. If undefined, the previous type of the `token` will be used, defaulting to `'PLAIN'`.
+ */
+function setScalarValue(token, value, context = {}) {
+    let { afterKey = false, implicitKey = false, inFlow = false, type } = context;
+    let indent = 'indent' in token ? token.indent : null;
+    if (afterKey && typeof indent === 'number')
+        indent += 2;
+    if (!type)
+        switch (token.type) {
+            case 'single-quoted-scalar':
+                type = 'QUOTE_SINGLE';
+                break;
+            case 'double-quoted-scalar':
+                type = 'QUOTE_DOUBLE';
+                break;
+            case 'block-scalar': {
+                const header = token.props[0];
+                if (header.type !== 'block-scalar-header')
+                    throw new Error('Invalid block scalar header');
+                type = header.source[0] === '>' ? 'BLOCK_FOLDED' : 'BLOCK_LITERAL';
+                break;
+            }
+            default:
+                type = 'PLAIN';
+        }
+    const source = stringifyString.stringifyString({ type, value }, {
+        implicitKey: implicitKey || indent === null,
+        indent: indent !== null && indent > 0 ? ' '.repeat(indent) : '',
+        inFlow,
+        options: { blockQuote: true, lineWidth: -1 }
+    });
+    switch (source[0]) {
+        case '|':
+        case '>':
+            setBlockScalarValue(token, source);
+            break;
+        case '"':
+            setFlowScalarValue(token, source, 'double-quoted-scalar');
+            break;
+        case "'":
+            setFlowScalarValue(token, source, 'single-quoted-scalar');
+            break;
+        default:
+            setFlowScalarValue(token, source, 'scalar');
+    }
+}
+function setBlockScalarValue(token, source) {
+    const he = source.indexOf('\n');
+    const head = source.substring(0, he);
+    const body = source.substring(he + 1) + '\n';
+    if (token.type === 'block-scalar') {
+        const header = token.props[0];
+        if (header.type !== 'block-scalar-header')
+            throw new Error('Invalid block scalar header');
+        header.source = head;
+        token.source = body;
+    }
+    else {
+        const { offset } = token;
+        const indent = 'indent' in token ? token.indent : -1;
+        const props = [
+            { type: 'block-scalar-header', offset, indent, source: head }
+        ];
+        if (!addEndtoBlockProps(props, 'end' in token ? token.end : undefined))
+            props.push({ type: 'newline', offset: -1, indent, source: '\n' });
+        for (const key of Object.keys(token))
+            if (key !== 'type' && key !== 'offset')
+                delete token[key];
+        Object.assign(token, { type: 'block-scalar', indent, props, source: body });
+    }
+}
+/** @returns `true` if last token is a newline */
+function addEndtoBlockProps(props, end) {
+    if (end)
+        for (const st of end)
+            switch (st.type) {
+                case 'space':
+                case 'comment':
+                    props.push(st);
+                    break;
+                case 'newline':
+                    props.push(st);
+                    return true;
+            }
+    return false;
+}
+function setFlowScalarValue(token, source, type) {
+    switch (token.type) {
+        case 'scalar':
+        case 'double-quoted-scalar':
+        case 'single-quoted-scalar':
+            token.type = type;
+            token.source = source;
+            break;
+        case 'block-scalar': {
+            const end = token.props.slice(1);
+            let oa = source.length;
+            if (token.props[0].type === 'block-scalar-header')
+                oa -= token.props[0].source.length;
+            for (const tok of end)
+                tok.offset += oa;
+            delete token.props;
+            Object.assign(token, { type, source, end });
+            break;
+        }
+        case 'block-map':
+        case 'block-seq': {
+            const offset = token.offset + source.length;
+            const nl = { type: 'newline', offset, indent: token.indent, source: '\n' };
+            delete token.items;
+            Object.assign(token, { type, source, end: [nl] });
+            break;
+        }
+        default: {
+            const indent = 'indent' in token ? token.indent : -1;
+            const end = 'end' in token && Array.isArray(token.end)
+                ? token.end.filter(st => st.type === 'space' ||
+                    st.type === 'comment' ||
+                    st.type === 'newline')
+                : [];
+            for (const key of Object.keys(token))
+                if (key !== 'type' && key !== 'offset')
+                    delete token[key];
+            Object.assign(token, { type, indent, source, end });
+        }
+    }
+}
+
+exports.createScalarToken = createScalarToken;
+exports.resolveAsScalar = resolveAsScalar;
+exports.setScalarValue = setScalarValue;
+
+
+/***/ }),
+
+/***/ 1733:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+/**
+ * Stringify a CST document, token, or collection item
+ *
+ * Fair warning: This applies no validation whatsoever, and
+ * simply concatenates the sources in their logical order.
+ */
+const stringify = (cst) => 'type' in cst ? stringifyToken(cst) : stringifyItem(cst);
+function stringifyToken(token) {
+    switch (token.type) {
+        case 'block-scalar': {
+            let res = '';
+            for (const tok of token.props)
+                res += stringifyToken(tok);
+            return res + token.source;
+        }
+        case 'block-map':
+        case 'block-seq': {
+            let res = '';
+            for (const item of token.items)
+                res += stringifyItem(item);
+            return res;
+        }
+        case 'flow-collection': {
+            let res = token.start.source;
+            for (const item of token.items)
+                res += stringifyItem(item);
+            for (const st of token.end)
+                res += st.source;
+            return res;
+        }
+        case 'document': {
+            let res = stringifyItem(token);
+            if (token.end)
+                for (const st of token.end)
+                    res += st.source;
+            return res;
+        }
+        default: {
+            let res = token.source;
+            if ('end' in token && token.end)
+                for (const st of token.end)
+                    res += st.source;
+            return res;
+        }
+    }
+}
+function stringifyItem({ start, key, sep, value }) {
+    let res = '';
+    for (const st of start)
+        res += st.source;
+    if (key)
+        res += stringifyToken(key);
+    if (sep)
+        for (const st of sep)
+            res += st.source;
+    if (value)
+        res += stringifyToken(value);
+    return res;
+}
+
+exports.stringify = stringify;
+
+
+/***/ }),
+
+/***/ 7715:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+const BREAK = Symbol('break visit');
+const SKIP = Symbol('skip children');
+const REMOVE = Symbol('remove item');
+/**
+ * Apply a visitor to a CST document or item.
+ *
+ * Walks through the tree (depth-first) starting from the root, calling a
+ * `visitor` function with two arguments when entering each item:
+ *   - `item`: The current item, which included the following members:
+ *     - `start: SourceToken[]` – Source tokens before the key or value,
+ *       possibly including its anchor or tag.
+ *     - `key?: Token | null` – Set for pair values. May then be `null`, if
+ *       the key before the `:` separator is empty.
+ *     - `sep?: SourceToken[]` – Source tokens between the key and the value,
+ *       which should include the `:` map value indicator if `value` is set.
+ *     - `value?: Token` – The value of a sequence item, or of a map pair.
+ *   - `path`: The steps from the root to the current node, as an array of
+ *     `['key' | 'value', number]` tuples.
+ *
+ * The return value of the visitor may be used to control the traversal:
+ *   - `undefined` (default): Do nothing and continue
+ *   - `visit.SKIP`: Do not visit the children of this token, continue with
+ *      next sibling
+ *   - `visit.BREAK`: Terminate traversal completely
+ *   - `visit.REMOVE`: Remove the current item, then continue with the next one
+ *   - `number`: Set the index of the next step. This is useful especially if
+ *     the index of the current token has changed.
+ *   - `function`: Define the next visitor for this item. After the original
+ *     visitor is called on item entry, next visitors are called after handling
+ *     a non-empty `key` and when exiting the item.
+ */
+function visit(cst, visitor) {
+    if ('type' in cst && cst.type === 'document')
+        cst = { start: cst.start, value: cst.value };
+    _visit(Object.freeze([]), cst, visitor);
+}
+// Without the `as symbol` casts, TS declares these in the `visit`
+// namespace using `var`, but then complains about that because
+// `unique symbol` must be `const`.
+/** Terminate visit traversal completely */
+visit.BREAK = BREAK;
+/** Do not visit the children of the current item */
+visit.SKIP = SKIP;
+/** Remove the current item */
+visit.REMOVE = REMOVE;
+/** Find the item at `path` from `cst` as the root */
+visit.itemAtPath = (cst, path) => {
+    let item = cst;
+    for (const [field, index] of path) {
+        const tok = item?.[field];
+        if (tok && 'items' in tok) {
+            item = tok.items[index];
+        }
+        else
+            return undefined;
+    }
+    return item;
+};
+/**
+ * Get the immediate parent collection of the item at `path` from `cst` as the root.
+ *
+ * Throws an error if the collection is not found, which should never happen if the item itself exists.
+ */
+visit.parentCollection = (cst, path) => {
+    const parent = visit.itemAtPath(cst, path.slice(0, -1));
+    const field = path[path.length - 1][0];
+    const coll = parent?.[field];
+    if (coll && 'items' in coll)
+        return coll;
+    throw new Error('Parent collection not found');
+};
+function _visit(path, item, visitor) {
+    let ctrl = visitor(item, path);
+    if (typeof ctrl === 'symbol')
+        return ctrl;
+    for (const field of ['key', 'value']) {
+        const token = item[field];
+        if (token && 'items' in token) {
+            for (let i = 0; i < token.items.length; ++i) {
+                const ci = _visit(Object.freeze(path.concat([[field, i]])), token.items[i], visitor);
+                if (typeof ci === 'number')
+                    i = ci - 1;
+                else if (ci === BREAK)
+                    return BREAK;
+                else if (ci === REMOVE) {
+                    token.items.splice(i, 1);
+                    i -= 1;
+                }
+            }
+            if (typeof ctrl === 'function' && field === 'key')
+                ctrl = ctrl(item, path);
+        }
+    }
+    return typeof ctrl === 'function' ? ctrl(item, path) : ctrl;
+}
+
+exports.visit = visit;
+
+
+/***/ }),
+
+/***/ 3461:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var cstScalar = __nccwpck_require__(110);
+var cstStringify = __nccwpck_require__(1733);
+var cstVisit = __nccwpck_require__(7715);
+
+/** The byte order mark */
+const BOM = '\u{FEFF}';
+/** Start of doc-mode */
+const DOCUMENT = '\x02'; // C0: Start of Text
+/** Unexpected end of flow-mode */
+const FLOW_END = '\x18'; // C0: Cancel
+/** Next token is a scalar value */
+const SCALAR = '\x1f'; // C0: Unit Separator
+/** @returns `true` if `token` is a flow or block collection */
+const isCollection = (token) => !!token && 'items' in token;
+/** @returns `true` if `token` is a flow or block scalar; not an alias */
+const isScalar = (token) => !!token &&
+    (token.type === 'scalar' ||
+        token.type === 'single-quoted-scalar' ||
+        token.type === 'double-quoted-scalar' ||
+        token.type === 'block-scalar');
+/* istanbul ignore next */
+/** Get a printable representation of a lexer token */
+function prettyToken(token) {
+    switch (token) {
+        case BOM:
+            return '<BOM>';
+        case DOCUMENT:
+            return '<DOC>';
+        case FLOW_END:
+            return '<FLOW_END>';
+        case SCALAR:
+            return '<SCALAR>';
+        default:
+            return JSON.stringify(token);
+    }
+}
+/** Identify the type of a lexer token. May return `null` for unknown tokens. */
+function tokenType(source) {
+    switch (source) {
+        case BOM:
+            return 'byte-order-mark';
+        case DOCUMENT:
+            return 'doc-mode';
+        case FLOW_END:
+            return 'flow-error-end';
+        case SCALAR:
+            return 'scalar';
+        case '---':
+            return 'doc-start';
+        case '...':
+            return 'doc-end';
+        case '':
+        case '\n':
+        case '\r\n':
+            return 'newline';
+        case '-':
+            return 'seq-item-ind';
+        case '?':
+            return 'explicit-key-ind';
+        case ':':
+            return 'map-value-ind';
+        case '{':
+            return 'flow-map-start';
+        case '}':
+            return 'flow-map-end';
+        case '[':
+            return 'flow-seq-start';
+        case ']':
+            return 'flow-seq-end';
+        case ',':
+            return 'comma';
+    }
+    switch (source[0]) {
+        case ' ':
+        case '\t':
+            return 'space';
+        case '#':
+            return 'comment';
+        case '%':
+            return 'directive-line';
+        case '*':
+            return 'alias';
+        case '&':
+            return 'anchor';
+        case '!':
+            return 'tag';
+        case "'":
+            return 'single-quoted-scalar';
+        case '"':
+            return 'double-quoted-scalar';
+        case '|':
+        case '>':
+            return 'block-scalar-header';
+    }
+    return null;
+}
+
+exports.createScalarToken = cstScalar.createScalarToken;
+exports.resolveAsScalar = cstScalar.resolveAsScalar;
+exports.setScalarValue = cstScalar.setScalarValue;
+exports.stringify = cstStringify.stringify;
+exports.visit = cstVisit.visit;
+exports.BOM = BOM;
+exports.DOCUMENT = DOCUMENT;
+exports.FLOW_END = FLOW_END;
+exports.SCALAR = SCALAR;
+exports.isCollection = isCollection;
+exports.isScalar = isScalar;
+exports.prettyToken = prettyToken;
+exports.tokenType = tokenType;
+
+
+/***/ }),
+
+/***/ 361:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var cst = __nccwpck_require__(3461);
+
+/*
+START -> stream
+
+stream
+  directive -> line-end -> stream
+  indent + line-end -> stream
+  [else] -> line-start
+
+line-end
+  comment -> line-end
+  newline -> .
+  input-end -> END
+
+line-start
+  doc-start -> doc
+  doc-end -> stream
+  [else] -> indent -> block-start
+
+block-start
+  seq-item-start -> block-start
+  explicit-key-start -> block-start
+  map-value-start -> block-start
+  [else] -> doc
+
+doc
+  line-end -> line-start
+  spaces -> doc
+  anchor -> doc
+  tag -> doc
+  flow-start -> flow -> doc
+  flow-end -> error -> doc
+  seq-item-start -> error -> doc
+  explicit-key-start -> error -> doc
+  map-value-start -> doc
+  alias -> doc
+  quote-start -> quoted-scalar -> doc
+  block-scalar-header -> line-end -> block-scalar(min) -> line-start
+  [else] -> plain-scalar(false, min) -> doc
+
+flow
+  line-end -> flow
+  spaces -> flow
+  anchor -> flow
+  tag -> flow
+  flow-start -> flow -> flow
+  flow-end -> .
+  seq-item-start -> error -> flow
+  explicit-key-start -> flow
+  map-value-start -> flow
+  alias -> flow
+  quote-start -> quoted-scalar -> flow
+  comma -> flow
+  [else] -> plain-scalar(true, 0) -> flow
+
+quoted-scalar
+  quote-end -> .
+  [else] -> quoted-scalar
+
+block-scalar(min)
+  newline + peek(indent < min) -> .
+  [else] -> block-scalar(min)
+
+plain-scalar(is-flow, min)
+  scalar-end(is-flow) -> .
+  peek(newline + (indent < min)) -> .
+  [else] -> plain-scalar(min)
+*/
+function isEmpty(ch) {
+    switch (ch) {
+        case undefined:
+        case ' ':
+        case '\n':
+        case '\r':
+        case '\t':
+            return true;
+        default:
+            return false;
+    }
+}
+const hexDigits = new Set('0123456789ABCDEFabcdef');
+const tagChars = new Set("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-#;/?:@&=+$_.!~*'()");
+const flowIndicatorChars = new Set(',[]{}');
+const invalidAnchorChars = new Set(' ,[]{}\n\r\t');
+const isNotAnchorChar = (ch) => !ch || invalidAnchorChars.has(ch);
+/**
+ * Splits an input string into lexical tokens, i.e. smaller strings that are
+ * easily identifiable by `tokens.tokenType()`.
+ *
+ * Lexing starts always in a "stream" context. Incomplete input may be buffered
+ * until a complete token can be emitted.
+ *
+ * In addition to slices of the original input, the following control characters
+ * may also be emitted:
+ *
+ * - `\x02` (Start of Text): A document starts with the next token
+ * - `\x18` (Cancel): Unexpected end of flow-mode (indicates an error)
+ * - `\x1f` (Unit Separator): Next token is a scalar value
+ * - `\u{FEFF}` (Byte order mark): Emitted separately outside documents
+ */
+class Lexer {
+    constructor() {
+        /**
+         * Flag indicating whether the end of the current buffer marks the end of
+         * all input
+         */
+        this.atEnd = false;
+        /**
+         * Explicit indent set in block scalar header, as an offset from the current
+         * minimum indent, so e.g. set to 1 from a header `|2+`. Set to -1 if not
+         * explicitly set.
+         */
+        this.blockScalarIndent = -1;
+        /**
+         * Block scalars that include a + (keep) chomping indicator in their header
+         * include trailing empty lines, which are otherwise excluded from the
+         * scalar's contents.
+         */
+        this.blockScalarKeep = false;
+        /** Current input */
+        this.buffer = '';
+        /**
+         * Flag noting whether the map value indicator : can immediately follow this
+         * node within a flow context.
+         */
+        this.flowKey = false;
+        /** Count of surrounding flow collection levels. */
+        this.flowLevel = 0;
+        /**
+         * Minimum level of indentation required for next lines to be parsed as a
+         * part of the current scalar value.
+         */
+        this.indentNext = 0;
+        /** Indentation level of the current line. */
+        this.indentValue = 0;
+        /** Position of the next \n character. */
+        this.lineEndPos = null;
+        /** Stores the state of the lexer if reaching the end of incpomplete input */
+        this.next = null;
+        /** A pointer to `buffer`; the current position of the lexer. */
+        this.pos = 0;
+    }
+    /**
+     * Generate YAML tokens from the `source` string. If `incomplete`,
+     * a part of the last line may be left as a buffer for the next call.
+     *
+     * @returns A generator of lexical tokens
+     */
+    *lex(source, incomplete = false) {
+        if (source) {
+            if (typeof source !== 'string')
+                throw TypeError('source is not a string');
+            this.buffer = this.buffer ? this.buffer + source : source;
+            this.lineEndPos = null;
+        }
+        this.atEnd = !incomplete;
+        let next = this.next ?? 'stream';
+        while (next && (incomplete || this.hasChars(1)))
+            next = yield* this.parseNext(next);
+    }
+    atLineEnd() {
+        let i = this.pos;
+        let ch = this.buffer[i];
+        while (ch === ' ' || ch === '\t')
+            ch = this.buffer[++i];
+        if (!ch || ch === '#' || ch === '\n')
+            return true;
+        if (ch === '\r')
+            return this.buffer[i + 1] === '\n';
+        return false;
+    }
+    charAt(n) {
+        return this.buffer[this.pos + n];
+    }
+    continueScalar(offset) {
+        let ch = this.buffer[offset];
+        if (this.indentNext > 0) {
+            let indent = 0;
+            while (ch === ' ')
+                ch = this.buffer[++indent + offset];
+            if (ch === '\r') {
+                const next = this.buffer[indent + offset + 1];
+                if (next === '\n' || (!next && !this.atEnd))
+                    return offset + indent + 1;
+            }
+            return ch === '\n' || indent >= this.indentNext || (!ch && !this.atEnd)
+                ? offset + indent
+                : -1;
+        }
+        if (ch === '-' || ch === '.') {
+            const dt = this.buffer.substr(offset, 3);
+            if ((dt === '---' || dt === '...') && isEmpty(this.buffer[offset + 3]))
+                return -1;
+        }
+        return offset;
+    }
+    getLine() {
+        let end = this.lineEndPos;
+        if (typeof end !== 'number' || (end !== -1 && end < this.pos)) {
+            end = this.buffer.indexOf('\n', this.pos);
+            this.lineEndPos = end;
+        }
+        if (end === -1)
+            return this.atEnd ? this.buffer.substring(this.pos) : null;
+        if (this.buffer[end - 1] === '\r')
+            end -= 1;
+        return this.buffer.substring(this.pos, end);
+    }
+    hasChars(n) {
+        return this.pos + n <= this.buffer.length;
+    }
+    setNext(state) {
+        this.buffer = this.buffer.substring(this.pos);
+        this.pos = 0;
+        this.lineEndPos = null;
+        this.next = state;
+        return null;
+    }
+    peek(n) {
+        return this.buffer.substr(this.pos, n);
+    }
+    *parseNext(next) {
+        switch (next) {
+            case 'stream':
+                return yield* this.parseStream();
+            case 'line-start':
+                return yield* this.parseLineStart();
+            case 'block-start':
+                return yield* this.parseBlockStart();
+            case 'doc':
+                return yield* this.parseDocument();
+            case 'flow':
+                return yield* this.parseFlowCollection();
+            case 'quoted-scalar':
+                return yield* this.parseQuotedScalar();
+            case 'block-scalar':
+                return yield* this.parseBlockScalar();
+            case 'plain-scalar':
+                return yield* this.parsePlainScalar();
+        }
+    }
+    *parseStream() {
+        let line = this.getLine();
+        if (line === null)
+            return this.setNext('stream');
+        if (line[0] === cst.BOM) {
+            yield* this.pushCount(1);
+            line = line.substring(1);
+        }
+        if (line[0] === '%') {
+            let dirEnd = line.length;
+            let cs = line.indexOf('#');
+            while (cs !== -1) {
+                const ch = line[cs - 1];
+                if (ch === ' ' || ch === '\t') {
+                    dirEnd = cs - 1;
+                    break;
+                }
+                else {
+                    cs = line.indexOf('#', cs + 1);
+                }
+            }
+            while (true) {
+                const ch = line[dirEnd - 1];
+                if (ch === ' ' || ch === '\t')
+                    dirEnd -= 1;
+                else
+                    break;
+            }
+            const n = (yield* this.pushCount(dirEnd)) + (yield* this.pushSpaces(true));
+            yield* this.pushCount(line.length - n); // possible comment
+            this.pushNewline();
+            return 'stream';
+        }
+        if (this.atLineEnd()) {
+            const sp = yield* this.pushSpaces(true);
+            yield* this.pushCount(line.length - sp);
+            yield* this.pushNewline();
+            return 'stream';
+        }
+        yield cst.DOCUMENT;
+        return yield* this.parseLineStart();
+    }
+    *parseLineStart() {
+        const ch = this.charAt(0);
+        if (!ch && !this.atEnd)
+            return this.setNext('line-start');
+        if (ch === '-' || ch === '.') {
+            if (!this.atEnd && !this.hasChars(4))
+                return this.setNext('line-start');
+            const s = this.peek(3);
+            if ((s === '---' || s === '...') && isEmpty(this.charAt(3))) {
+                yield* this.pushCount(3);
+                this.indentValue = 0;
+                this.indentNext = 0;
+                return s === '---' ? 'doc' : 'stream';
+            }
+        }
+        this.indentValue = yield* this.pushSpaces(false);
+        if (this.indentNext > this.indentValue && !isEmpty(this.charAt(1)))
+            this.indentNext = this.indentValue;
+        return yield* this.parseBlockStart();
+    }
+    *parseBlockStart() {
+        const [ch0, ch1] = this.peek(2);
+        if (!ch1 && !this.atEnd)
+            return this.setNext('block-start');
+        if ((ch0 === '-' || ch0 === '?' || ch0 === ':') && isEmpty(ch1)) {
+            const n = (yield* this.pushCount(1)) + (yield* this.pushSpaces(true));
+            this.indentNext = this.indentValue + 1;
+            this.indentValue += n;
+            return yield* this.parseBlockStart();
+        }
+        return 'doc';
+    }
+    *parseDocument() {
+        yield* this.pushSpaces(true);
+        const line = this.getLine();
+        if (line === null)
+            return this.setNext('doc');
+        let n = yield* this.pushIndicators();
+        switch (line[n]) {
+            case '#':
+                yield* this.pushCount(line.length - n);
+            // fallthrough
+            case undefined:
+                yield* this.pushNewline();
+                return yield* this.parseLineStart();
+            case '{':
+            case '[':
+                yield* this.pushCount(1);
+                this.flowKey = false;
+                this.flowLevel = 1;
+                return 'flow';
+            case '}':
+            case ']':
+                // this is an error
+                yield* this.pushCount(1);
+                return 'doc';
+            case '*':
+                yield* this.pushUntil(isNotAnchorChar);
+                return 'doc';
+            case '"':
+            case "'":
+                return yield* this.parseQuotedScalar();
+            case '|':
+            case '>':
+                n += yield* this.parseBlockScalarHeader();
+                n += yield* this.pushSpaces(true);
+                yield* this.pushCount(line.length - n);
+                yield* this.pushNewline();
+                return yield* this.parseBlockScalar();
+            default:
+                return yield* this.parsePlainScalar();
+        }
+    }
+    *parseFlowCollection() {
+        let nl, sp;
+        let indent = -1;
+        do {
+            nl = yield* this.pushNewline();
+            if (nl > 0) {
+                sp = yield* this.pushSpaces(false);
+                this.indentValue = indent = sp;
+            }
+            else {
+                sp = 0;
+            }
+            sp += yield* this.pushSpaces(true);
+        } while (nl + sp > 0);
+        const line = this.getLine();
+        if (line === null)
+            return this.setNext('flow');
+        if ((indent !== -1 && indent < this.indentNext && line[0] !== '#') ||
+            (indent === 0 &&
+                (line.startsWith('---') || line.startsWith('...')) &&
+                isEmpty(line[3]))) {
+            // Allowing for the terminal ] or } at the same (rather than greater)
+            // indent level as the initial [ or { is technically invalid, but
+            // failing here would be surprising to users.
+            const atFlowEndMarker = indent === this.indentNext - 1 &&
+                this.flowLevel === 1 &&
+                (line[0] === ']' || line[0] === '}');
+            if (!atFlowEndMarker) {
+                // this is an error
+                this.flowLevel = 0;
+                yield cst.FLOW_END;
+                return yield* this.parseLineStart();
+            }
+        }
+        let n = 0;
+        while (line[n] === ',') {
+            n += yield* this.pushCount(1);
+            n += yield* this.pushSpaces(true);
+            this.flowKey = false;
+        }
+        n += yield* this.pushIndicators();
+        switch (line[n]) {
+            case undefined:
+                return 'flow';
+            case '#':
+                yield* this.pushCount(line.length - n);
+                return 'flow';
+            case '{':
+            case '[':
+                yield* this.pushCount(1);
+                this.flowKey = false;
+                this.flowLevel += 1;
+                return 'flow';
+            case '}':
+            case ']':
+                yield* this.pushCount(1);
+                this.flowKey = true;
+                this.flowLevel -= 1;
+                return this.flowLevel ? 'flow' : 'doc';
+            case '*':
+                yield* this.pushUntil(isNotAnchorChar);
+                return 'flow';
+            case '"':
+            case "'":
+                this.flowKey = true;
+                return yield* this.parseQuotedScalar();
+            case ':': {
+                const next = this.charAt(1);
+                if (this.flowKey || isEmpty(next) || next === ',') {
+                    this.flowKey = false;
+                    yield* this.pushCount(1);
+                    yield* this.pushSpaces(true);
+                    return 'flow';
+                }
+            }
+            // fallthrough
+            default:
+                this.flowKey = false;
+                return yield* this.parsePlainScalar();
+        }
+    }
+    *parseQuotedScalar() {
+        const quote = this.charAt(0);
+        let end = this.buffer.indexOf(quote, this.pos + 1);
+        if (quote === "'") {
+            while (end !== -1 && this.buffer[end + 1] === "'")
+                end = this.buffer.indexOf("'", end + 2);
+        }
+        else {
+            // double-quote
+            while (end !== -1) {
+                let n = 0;
+                while (this.buffer[end - 1 - n] === '\\')
+                    n += 1;
+                if (n % 2 === 0)
+                    break;
+                end = this.buffer.indexOf('"', end + 1);
+            }
+        }
+        // Only looking for newlines within the quotes
+        const qb = this.buffer.substring(0, end);
+        let nl = qb.indexOf('\n', this.pos);
+        if (nl !== -1) {
+            while (nl !== -1) {
+                const cs = this.continueScalar(nl + 1);
+                if (cs === -1)
+                    break;
+                nl = qb.indexOf('\n', cs);
+            }
+            if (nl !== -1) {
+                // this is an error caused by an unexpected unindent
+                end = nl - (qb[nl - 1] === '\r' ? 2 : 1);
+            }
+        }
+        if (end === -1) {
+            if (!this.atEnd)
+                return this.setNext('quoted-scalar');
+            end = this.buffer.length;
+        }
+        yield* this.pushToIndex(end + 1, false);
+        return this.flowLevel ? 'flow' : 'doc';
+    }
+    *parseBlockScalarHeader() {
+        this.blockScalarIndent = -1;
+        this.blockScalarKeep = false;
+        let i = this.pos;
+        while (true) {
+            const ch = this.buffer[++i];
+            if (ch === '+')
+                this.blockScalarKeep = true;
+            else if (ch > '0' && ch <= '9')
+                this.blockScalarIndent = Number(ch) - 1;
+            else if (ch !== '-')
+                break;
+        }
+        return yield* this.pushUntil(ch => isEmpty(ch) || ch === '#');
+    }
+    *parseBlockScalar() {
+        let nl = this.pos - 1; // may be -1 if this.pos === 0
+        let indent = 0;
+        let ch;
+        loop: for (let i = this.pos; (ch = this.buffer[i]); ++i) {
+            switch (ch) {
+                case ' ':
+                    indent += 1;
+                    break;
+                case '\n':
+                    nl = i;
+                    indent = 0;
+                    break;
+                case '\r': {
+                    const next = this.buffer[i + 1];
+                    if (!next && !this.atEnd)
+                        return this.setNext('block-scalar');
+                    if (next === '\n')
+                        break;
+                } // fallthrough
+                default:
+                    break loop;
+            }
+        }
+        if (!ch && !this.atEnd)
+            return this.setNext('block-scalar');
+        if (indent >= this.indentNext) {
+            if (this.blockScalarIndent === -1)
+                this.indentNext = indent;
+            else {
+                this.indentNext =
+                    this.blockScalarIndent + (this.indentNext === 0 ? 1 : this.indentNext);
+            }
+            do {
+                const cs = this.continueScalar(nl + 1);
+                if (cs === -1)
+                    break;
+                nl = this.buffer.indexOf('\n', cs);
+            } while (nl !== -1);
+            if (nl === -1) {
+                if (!this.atEnd)
+                    return this.setNext('block-scalar');
+                nl = this.buffer.length;
+            }
+        }
+        // Trailing insufficiently indented tabs are invalid.
+        // To catch that during parsing, we include them in the block scalar value.
+        let i = nl + 1;
+        ch = this.buffer[i];
+        while (ch === ' ')
+            ch = this.buffer[++i];
+        if (ch === '\t') {
+            while (ch === '\t' || ch === ' ' || ch === '\r' || ch === '\n')
+                ch = this.buffer[++i];
+            nl = i - 1;
+        }
+        else if (!this.blockScalarKeep) {
+            do {
+                let i = nl - 1;
+                let ch = this.buffer[i];
+                if (ch === '\r')
+                    ch = this.buffer[--i];
+                const lastChar = i; // Drop the line if last char not more indented
+                while (ch === ' ')
+                    ch = this.buffer[--i];
+                if (ch === '\n' && i >= this.pos && i + 1 + indent > lastChar)
+                    nl = i;
+                else
+                    break;
+            } while (true);
+        }
+        yield cst.SCALAR;
+        yield* this.pushToIndex(nl + 1, true);
+        return yield* this.parseLineStart();
+    }
+    *parsePlainScalar() {
+        const inFlow = this.flowLevel > 0;
+        let end = this.pos - 1;
+        let i = this.pos - 1;
+        let ch;
+        while ((ch = this.buffer[++i])) {
+            if (ch === ':') {
+                const next = this.buffer[i + 1];
+                if (isEmpty(next) || (inFlow && flowIndicatorChars.has(next)))
+                    break;
+                end = i;
+            }
+            else if (isEmpty(ch)) {
+                let next = this.buffer[i + 1];
+                if (ch === '\r') {
+                    if (next === '\n') {
+                        i += 1;
+                        ch = '\n';
+                        next = this.buffer[i + 1];
+                    }
+                    else
+                        end = i;
+                }
+                if (next === '#' || (inFlow && flowIndicatorChars.has(next)))
+                    break;
+                if (ch === '\n') {
+                    const cs = this.continueScalar(i + 1);
+                    if (cs === -1)
+                        break;
+                    i = Math.max(i, cs - 2); // to advance, but still account for ' #'
+                }
+            }
+            else {
+                if (inFlow && flowIndicatorChars.has(ch))
+                    break;
+                end = i;
+            }
+        }
+        if (!ch && !this.atEnd)
+            return this.setNext('plain-scalar');
+        yield cst.SCALAR;
+        yield* this.pushToIndex(end + 1, true);
+        return inFlow ? 'flow' : 'doc';
+    }
+    *pushCount(n) {
+        if (n > 0) {
+            yield this.buffer.substr(this.pos, n);
+            this.pos += n;
+            return n;
+        }
+        return 0;
+    }
+    *pushToIndex(i, allowEmpty) {
+        const s = this.buffer.slice(this.pos, i);
+        if (s) {
+            yield s;
+            this.pos += s.length;
+            return s.length;
+        }
+        else if (allowEmpty)
+            yield '';
+        return 0;
+    }
+    *pushIndicators() {
+        switch (this.charAt(0)) {
+            case '!':
+                return ((yield* this.pushTag()) +
+                    (yield* this.pushSpaces(true)) +
+                    (yield* this.pushIndicators()));
+            case '&':
+                return ((yield* this.pushUntil(isNotAnchorChar)) +
+                    (yield* this.pushSpaces(true)) +
+                    (yield* this.pushIndicators()));
+            case '-': // this is an error
+            case '?': // this is an error outside flow collections
+            case ':': {
+                const inFlow = this.flowLevel > 0;
+                const ch1 = this.charAt(1);
+                if (isEmpty(ch1) || (inFlow && flowIndicatorChars.has(ch1))) {
+                    if (!inFlow)
+                        this.indentNext = this.indentValue + 1;
+                    else if (this.flowKey)
+                        this.flowKey = false;
+                    return ((yield* this.pushCount(1)) +
+                        (yield* this.pushSpaces(true)) +
+                        (yield* this.pushIndicators()));
+                }
+            }
+        }
+        return 0;
+    }
+    *pushTag() {
+        if (this.charAt(1) === '<') {
+            let i = this.pos + 2;
+            let ch = this.buffer[i];
+            while (!isEmpty(ch) && ch !== '>')
+                ch = this.buffer[++i];
+            return yield* this.pushToIndex(ch === '>' ? i + 1 : i, false);
+        }
+        else {
+            let i = this.pos + 1;
+            let ch = this.buffer[i];
+            while (ch) {
+                if (tagChars.has(ch))
+                    ch = this.buffer[++i];
+                else if (ch === '%' &&
+                    hexDigits.has(this.buffer[i + 1]) &&
+                    hexDigits.has(this.buffer[i + 2])) {
+                    ch = this.buffer[(i += 3)];
+                }
+                else
+                    break;
+            }
+            return yield* this.pushToIndex(i, false);
+        }
+    }
+    *pushNewline() {
+        const ch = this.buffer[this.pos];
+        if (ch === '\n')
+            return yield* this.pushCount(1);
+        else if (ch === '\r' && this.charAt(1) === '\n')
+            return yield* this.pushCount(2);
+        else
+            return 0;
+    }
+    *pushSpaces(allowTabs) {
+        let i = this.pos - 1;
+        let ch;
+        do {
+            ch = this.buffer[++i];
+        } while (ch === ' ' || (allowTabs && ch === '\t'));
+        const n = i - this.pos;
+        if (n > 0) {
+            yield this.buffer.substr(this.pos, n);
+            this.pos = i;
+        }
+        return n;
+    }
+    *pushUntil(test) {
+        let i = this.pos;
+        let ch = this.buffer[i];
+        while (!test(ch))
+            ch = this.buffer[++i];
+        return yield* this.pushToIndex(i, false);
+    }
+}
+
+exports.Lexer = Lexer;
+
+
+/***/ }),
+
+/***/ 6628:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+/**
+ * Tracks newlines during parsing in order to provide an efficient API for
+ * determining the one-indexed `{ line, col }` position for any offset
+ * within the input.
+ */
+class LineCounter {
+    constructor() {
+        this.lineStarts = [];
+        /**
+         * Should be called in ascending order. Otherwise, call
+         * `lineCounter.lineStarts.sort()` before calling `linePos()`.
+         */
+        this.addNewLine = (offset) => this.lineStarts.push(offset);
+        /**
+         * Performs a binary search and returns the 1-indexed { line, col }
+         * position of `offset`. If `line === 0`, `addNewLine` has never been
+         * called or `offset` is before the first known newline.
+         */
+        this.linePos = (offset) => {
+            let low = 0;
+            let high = this.lineStarts.length;
+            while (low < high) {
+                const mid = (low + high) >> 1; // Math.floor((low + high) / 2)
+                if (this.lineStarts[mid] < offset)
+                    low = mid + 1;
+                else
+                    high = mid;
+            }
+            if (this.lineStarts[low] === offset)
+                return { line: low + 1, col: 1 };
+            if (low === 0)
+                return { line: 0, col: offset };
+            const start = this.lineStarts[low - 1];
+            return { line: low, col: offset - start + 1 };
+        };
+    }
+}
+
+exports.LineCounter = LineCounter;
+
+
+/***/ }),
+
+/***/ 3456:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var cst = __nccwpck_require__(3461);
+var lexer = __nccwpck_require__(361);
+
+function includesToken(list, type) {
+    for (let i = 0; i < list.length; ++i)
+        if (list[i].type === type)
+            return true;
+    return false;
+}
+function findNonEmptyIndex(list) {
+    for (let i = 0; i < list.length; ++i) {
+        switch (list[i].type) {
+            case 'space':
+            case 'comment':
+            case 'newline':
+                break;
+            default:
+                return i;
+        }
+    }
+    return -1;
+}
+function isFlowToken(token) {
+    switch (token?.type) {
+        case 'alias':
+        case 'scalar':
+        case 'single-quoted-scalar':
+        case 'double-quoted-scalar':
+        case 'flow-collection':
+            return true;
+        default:
+            return false;
+    }
+}
+function getPrevProps(parent) {
+    switch (parent.type) {
+        case 'document':
+            return parent.start;
+        case 'block-map': {
+            const it = parent.items[parent.items.length - 1];
+            return it.sep ?? it.start;
+        }
+        case 'block-seq':
+            return parent.items[parent.items.length - 1].start;
+        /* istanbul ignore next should not happen */
+        default:
+            return [];
+    }
+}
+/** Note: May modify input array */
+function getFirstKeyStartProps(prev) {
+    if (prev.length === 0)
+        return [];
+    let i = prev.length;
+    loop: while (--i >= 0) {
+        switch (prev[i].type) {
+            case 'doc-start':
+            case 'explicit-key-ind':
+            case 'map-value-ind':
+            case 'seq-item-ind':
+            case 'newline':
+                break loop;
+        }
+    }
+    while (prev[++i]?.type === 'space') {
+        /* loop */
+    }
+    return prev.splice(i, prev.length);
+}
+function fixFlowSeqItems(fc) {
+    if (fc.start.type === 'flow-seq-start') {
+        for (const it of fc.items) {
+            if (it.sep &&
+                !it.value &&
+                !includesToken(it.start, 'explicit-key-ind') &&
+                !includesToken(it.sep, 'map-value-ind')) {
+                if (it.key)
+                    it.value = it.key;
+                delete it.key;
+                if (isFlowToken(it.value)) {
+                    if (it.value.end)
+                        Array.prototype.push.apply(it.value.end, it.sep);
+                    else
+                        it.value.end = it.sep;
+                }
+                else
+                    Array.prototype.push.apply(it.start, it.sep);
+                delete it.sep;
+            }
+        }
+    }
+}
+/**
+ * A YAML concrete syntax tree (CST) parser
+ *
+ * ```ts
+ * const src: string = ...
+ * for (const token of new Parser().parse(src)) {
+ *   // token: Token
+ * }
+ * ```
+ *
+ * To use the parser with a user-provided lexer:
+ *
+ * ```ts
+ * function* parse(source: string, lexer: Lexer) {
+ *   const parser = new Parser()
+ *   for (const lexeme of lexer.lex(source))
+ *     yield* parser.next(lexeme)
+ *   yield* parser.end()
+ * }
+ *
+ * const src: string = ...
+ * const lexer = new Lexer()
+ * for (const token of parse(src, lexer)) {
+ *   // token: Token
+ * }
+ * ```
+ */
+class Parser {
+    /**
+     * @param onNewLine - If defined, called separately with the start position of
+     *   each new line (in `parse()`, including the start of input).
+     */
+    constructor(onNewLine) {
+        /** If true, space and sequence indicators count as indentation */
+        this.atNewLine = true;
+        /** If true, next token is a scalar value */
+        this.atScalar = false;
+        /** Current indentation level */
+        this.indent = 0;
+        /** Current offset since the start of parsing */
+        this.offset = 0;
+        /** On the same line with a block map key */
+        this.onKeyLine = false;
+        /** Top indicates the node that's currently being built */
+        this.stack = [];
+        /** The source of the current token, set in parse() */
+        this.source = '';
+        /** The type of the current token, set in parse() */
+        this.type = '';
+        // Must be defined after `next()`
+        this.lexer = new lexer.Lexer();
+        this.onNewLine = onNewLine;
+    }
+    /**
+     * Parse `source` as a YAML stream.
+     * If `incomplete`, a part of the last line may be left as a buffer for the next call.
+     *
+     * Errors are not thrown, but yielded as `{ type: 'error', message }` tokens.
+     *
+     * @returns A generator of tokens representing each directive, document, and other structure.
+     */
+    *parse(source, incomplete = false) {
+        if (this.onNewLine && this.offset === 0)
+            this.onNewLine(0);
+        for (const lexeme of this.lexer.lex(source, incomplete))
+            yield* this.next(lexeme);
+        if (!incomplete)
+            yield* this.end();
+    }
+    /**
+     * Advance the parser by the `source` of one lexical token.
+     */
+    *next(source) {
+        this.source = source;
+        if (process.env.LOG_TOKENS)
+            console.log('|', cst.prettyToken(source));
+        if (this.atScalar) {
+            this.atScalar = false;
+            yield* this.step();
+            this.offset += source.length;
+            return;
+        }
+        const type = cst.tokenType(source);
+        if (!type) {
+            const message = `Not a YAML token: ${source}`;
+            yield* this.pop({ type: 'error', offset: this.offset, message, source });
+            this.offset += source.length;
+        }
+        else if (type === 'scalar') {
+            this.atNewLine = false;
+            this.atScalar = true;
+            this.type = 'scalar';
+        }
+        else {
+            this.type = type;
+            yield* this.step();
+            switch (type) {
+                case 'newline':
+                    this.atNewLine = true;
+                    this.indent = 0;
+                    if (this.onNewLine)
+                        this.onNewLine(this.offset + source.length);
+                    break;
+                case 'space':
+                    if (this.atNewLine && source[0] === ' ')
+                        this.indent += source.length;
+                    break;
+                case 'explicit-key-ind':
+                case 'map-value-ind':
+                case 'seq-item-ind':
+                    if (this.atNewLine)
+                        this.indent += source.length;
+                    break;
+                case 'doc-mode':
+                case 'flow-error-end':
+                    return;
+                default:
+                    this.atNewLine = false;
+            }
+            this.offset += source.length;
+        }
+    }
+    /** Call at end of input to push out any remaining constructions */
+    *end() {
+        while (this.stack.length > 0)
+            yield* this.pop();
+    }
+    get sourceToken() {
+        const st = {
+            type: this.type,
+            offset: this.offset,
+            indent: this.indent,
+            source: this.source
+        };
+        return st;
+    }
+    *step() {
+        const top = this.peek(1);
+        if (this.type === 'doc-end' && (!top || top.type !== 'doc-end')) {
+            while (this.stack.length > 0)
+                yield* this.pop();
+            this.stack.push({
+                type: 'doc-end',
+                offset: this.offset,
+                source: this.source
+            });
+            return;
+        }
+        if (!top)
+            return yield* this.stream();
+        switch (top.type) {
+            case 'document':
+                return yield* this.document(top);
+            case 'alias':
+            case 'scalar':
+            case 'single-quoted-scalar':
+            case 'double-quoted-scalar':
+                return yield* this.scalar(top);
+            case 'block-scalar':
+                return yield* this.blockScalar(top);
+            case 'block-map':
+                return yield* this.blockMap(top);
+            case 'block-seq':
+                return yield* this.blockSequence(top);
+            case 'flow-collection':
+                return yield* this.flowCollection(top);
+            case 'doc-end':
+                return yield* this.documentEnd(top);
+        }
+        /* istanbul ignore next should not happen */
+        yield* this.pop();
+    }
+    peek(n) {
+        return this.stack[this.stack.length - n];
+    }
+    *pop(error) {
+        const token = error ?? this.stack.pop();
+        /* istanbul ignore if should not happen */
+        if (!token) {
+            const message = 'Tried to pop an empty stack';
+            yield { type: 'error', offset: this.offset, source: '', message };
+        }
+        else if (this.stack.length === 0) {
+            yield token;
+        }
+        else {
+            const top = this.peek(1);
+            if (token.type === 'block-scalar') {
+                // Block scalars use their parent rather than header indent
+                token.indent = 'indent' in top ? top.indent : 0;
+            }
+            else if (token.type === 'flow-collection' && top.type === 'document') {
+                // Ignore all indent for top-level flow collections
+                token.indent = 0;
+            }
+            if (token.type === 'flow-collection')
+                fixFlowSeqItems(token);
+            switch (top.type) {
+                case 'document':
+                    top.value = token;
+                    break;
+                case 'block-scalar':
+                    top.props.push(token); // error
+                    break;
+                case 'block-map': {
+                    const it = top.items[top.items.length - 1];
+                    if (it.value) {
+                        top.items.push({ start: [], key: token, sep: [] });
+                        this.onKeyLine = true;
+                        return;
+                    }
+                    else if (it.sep) {
+                        it.value = token;
+                    }
+                    else {
+                        Object.assign(it, { key: token, sep: [] });
+                        this.onKeyLine = !it.explicitKey;
+                        return;
+                    }
+                    break;
+                }
+                case 'block-seq': {
+                    const it = top.items[top.items.length - 1];
+                    if (it.value)
+                        top.items.push({ start: [], value: token });
+                    else
+                        it.value = token;
+                    break;
+                }
+                case 'flow-collection': {
+                    const it = top.items[top.items.length - 1];
+                    if (!it || it.value)
+                        top.items.push({ start: [], key: token, sep: [] });
+                    else if (it.sep)
+                        it.value = token;
+                    else
+                        Object.assign(it, { key: token, sep: [] });
+                    return;
+                }
+                /* istanbul ignore next should not happen */
+                default:
+                    yield* this.pop();
+                    yield* this.pop(token);
+            }
+            if ((top.type === 'document' ||
+                top.type === 'block-map' ||
+                top.type === 'block-seq') &&
+                (token.type === 'block-map' || token.type === 'block-seq')) {
+                const last = token.items[token.items.length - 1];
+                if (last &&
+                    !last.sep &&
+                    !last.value &&
+                    last.start.length > 0 &&
+                    findNonEmptyIndex(last.start) === -1 &&
+                    (token.indent === 0 ||
+                        last.start.every(st => st.type !== 'comment' || st.indent < token.indent))) {
+                    if (top.type === 'document')
+                        top.end = last.start;
+                    else
+                        top.items.push({ start: last.start });
+                    token.items.splice(-1, 1);
+                }
+            }
+        }
+    }
+    *stream() {
+        switch (this.type) {
+            case 'directive-line':
+                yield { type: 'directive', offset: this.offset, source: this.source };
+                return;
+            case 'byte-order-mark':
+            case 'space':
+            case 'comment':
+            case 'newline':
+                yield this.sourceToken;
+                return;
+            case 'doc-mode':
+            case 'doc-start': {
+                const doc = {
+                    type: 'document',
+                    offset: this.offset,
+                    start: []
+                };
+                if (this.type === 'doc-start')
+                    doc.start.push(this.sourceToken);
+                this.stack.push(doc);
+                return;
+            }
+        }
+        yield {
+            type: 'error',
+            offset: this.offset,
+            message: `Unexpected ${this.type} token in YAML stream`,
+            source: this.source
+        };
+    }
+    *document(doc) {
+        if (doc.value)
+            return yield* this.lineEnd(doc);
+        switch (this.type) {
+            case 'doc-start': {
+                if (findNonEmptyIndex(doc.start) !== -1) {
+                    yield* this.pop();
+                    yield* this.step();
+                }
+                else
+                    doc.start.push(this.sourceToken);
+                return;
+            }
+            case 'anchor':
+            case 'tag':
+            case 'space':
+            case 'comment':
+            case 'newline':
+                doc.start.push(this.sourceToken);
+                return;
+        }
+        const bv = this.startBlockValue(doc);
+        if (bv)
+            this.stack.push(bv);
+        else {
+            yield {
+                type: 'error',
+                offset: this.offset,
+                message: `Unexpected ${this.type} token in YAML document`,
+                source: this.source
+            };
+        }
+    }
+    *scalar(scalar) {
+        if (this.type === 'map-value-ind') {
+            const prev = getPrevProps(this.peek(2));
+            const start = getFirstKeyStartProps(prev);
+            let sep;
+            if (scalar.end) {
+                sep = scalar.end;
+                sep.push(this.sourceToken);
+                delete scalar.end;
+            }
+            else
+                sep = [this.sourceToken];
+            const map = {
+                type: 'block-map',
+                offset: scalar.offset,
+                indent: scalar.indent,
+                items: [{ start, key: scalar, sep }]
+            };
+            this.onKeyLine = true;
+            this.stack[this.stack.length - 1] = map;
+        }
+        else
+            yield* this.lineEnd(scalar);
+    }
+    *blockScalar(scalar) {
+        switch (this.type) {
+            case 'space':
+            case 'comment':
+            case 'newline':
+                scalar.props.push(this.sourceToken);
+                return;
+            case 'scalar':
+                scalar.source = this.source;
+                // block-scalar source includes trailing newline
+                this.atNewLine = true;
+                this.indent = 0;
+                if (this.onNewLine) {
+                    let nl = this.source.indexOf('\n') + 1;
+                    while (nl !== 0) {
+                        this.onNewLine(this.offset + nl);
+                        nl = this.source.indexOf('\n', nl) + 1;
+                    }
+                }
+                yield* this.pop();
+                break;
+            /* istanbul ignore next should not happen */
+            default:
+                yield* this.pop();
+                yield* this.step();
+        }
+    }
+    *blockMap(map) {
+        const it = map.items[map.items.length - 1];
+        // it.sep is true-ish if pair already has key or : separator
+        switch (this.type) {
+            case 'newline':
+                this.onKeyLine = false;
+                if (it.value) {
+                    const end = 'end' in it.value ? it.value.end : undefined;
+                    const last = Array.isArray(end) ? end[end.length - 1] : undefined;
+                    if (last?.type === 'comment')
+                        end?.push(this.sourceToken);
+                    else
+                        map.items.push({ start: [this.sourceToken] });
+                }
+                else if (it.sep) {
+                    it.sep.push(this.sourceToken);
+                }
+                else {
+                    it.start.push(this.sourceToken);
+                }
+                return;
+            case 'space':
+            case 'comment':
+                if (it.value) {
+                    map.items.push({ start: [this.sourceToken] });
+                }
+                else if (it.sep) {
+                    it.sep.push(this.sourceToken);
+                }
+                else {
+                    if (this.atIndentedComment(it.start, map.indent)) {
+                        const prev = map.items[map.items.length - 2];
+                        const end = prev?.value?.end;
+                        if (Array.isArray(end)) {
+                            Array.prototype.push.apply(end, it.start);
+                            end.push(this.sourceToken);
+                            map.items.pop();
+                            return;
+                        }
+                    }
+                    it.start.push(this.sourceToken);
+                }
+                return;
+        }
+        if (this.indent >= map.indent) {
+            const atMapIndent = !this.onKeyLine && this.indent === map.indent;
+            const atNextItem = atMapIndent &&
+                (it.sep || it.explicitKey) &&
+                this.type !== 'seq-item-ind';
+            // For empty nodes, assign newline-separated not indented empty tokens to following node
+            let start = [];
+            if (atNextItem && it.sep && !it.value) {
+                const nl = [];
+                for (let i = 0; i < it.sep.length; ++i) {
+                    const st = it.sep[i];
+                    switch (st.type) {
+                        case 'newline':
+                            nl.push(i);
+                            break;
+                        case 'space':
+                            break;
+                        case 'comment':
+                            if (st.indent > map.indent)
+                                nl.length = 0;
+                            break;
+                        default:
+                            nl.length = 0;
+                    }
+                }
+                if (nl.length >= 2)
+                    start = it.sep.splice(nl[1]);
+            }
+            switch (this.type) {
+                case 'anchor':
+                case 'tag':
+                    if (atNextItem || it.value) {
+                        start.push(this.sourceToken);
+                        map.items.push({ start });
+                        this.onKeyLine = true;
+                    }
+                    else if (it.sep) {
+                        it.sep.push(this.sourceToken);
+                    }
+                    else {
+                        it.start.push(this.sourceToken);
+                    }
+                    return;
+                case 'explicit-key-ind':
+                    if (!it.sep && !it.explicitKey) {
+                        it.start.push(this.sourceToken);
+                        it.explicitKey = true;
+                    }
+                    else if (atNextItem || it.value) {
+                        start.push(this.sourceToken);
+                        map.items.push({ start, explicitKey: true });
+                    }
+                    else {
+                        this.stack.push({
+                            type: 'block-map',
+                            offset: this.offset,
+                            indent: this.indent,
+                            items: [{ start: [this.sourceToken], explicitKey: true }]
+                        });
+                    }
+                    this.onKeyLine = true;
+                    return;
+                case 'map-value-ind':
+                    if (it.explicitKey) {
+                        if (!it.sep) {
+                            if (includesToken(it.start, 'newline')) {
+                                Object.assign(it, { key: null, sep: [this.sourceToken] });
+                            }
+                            else {
+                                const start = getFirstKeyStartProps(it.start);
+                                this.stack.push({
+                                    type: 'block-map',
+                                    offset: this.offset,
+                                    indent: this.indent,
+                                    items: [{ start, key: null, sep: [this.sourceToken] }]
+                                });
+                            }
+                        }
+                        else if (it.value) {
+                            map.items.push({ start: [], key: null, sep: [this.sourceToken] });
+                        }
+                        else if (includesToken(it.sep, 'map-value-ind')) {
+                            this.stack.push({
+                                type: 'block-map',
+                                offset: this.offset,
+                                indent: this.indent,
+                                items: [{ start, key: null, sep: [this.sourceToken] }]
+                            });
+                        }
+                        else if (isFlowToken(it.key) &&
+                            !includesToken(it.sep, 'newline')) {
+                            const start = getFirstKeyStartProps(it.start);
+                            const key = it.key;
+                            const sep = it.sep;
+                            sep.push(this.sourceToken);
+                            // @ts-expect-error type guard is wrong here
+                            delete it.key;
+                            // @ts-expect-error type guard is wrong here
+                            delete it.sep;
+                            this.stack.push({
+                                type: 'block-map',
+                                offset: this.offset,
+                                indent: this.indent,
+                                items: [{ start, key, sep }]
+                            });
+                        }
+                        else if (start.length > 0) {
+                            // Not actually at next item
+                            it.sep = it.sep.concat(start, this.sourceToken);
+                        }
+                        else {
+                            it.sep.push(this.sourceToken);
+                        }
+                    }
+                    else {
+                        if (!it.sep) {
+                            Object.assign(it, { key: null, sep: [this.sourceToken] });
+                        }
+                        else if (it.value || atNextItem) {
+                            map.items.push({ start, key: null, sep: [this.sourceToken] });
+                        }
+                        else if (includesToken(it.sep, 'map-value-ind')) {
+                            this.stack.push({
+                                type: 'block-map',
+                                offset: this.offset,
+                                indent: this.indent,
+                                items: [{ start: [], key: null, sep: [this.sourceToken] }]
+                            });
+                        }
+                        else {
+                            it.sep.push(this.sourceToken);
+                        }
+                    }
+                    this.onKeyLine = true;
+                    return;
+                case 'alias':
+                case 'scalar':
+                case 'single-quoted-scalar':
+                case 'double-quoted-scalar': {
+                    const fs = this.flowScalar(this.type);
+                    if (atNextItem || it.value) {
+                        map.items.push({ start, key: fs, sep: [] });
+                        this.onKeyLine = true;
+                    }
+                    else if (it.sep) {
+                        this.stack.push(fs);
+                    }
+                    else {
+                        Object.assign(it, { key: fs, sep: [] });
+                        this.onKeyLine = true;
+                    }
+                    return;
+                }
+                default: {
+                    const bv = this.startBlockValue(map);
+                    if (bv) {
+                        if (atMapIndent && bv.type !== 'block-seq') {
+                            map.items.push({ start });
+                        }
+                        this.stack.push(bv);
+                        return;
+                    }
+                }
+            }
+        }
+        yield* this.pop();
+        yield* this.step();
+    }
+    *blockSequence(seq) {
+        const it = seq.items[seq.items.length - 1];
+        switch (this.type) {
+            case 'newline':
+                if (it.value) {
+                    const end = 'end' in it.value ? it.value.end : undefined;
+                    const last = Array.isArray(end) ? end[end.length - 1] : undefined;
+                    if (last?.type === 'comment')
+                        end?.push(this.sourceToken);
+                    else
+                        seq.items.push({ start: [this.sourceToken] });
+                }
+                else
+                    it.start.push(this.sourceToken);
+                return;
+            case 'space':
+            case 'comment':
+                if (it.value)
+                    seq.items.push({ start: [this.sourceToken] });
+                else {
+                    if (this.atIndentedComment(it.start, seq.indent)) {
+                        const prev = seq.items[seq.items.length - 2];
+                        const end = prev?.value?.end;
+                        if (Array.isArray(end)) {
+                            Array.prototype.push.apply(end, it.start);
+                            end.push(this.sourceToken);
+                            seq.items.pop();
+                            return;
+                        }
+                    }
+                    it.start.push(this.sourceToken);
+                }
+                return;
+            case 'anchor':
+            case 'tag':
+                if (it.value || this.indent <= seq.indent)
+                    break;
+                it.start.push(this.sourceToken);
+                return;
+            case 'seq-item-ind':
+                if (this.indent !== seq.indent)
+                    break;
+                if (it.value || includesToken(it.start, 'seq-item-ind'))
+                    seq.items.push({ start: [this.sourceToken] });
+                else
+                    it.start.push(this.sourceToken);
+                return;
+        }
+        if (this.indent > seq.indent) {
+            const bv = this.startBlockValue(seq);
+            if (bv) {
+                this.stack.push(bv);
+                return;
+            }
+        }
+        yield* this.pop();
+        yield* this.step();
+    }
+    *flowCollection(fc) {
+        const it = fc.items[fc.items.length - 1];
+        if (this.type === 'flow-error-end') {
+            let top;
+            do {
+                yield* this.pop();
+                top = this.peek(1);
+            } while (top && top.type === 'flow-collection');
+        }
+        else if (fc.end.length === 0) {
+            switch (this.type) {
+                case 'comma':
+                case 'explicit-key-ind':
+                    if (!it || it.sep)
+                        fc.items.push({ start: [this.sourceToken] });
+                    else
+                        it.start.push(this.sourceToken);
+                    return;
+                case 'map-value-ind':
+                    if (!it || it.value)
+                        fc.items.push({ start: [], key: null, sep: [this.sourceToken] });
+                    else if (it.sep)
+                        it.sep.push(this.sourceToken);
+                    else
+                        Object.assign(it, { key: null, sep: [this.sourceToken] });
+                    return;
+                case 'space':
+                case 'comment':
+                case 'newline':
+                case 'anchor':
+                case 'tag':
+                    if (!it || it.value)
+                        fc.items.push({ start: [this.sourceToken] });
+                    else if (it.sep)
+                        it.sep.push(this.sourceToken);
+                    else
+                        it.start.push(this.sourceToken);
+                    return;
+                case 'alias':
+                case 'scalar':
+                case 'single-quoted-scalar':
+                case 'double-quoted-scalar': {
+                    const fs = this.flowScalar(this.type);
+                    if (!it || it.value)
+                        fc.items.push({ start: [], key: fs, sep: [] });
+                    else if (it.sep)
+                        this.stack.push(fs);
+                    else
+                        Object.assign(it, { key: fs, sep: [] });
+                    return;
+                }
+                case 'flow-map-end':
+                case 'flow-seq-end':
+                    fc.end.push(this.sourceToken);
+                    return;
+            }
+            const bv = this.startBlockValue(fc);
+            /* istanbul ignore else should not happen */
+            if (bv)
+                this.stack.push(bv);
+            else {
+                yield* this.pop();
+                yield* this.step();
+            }
+        }
+        else {
+            const parent = this.peek(2);
+            if (parent.type === 'block-map' &&
+                ((this.type === 'map-value-ind' && parent.indent === fc.indent) ||
+                    (this.type === 'newline' &&
+                        !parent.items[parent.items.length - 1].sep))) {
+                yield* this.pop();
+                yield* this.step();
+            }
+            else if (this.type === 'map-value-ind' &&
+                parent.type !== 'flow-collection') {
+                const prev = getPrevProps(parent);
+                const start = getFirstKeyStartProps(prev);
+                fixFlowSeqItems(fc);
+                const sep = fc.end.splice(1, fc.end.length);
+                sep.push(this.sourceToken);
+                const map = {
+                    type: 'block-map',
+                    offset: fc.offset,
+                    indent: fc.indent,
+                    items: [{ start, key: fc, sep }]
+                };
+                this.onKeyLine = true;
+                this.stack[this.stack.length - 1] = map;
+            }
+            else {
+                yield* this.lineEnd(fc);
+            }
+        }
+    }
+    flowScalar(type) {
+        if (this.onNewLine) {
+            let nl = this.source.indexOf('\n') + 1;
+            while (nl !== 0) {
+                this.onNewLine(this.offset + nl);
+                nl = this.source.indexOf('\n', nl) + 1;
+            }
+        }
+        return {
+            type,
+            offset: this.offset,
+            indent: this.indent,
+            source: this.source
+        };
+    }
+    startBlockValue(parent) {
+        switch (this.type) {
+            case 'alias':
+            case 'scalar':
+            case 'single-quoted-scalar':
+            case 'double-quoted-scalar':
+                return this.flowScalar(this.type);
+            case 'block-scalar-header':
+                return {
+                    type: 'block-scalar',
+                    offset: this.offset,
+                    indent: this.indent,
+                    props: [this.sourceToken],
+                    source: ''
+                };
+            case 'flow-map-start':
+            case 'flow-seq-start':
+                return {
+                    type: 'flow-collection',
+                    offset: this.offset,
+                    indent: this.indent,
+                    start: this.sourceToken,
+                    items: [],
+                    end: []
+                };
+            case 'seq-item-ind':
+                return {
+                    type: 'block-seq',
+                    offset: this.offset,
+                    indent: this.indent,
+                    items: [{ start: [this.sourceToken] }]
+                };
+            case 'explicit-key-ind': {
+                this.onKeyLine = true;
+                const prev = getPrevProps(parent);
+                const start = getFirstKeyStartProps(prev);
+                start.push(this.sourceToken);
+                return {
+                    type: 'block-map',
+                    offset: this.offset,
+                    indent: this.indent,
+                    items: [{ start, explicitKey: true }]
+                };
+            }
+            case 'map-value-ind': {
+                this.onKeyLine = true;
+                const prev = getPrevProps(parent);
+                const start = getFirstKeyStartProps(prev);
+                return {
+                    type: 'block-map',
+                    offset: this.offset,
+                    indent: this.indent,
+                    items: [{ start, key: null, sep: [this.sourceToken] }]
+                };
+            }
+        }
+        return null;
+    }
+    atIndentedComment(start, indent) {
+        if (this.type !== 'comment')
+            return false;
+        if (this.indent <= indent)
+            return false;
+        return start.every(st => st.type === 'newline' || st.type === 'space');
+    }
+    *documentEnd(docEnd) {
+        if (this.type !== 'doc-mode') {
+            if (docEnd.end)
+                docEnd.end.push(this.sourceToken);
+            else
+                docEnd.end = [this.sourceToken];
+            if (this.type === 'newline')
+                yield* this.pop();
+        }
+    }
+    *lineEnd(token) {
+        switch (this.type) {
+            case 'comma':
+            case 'doc-start':
+            case 'doc-end':
+            case 'flow-seq-end':
+            case 'flow-map-end':
+            case 'map-value-ind':
+                yield* this.pop();
+                yield* this.step();
+                break;
+            case 'newline':
+                this.onKeyLine = false;
+            // fallthrough
+            case 'space':
+            case 'comment':
+            default:
+                // all other values are errors
+                if (token.end)
+                    token.end.push(this.sourceToken);
+                else
+                    token.end = [this.sourceToken];
+                if (this.type === 'newline')
+                    yield* this.pop();
+        }
+    }
+}
+
+exports.Parser = Parser;
+
+
+/***/ }),
+
+/***/ 4047:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var composer = __nccwpck_require__(9984);
+var Document = __nccwpck_require__(3021);
+var errors = __nccwpck_require__(1464);
+var log = __nccwpck_require__(7249);
+var identity = __nccwpck_require__(1127);
+var lineCounter = __nccwpck_require__(6628);
+var parser = __nccwpck_require__(3456);
+
+function parseOptions(options) {
+    const prettyErrors = options.prettyErrors !== false;
+    const lineCounter$1 = options.lineCounter || (prettyErrors && new lineCounter.LineCounter()) || null;
+    return { lineCounter: lineCounter$1, prettyErrors };
+}
+/**
+ * Parse the input as a stream of YAML documents.
+ *
+ * Documents should be separated from each other by `...` or `---` marker lines.
+ *
+ * @returns If an empty `docs` array is returned, it will be of type
+ *   EmptyStream and contain additional stream information. In
+ *   TypeScript, you should use `'empty' in docs` as a type guard for it.
+ */
+function parseAllDocuments(source, options = {}) {
+    const { lineCounter, prettyErrors } = parseOptions(options);
+    const parser$1 = new parser.Parser(lineCounter?.addNewLine);
+    const composer$1 = new composer.Composer(options);
+    const docs = Array.from(composer$1.compose(parser$1.parse(source)));
+    if (prettyErrors && lineCounter)
+        for (const doc of docs) {
+            doc.errors.forEach(errors.prettifyError(source, lineCounter));
+            doc.warnings.forEach(errors.prettifyError(source, lineCounter));
+        }
+    if (docs.length > 0)
+        return docs;
+    return Object.assign([], { empty: true }, composer$1.streamInfo());
+}
+/** Parse an input string into a single YAML.Document */
+function parseDocument(source, options = {}) {
+    const { lineCounter, prettyErrors } = parseOptions(options);
+    const parser$1 = new parser.Parser(lineCounter?.addNewLine);
+    const composer$1 = new composer.Composer(options);
+    // `doc` is always set by compose.end(true) at the very latest
+    let doc = null;
+    for (const _doc of composer$1.compose(parser$1.parse(source), true, source.length)) {
+        if (!doc)
+            doc = _doc;
+        else if (doc.options.logLevel !== 'silent') {
+            doc.errors.push(new errors.YAMLParseError(_doc.range.slice(0, 2), 'MULTIPLE_DOCS', 'Source contains multiple documents; please use YAML.parseAllDocuments()'));
+            break;
+        }
+    }
+    if (prettyErrors && lineCounter) {
+        doc.errors.forEach(errors.prettifyError(source, lineCounter));
+        doc.warnings.forEach(errors.prettifyError(source, lineCounter));
+    }
+    return doc;
+}
+function parse(src, reviver, options) {
+    let _reviver = undefined;
+    if (typeof reviver === 'function') {
+        _reviver = reviver;
+    }
+    else if (options === undefined && reviver && typeof reviver === 'object') {
+        options = reviver;
+    }
+    const doc = parseDocument(src, options);
+    if (!doc)
+        return null;
+    doc.warnings.forEach(warning => log.warn(doc.options.logLevel, warning));
+    if (doc.errors.length > 0) {
+        if (doc.options.logLevel !== 'silent')
+            throw doc.errors[0];
+        else
+            doc.errors = [];
+    }
+    return doc.toJS(Object.assign({ reviver: _reviver }, options));
+}
+function stringify(value, replacer, options) {
+    let _replacer = null;
+    if (typeof replacer === 'function' || Array.isArray(replacer)) {
+        _replacer = replacer;
+    }
+    else if (options === undefined && replacer) {
+        options = replacer;
+    }
+    if (typeof options === 'string')
+        options = options.length;
+    if (typeof options === 'number') {
+        const indent = Math.round(options);
+        options = indent < 1 ? undefined : indent > 8 ? { indent: 8 } : { indent };
+    }
+    if (value === undefined) {
+        const { keepUndefined } = options ?? replacer ?? {};
+        if (!keepUndefined)
+            return undefined;
+    }
+    if (identity.isDocument(value) && !_replacer)
+        return value.toString(options);
+    return new Document.Document(value, _replacer, options).toString(options);
+}
+
+exports.parse = parse;
+exports.parseAllDocuments = parseAllDocuments;
+exports.parseDocument = parseDocument;
+exports.stringify = stringify;
+
+
+/***/ }),
+
+/***/ 5840:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var map = __nccwpck_require__(7451);
+var seq = __nccwpck_require__(1706);
+var string = __nccwpck_require__(6464);
+var tags = __nccwpck_require__(18);
+
+const sortMapEntriesByKey = (a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
+class Schema {
+    constructor({ compat, customTags, merge, resolveKnownTags, schema, sortMapEntries, toStringDefaults }) {
+        this.compat = Array.isArray(compat)
+            ? tags.getTags(compat, 'compat')
+            : compat
+                ? tags.getTags(null, compat)
+                : null;
+        this.name = (typeof schema === 'string' && schema) || 'core';
+        this.knownTags = resolveKnownTags ? tags.coreKnownTags : {};
+        this.tags = tags.getTags(customTags, this.name, merge);
+        this.toStringOptions = toStringDefaults ?? null;
+        Object.defineProperty(this, identity.MAP, { value: map.map });
+        Object.defineProperty(this, identity.SCALAR, { value: string.string });
+        Object.defineProperty(this, identity.SEQ, { value: seq.seq });
+        // Used by createMap()
+        this.sortMapEntries =
+            typeof sortMapEntries === 'function'
+                ? sortMapEntries
+                : sortMapEntries === true
+                    ? sortMapEntriesByKey
+                    : null;
+    }
+    clone() {
+        const copy = Object.create(Schema.prototype, Object.getOwnPropertyDescriptors(this));
+        copy.tags = this.tags.slice();
+        return copy;
+    }
+}
+
+exports.Schema = Schema;
+
+
+/***/ }),
+
+/***/ 7451:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var YAMLMap = __nccwpck_require__(4454);
+
+const map = {
+    collection: 'map',
+    default: true,
+    nodeClass: YAMLMap.YAMLMap,
+    tag: 'tag:yaml.org,2002:map',
+    resolve(map, onError) {
+        if (!identity.isMap(map))
+            onError('Expected a mapping for this tag');
+        return map;
+    },
+    createNode: (schema, obj, ctx) => YAMLMap.YAMLMap.from(schema, obj, ctx)
+};
+
+exports.map = map;
+
+
+/***/ }),
+
+/***/ 3632:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+
+const nullTag = {
+    identify: value => value == null,
+    createNode: () => new Scalar.Scalar(null),
+    default: true,
+    tag: 'tag:yaml.org,2002:null',
+    test: /^(?:~|[Nn]ull|NULL)?$/,
+    resolve: () => new Scalar.Scalar(null),
+    stringify: ({ source }, ctx) => typeof source === 'string' && nullTag.test.test(source)
+        ? source
+        : ctx.options.nullStr
+};
+
+exports.nullTag = nullTag;
+
+
+/***/ }),
+
+/***/ 1706:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var YAMLSeq = __nccwpck_require__(2223);
+
+const seq = {
+    collection: 'seq',
+    default: true,
+    nodeClass: YAMLSeq.YAMLSeq,
+    tag: 'tag:yaml.org,2002:seq',
+    resolve(seq, onError) {
+        if (!identity.isSeq(seq))
+            onError('Expected a sequence for this tag');
+        return seq;
+    },
+    createNode: (schema, obj, ctx) => YAMLSeq.YAMLSeq.from(schema, obj, ctx)
+};
+
+exports.seq = seq;
+
+
+/***/ }),
+
+/***/ 6464:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var stringifyString = __nccwpck_require__(3069);
+
+const string = {
+    identify: value => typeof value === 'string',
+    default: true,
+    tag: 'tag:yaml.org,2002:str',
+    resolve: str => str,
+    stringify(item, ctx, onComment, onChompKeep) {
+        ctx = Object.assign({ actualString: true }, ctx);
+        return stringifyString.stringifyString(item, ctx, onComment, onChompKeep);
+    }
+};
+
+exports.string = string;
+
+
+/***/ }),
+
+/***/ 3959:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+
+const boolTag = {
+    identify: value => typeof value === 'boolean',
+    default: true,
+    tag: 'tag:yaml.org,2002:bool',
+    test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
+    resolve: str => new Scalar.Scalar(str[0] === 't' || str[0] === 'T'),
+    stringify({ source, value }, ctx) {
+        if (source && boolTag.test.test(source)) {
+            const sv = source[0] === 't' || source[0] === 'T';
+            if (value === sv)
+                return source;
+        }
+        return value ? ctx.options.trueStr : ctx.options.falseStr;
+    }
+};
+
+exports.boolTag = boolTag;
+
+
+/***/ }),
+
+/***/ 8405:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+var stringifyNumber = __nccwpck_require__(8689);
+
+const floatNaN = {
+    identify: value => typeof value === 'number',
+    default: true,
+    tag: 'tag:yaml.org,2002:float',
+    test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
+    resolve: str => str.slice(-3).toLowerCase() === 'nan'
+        ? NaN
+        : str[0] === '-'
+            ? Number.NEGATIVE_INFINITY
+            : Number.POSITIVE_INFINITY,
+    stringify: stringifyNumber.stringifyNumber
+};
+const floatExp = {
+    identify: value => typeof value === 'number',
+    default: true,
+    tag: 'tag:yaml.org,2002:float',
+    format: 'EXP',
+    test: /^[-+]?(?:\.[0-9]+|[0-9]+(?:\.[0-9]*)?)[eE][-+]?[0-9]+$/,
+    resolve: str => parseFloat(str),
+    stringify(node) {
+        const num = Number(node.value);
+        return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
+    }
+};
+const float = {
+    identify: value => typeof value === 'number',
+    default: true,
+    tag: 'tag:yaml.org,2002:float',
+    test: /^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,
+    resolve(str) {
+        const node = new Scalar.Scalar(parseFloat(str));
+        const dot = str.indexOf('.');
+        if (dot !== -1 && str[str.length - 1] === '0')
+            node.minFractionDigits = str.length - dot - 1;
+        return node;
+    },
+    stringify: stringifyNumber.stringifyNumber
+};
+
+exports.float = float;
+exports.floatExp = floatExp;
+exports.floatNaN = floatNaN;
+
+
+/***/ }),
+
+/***/ 9874:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var stringifyNumber = __nccwpck_require__(8689);
+
+const intIdentify = (value) => typeof value === 'bigint' || Number.isInteger(value);
+const intResolve = (str, offset, radix, { intAsBigInt }) => (intAsBigInt ? BigInt(str) : parseInt(str.substring(offset), radix));
+function intStringify(node, radix, prefix) {
+    const { value } = node;
+    if (intIdentify(value) && value >= 0)
+        return prefix + value.toString(radix);
+    return stringifyNumber.stringifyNumber(node);
+}
+const intOct = {
+    identify: value => intIdentify(value) && value >= 0,
+    default: true,
+    tag: 'tag:yaml.org,2002:int',
+    format: 'OCT',
+    test: /^0o[0-7]+$/,
+    resolve: (str, _onError, opt) => intResolve(str, 2, 8, opt),
+    stringify: node => intStringify(node, 8, '0o')
+};
+const int = {
+    identify: intIdentify,
+    default: true,
+    tag: 'tag:yaml.org,2002:int',
+    test: /^[-+]?[0-9]+$/,
+    resolve: (str, _onError, opt) => intResolve(str, 0, 10, opt),
+    stringify: stringifyNumber.stringifyNumber
+};
+const intHex = {
+    identify: value => intIdentify(value) && value >= 0,
+    default: true,
+    tag: 'tag:yaml.org,2002:int',
+    format: 'HEX',
+    test: /^0x[0-9a-fA-F]+$/,
+    resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
+    stringify: node => intStringify(node, 16, '0x')
+};
+
+exports.int = int;
+exports.intHex = intHex;
+exports.intOct = intOct;
+
+
+/***/ }),
+
+/***/ 896:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var map = __nccwpck_require__(7451);
+var _null = __nccwpck_require__(3632);
+var seq = __nccwpck_require__(1706);
+var string = __nccwpck_require__(6464);
+var bool = __nccwpck_require__(3959);
+var float = __nccwpck_require__(8405);
+var int = __nccwpck_require__(9874);
+
+const schema = [
+    map.map,
+    seq.seq,
+    string.string,
+    _null.nullTag,
+    bool.boolTag,
+    int.intOct,
+    int.int,
+    int.intHex,
+    float.floatNaN,
+    float.floatExp,
+    float.float
+];
+
+exports.schema = schema;
+
+
+/***/ }),
+
+/***/ 3559:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+var map = __nccwpck_require__(7451);
+var seq = __nccwpck_require__(1706);
+
+function intIdentify(value) {
+    return typeof value === 'bigint' || Number.isInteger(value);
+}
+const stringifyJSON = ({ value }) => JSON.stringify(value);
+const jsonScalars = [
+    {
+        identify: value => typeof value === 'string',
+        default: true,
+        tag: 'tag:yaml.org,2002:str',
+        resolve: str => str,
+        stringify: stringifyJSON
+    },
+    {
+        identify: value => value == null,
+        createNode: () => new Scalar.Scalar(null),
+        default: true,
+        tag: 'tag:yaml.org,2002:null',
+        test: /^null$/,
+        resolve: () => null,
+        stringify: stringifyJSON
+    },
+    {
+        identify: value => typeof value === 'boolean',
+        default: true,
+        tag: 'tag:yaml.org,2002:bool',
+        test: /^true|false$/,
+        resolve: str => str === 'true',
+        stringify: stringifyJSON
+    },
+    {
+        identify: intIdentify,
+        default: true,
+        tag: 'tag:yaml.org,2002:int',
+        test: /^-?(?:0|[1-9][0-9]*)$/,
+        resolve: (str, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str, 10),
+        stringify: ({ value }) => intIdentify(value) ? value.toString() : JSON.stringify(value)
+    },
+    {
+        identify: value => typeof value === 'number',
+        default: true,
+        tag: 'tag:yaml.org,2002:float',
+        test: /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$/,
+        resolve: str => parseFloat(str),
+        stringify: stringifyJSON
+    }
+];
+const jsonError = {
+    default: true,
+    tag: '',
+    test: /^/,
+    resolve(str, onError) {
+        onError(`Unresolved plain scalar ${JSON.stringify(str)}`);
+        return str;
+    }
+};
+const schema = [map.map, seq.seq].concat(jsonScalars, jsonError);
+
+exports.schema = schema;
+
+
+/***/ }),
+
+/***/ 18:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var map = __nccwpck_require__(7451);
+var _null = __nccwpck_require__(3632);
+var seq = __nccwpck_require__(1706);
+var string = __nccwpck_require__(6464);
+var bool = __nccwpck_require__(3959);
+var float = __nccwpck_require__(8405);
+var int = __nccwpck_require__(9874);
+var schema = __nccwpck_require__(896);
+var schema$1 = __nccwpck_require__(3559);
+var binary = __nccwpck_require__(6083);
+var merge = __nccwpck_require__(452);
+var omap = __nccwpck_require__(303);
+var pairs = __nccwpck_require__(8385);
+var schema$2 = __nccwpck_require__(8294);
+var set = __nccwpck_require__(1528);
+var timestamp = __nccwpck_require__(4371);
+
+const schemas = new Map([
+    ['core', schema.schema],
+    ['failsafe', [map.map, seq.seq, string.string]],
+    ['json', schema$1.schema],
+    ['yaml11', schema$2.schema],
+    ['yaml-1.1', schema$2.schema]
+]);
+const tagsByName = {
+    binary: binary.binary,
+    bool: bool.boolTag,
+    float: float.float,
+    floatExp: float.floatExp,
+    floatNaN: float.floatNaN,
+    floatTime: timestamp.floatTime,
+    int: int.int,
+    intHex: int.intHex,
+    intOct: int.intOct,
+    intTime: timestamp.intTime,
+    map: map.map,
+    merge: merge.merge,
+    null: _null.nullTag,
+    omap: omap.omap,
+    pairs: pairs.pairs,
+    seq: seq.seq,
+    set: set.set,
+    timestamp: timestamp.timestamp
+};
+const coreKnownTags = {
+    'tag:yaml.org,2002:binary': binary.binary,
+    'tag:yaml.org,2002:merge': merge.merge,
+    'tag:yaml.org,2002:omap': omap.omap,
+    'tag:yaml.org,2002:pairs': pairs.pairs,
+    'tag:yaml.org,2002:set': set.set,
+    'tag:yaml.org,2002:timestamp': timestamp.timestamp
+};
+function getTags(customTags, schemaName, addMergeTag) {
+    const schemaTags = schemas.get(schemaName);
+    if (schemaTags && !customTags) {
+        return addMergeTag && !schemaTags.includes(merge.merge)
+            ? schemaTags.concat(merge.merge)
+            : schemaTags.slice();
+    }
+    let tags = schemaTags;
+    if (!tags) {
+        if (Array.isArray(customTags))
+            tags = [];
+        else {
+            const keys = Array.from(schemas.keys())
+                .filter(key => key !== 'yaml11')
+                .map(key => JSON.stringify(key))
+                .join(', ');
+            throw new Error(`Unknown schema "${schemaName}"; use one of ${keys} or define customTags array`);
+        }
+    }
+    if (Array.isArray(customTags)) {
+        for (const tag of customTags)
+            tags = tags.concat(tag);
+    }
+    else if (typeof customTags === 'function') {
+        tags = customTags(tags.slice());
+    }
+    if (addMergeTag)
+        tags = tags.concat(merge.merge);
+    return tags.reduce((tags, tag) => {
+        const tagObj = typeof tag === 'string' ? tagsByName[tag] : tag;
+        if (!tagObj) {
+            const tagName = JSON.stringify(tag);
+            const keys = Object.keys(tagsByName)
+                .map(key => JSON.stringify(key))
+                .join(', ');
+            throw new Error(`Unknown custom tag ${tagName}; use one of ${keys}`);
+        }
+        if (!tags.includes(tagObj))
+            tags.push(tagObj);
+        return tags;
+    }, []);
+}
+
+exports.coreKnownTags = coreKnownTags;
+exports.getTags = getTags;
+
+
+/***/ }),
+
+/***/ 6083:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+var stringifyString = __nccwpck_require__(3069);
+
+const binary = {
+    identify: value => value instanceof Uint8Array, // Buffer inherits from Uint8Array
+    default: false,
+    tag: 'tag:yaml.org,2002:binary',
+    /**
+     * Returns a Buffer in node and an Uint8Array in browsers
+     *
+     * To use the resulting buffer as an image, you'll want to do something like:
+     *
+     *   const blob = new Blob([buffer], { type: 'image/jpeg' })
+     *   document.querySelector('#photo').src = URL.createObjectURL(blob)
+     */
+    resolve(src, onError) {
+        if (typeof Buffer === 'function') {
+            return Buffer.from(src, 'base64');
+        }
+        else if (typeof atob === 'function') {
+            // On IE 11, atob() can't handle newlines
+            const str = atob(src.replace(/[\n\r]/g, ''));
+            const buffer = new Uint8Array(str.length);
+            for (let i = 0; i < str.length; ++i)
+                buffer[i] = str.charCodeAt(i);
+            return buffer;
+        }
+        else {
+            onError('This environment does not support reading binary tags; either Buffer or atob is required');
+            return src;
+        }
+    },
+    stringify({ comment, type, value }, ctx, onComment, onChompKeep) {
+        const buf = value; // checked earlier by binary.identify()
+        let str;
+        if (typeof Buffer === 'function') {
+            str =
+                buf instanceof Buffer
+                    ? buf.toString('base64')
+                    : Buffer.from(buf.buffer).toString('base64');
+        }
+        else if (typeof btoa === 'function') {
+            let s = '';
+            for (let i = 0; i < buf.length; ++i)
+                s += String.fromCharCode(buf[i]);
+            str = btoa(s);
+        }
+        else {
+            throw new Error('This environment does not support writing binary tags; either Buffer or btoa is required');
+        }
+        if (!type)
+            type = Scalar.Scalar.BLOCK_LITERAL;
+        if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
+            const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
+            const n = Math.ceil(str.length / lineWidth);
+            const lines = new Array(n);
+            for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
+                lines[i] = str.substr(o, lineWidth);
+            }
+            str = lines.join(type === Scalar.Scalar.BLOCK_LITERAL ? '\n' : ' ');
+        }
+        return stringifyString.stringifyString({ comment, type, value: str }, ctx, onComment, onChompKeep);
+    }
+};
+
+exports.binary = binary;
+
+
+/***/ }),
+
+/***/ 8398:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+
+function boolStringify({ value, source }, ctx) {
+    const boolObj = value ? trueTag : falseTag;
+    if (source && boolObj.test.test(source))
+        return source;
+    return value ? ctx.options.trueStr : ctx.options.falseStr;
+}
+const trueTag = {
+    identify: value => value === true,
+    default: true,
+    tag: 'tag:yaml.org,2002:bool',
+    test: /^(?:Y|y|[Yy]es|YES|[Tt]rue|TRUE|[Oo]n|ON)$/,
+    resolve: () => new Scalar.Scalar(true),
+    stringify: boolStringify
+};
+const falseTag = {
+    identify: value => value === false,
+    default: true,
+    tag: 'tag:yaml.org,2002:bool',
+    test: /^(?:N|n|[Nn]o|NO|[Ff]alse|FALSE|[Oo]ff|OFF)$/,
+    resolve: () => new Scalar.Scalar(false),
+    stringify: boolStringify
+};
+
+exports.falseTag = falseTag;
+exports.trueTag = trueTag;
+
+
+/***/ }),
+
+/***/ 5782:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+var stringifyNumber = __nccwpck_require__(8689);
+
+const floatNaN = {
+    identify: value => typeof value === 'number',
+    default: true,
+    tag: 'tag:yaml.org,2002:float',
+    test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
+    resolve: (str) => str.slice(-3).toLowerCase() === 'nan'
+        ? NaN
+        : str[0] === '-'
+            ? Number.NEGATIVE_INFINITY
+            : Number.POSITIVE_INFINITY,
+    stringify: stringifyNumber.stringifyNumber
+};
+const floatExp = {
+    identify: value => typeof value === 'number',
+    default: true,
+    tag: 'tag:yaml.org,2002:float',
+    format: 'EXP',
+    test: /^[-+]?(?:[0-9][0-9_]*)?(?:\.[0-9_]*)?[eE][-+]?[0-9]+$/,
+    resolve: (str) => parseFloat(str.replace(/_/g, '')),
+    stringify(node) {
+        const num = Number(node.value);
+        return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
+    }
+};
+const float = {
+    identify: value => typeof value === 'number',
+    default: true,
+    tag: 'tag:yaml.org,2002:float',
+    test: /^[-+]?(?:[0-9][0-9_]*)?\.[0-9_]*$/,
+    resolve(str) {
+        const node = new Scalar.Scalar(parseFloat(str.replace(/_/g, '')));
+        const dot = str.indexOf('.');
+        if (dot !== -1) {
+            const f = str.substring(dot + 1).replace(/_/g, '');
+            if (f[f.length - 1] === '0')
+                node.minFractionDigits = f.length;
+        }
+        return node;
+    },
+    stringify: stringifyNumber.stringifyNumber
+};
+
+exports.float = float;
+exports.floatExp = floatExp;
+exports.floatNaN = floatNaN;
+
+
+/***/ }),
+
+/***/ 873:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var stringifyNumber = __nccwpck_require__(8689);
+
+const intIdentify = (value) => typeof value === 'bigint' || Number.isInteger(value);
+function intResolve(str, offset, radix, { intAsBigInt }) {
+    const sign = str[0];
+    if (sign === '-' || sign === '+')
+        offset += 1;
+    str = str.substring(offset).replace(/_/g, '');
+    if (intAsBigInt) {
+        switch (radix) {
+            case 2:
+                str = `0b${str}`;
+                break;
+            case 8:
+                str = `0o${str}`;
+                break;
+            case 16:
+                str = `0x${str}`;
+                break;
+        }
+        const n = BigInt(str);
+        return sign === '-' ? BigInt(-1) * n : n;
+    }
+    const n = parseInt(str, radix);
+    return sign === '-' ? -1 * n : n;
+}
+function intStringify(node, radix, prefix) {
+    const { value } = node;
+    if (intIdentify(value)) {
+        const str = value.toString(radix);
+        return value < 0 ? '-' + prefix + str.substr(1) : prefix + str;
+    }
+    return stringifyNumber.stringifyNumber(node);
+}
+const intBin = {
+    identify: intIdentify,
+    default: true,
+    tag: 'tag:yaml.org,2002:int',
+    format: 'BIN',
+    test: /^[-+]?0b[0-1_]+$/,
+    resolve: (str, _onError, opt) => intResolve(str, 2, 2, opt),
+    stringify: node => intStringify(node, 2, '0b')
+};
+const intOct = {
+    identify: intIdentify,
+    default: true,
+    tag: 'tag:yaml.org,2002:int',
+    format: 'OCT',
+    test: /^[-+]?0[0-7_]+$/,
+    resolve: (str, _onError, opt) => intResolve(str, 1, 8, opt),
+    stringify: node => intStringify(node, 8, '0')
+};
+const int = {
+    identify: intIdentify,
+    default: true,
+    tag: 'tag:yaml.org,2002:int',
+    test: /^[-+]?[0-9][0-9_]*$/,
+    resolve: (str, _onError, opt) => intResolve(str, 0, 10, opt),
+    stringify: stringifyNumber.stringifyNumber
+};
+const intHex = {
+    identify: intIdentify,
+    default: true,
+    tag: 'tag:yaml.org,2002:int',
+    format: 'HEX',
+    test: /^[-+]?0x[0-9a-fA-F_]+$/,
+    resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
+    stringify: node => intStringify(node, 16, '0x')
+};
+
+exports.int = int;
+exports.intBin = intBin;
+exports.intHex = intHex;
+exports.intOct = intOct;
+
+
+/***/ }),
+
+/***/ 452:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var Scalar = __nccwpck_require__(3301);
+
+// If the value associated with a merge key is a single mapping node, each of
+// its key/value pairs is inserted into the current mapping, unless the key
+// already exists in it. If the value associated with the merge key is a
+// sequence, then this sequence is expected to contain mapping nodes and each
+// of these nodes is merged in turn according to its order in the sequence.
+// Keys in mapping nodes earlier in the sequence override keys specified in
+// later mapping nodes. -- http://yaml.org/type/merge.html
+const MERGE_KEY = '<<';
+const merge = {
+    identify: value => value === MERGE_KEY ||
+        (typeof value === 'symbol' && value.description === MERGE_KEY),
+    default: 'key',
+    tag: 'tag:yaml.org,2002:merge',
+    test: /^<<$/,
+    resolve: () => Object.assign(new Scalar.Scalar(Symbol(MERGE_KEY)), {
+        addToJSMap: addMergeToJSMap
+    }),
+    stringify: () => MERGE_KEY
+};
+const isMergeKey = (ctx, key) => (merge.identify(key) ||
+    (identity.isScalar(key) &&
+        (!key.type || key.type === Scalar.Scalar.PLAIN) &&
+        merge.identify(key.value))) &&
+    ctx?.doc.schema.tags.some(tag => tag.tag === merge.tag && tag.default);
+function addMergeToJSMap(ctx, map, value) {
+    value = ctx && identity.isAlias(value) ? value.resolve(ctx.doc) : value;
+    if (identity.isSeq(value))
+        for (const it of value.items)
+            mergeValue(ctx, map, it);
+    else if (Array.isArray(value))
+        for (const it of value)
+            mergeValue(ctx, map, it);
+    else
+        mergeValue(ctx, map, value);
+}
+function mergeValue(ctx, map, value) {
+    const source = ctx && identity.isAlias(value) ? value.resolve(ctx.doc) : value;
+    if (!identity.isMap(source))
+        throw new Error('Merge sources must be maps or map aliases');
+    const srcMap = source.toJSON(null, ctx, Map);
+    for (const [key, value] of srcMap) {
+        if (map instanceof Map) {
+            if (!map.has(key))
+                map.set(key, value);
+        }
+        else if (map instanceof Set) {
+            map.add(key);
+        }
+        else if (!Object.prototype.hasOwnProperty.call(map, key)) {
+            Object.defineProperty(map, key, {
+                value,
+                writable: true,
+                enumerable: true,
+                configurable: true
+            });
+        }
+    }
+    return map;
+}
+
+exports.addMergeToJSMap = addMergeToJSMap;
+exports.isMergeKey = isMergeKey;
+exports.merge = merge;
+
+
+/***/ }),
+
+/***/ 303:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var toJS = __nccwpck_require__(6424);
+var YAMLMap = __nccwpck_require__(4454);
+var YAMLSeq = __nccwpck_require__(2223);
+var pairs = __nccwpck_require__(8385);
+
+class YAMLOMap extends YAMLSeq.YAMLSeq {
+    constructor() {
+        super();
+        this.add = YAMLMap.YAMLMap.prototype.add.bind(this);
+        this.delete = YAMLMap.YAMLMap.prototype.delete.bind(this);
+        this.get = YAMLMap.YAMLMap.prototype.get.bind(this);
+        this.has = YAMLMap.YAMLMap.prototype.has.bind(this);
+        this.set = YAMLMap.YAMLMap.prototype.set.bind(this);
+        this.tag = YAMLOMap.tag;
+    }
+    /**
+     * If `ctx` is given, the return type is actually `Map<unknown, unknown>`,
+     * but TypeScript won't allow widening the signature of a child method.
+     */
+    toJSON(_, ctx) {
+        if (!ctx)
+            return super.toJSON(_);
+        const map = new Map();
+        if (ctx?.onCreate)
+            ctx.onCreate(map);
+        for (const pair of this.items) {
+            let key, value;
+            if (identity.isPair(pair)) {
+                key = toJS.toJS(pair.key, '', ctx);
+                value = toJS.toJS(pair.value, key, ctx);
+            }
+            else {
+                key = toJS.toJS(pair, '', ctx);
+            }
+            if (map.has(key))
+                throw new Error('Ordered maps must not include duplicate keys');
+            map.set(key, value);
+        }
+        return map;
+    }
+    static from(schema, iterable, ctx) {
+        const pairs$1 = pairs.createPairs(schema, iterable, ctx);
+        const omap = new this();
+        omap.items = pairs$1.items;
+        return omap;
+    }
+}
+YAMLOMap.tag = 'tag:yaml.org,2002:omap';
+const omap = {
+    collection: 'seq',
+    identify: value => value instanceof Map,
+    nodeClass: YAMLOMap,
+    default: false,
+    tag: 'tag:yaml.org,2002:omap',
+    resolve(seq, onError) {
+        const pairs$1 = pairs.resolvePairs(seq, onError);
+        const seenKeys = [];
+        for (const { key } of pairs$1.items) {
+            if (identity.isScalar(key)) {
+                if (seenKeys.includes(key.value)) {
+                    onError(`Ordered maps must not include duplicate keys: ${key.value}`);
+                }
+                else {
+                    seenKeys.push(key.value);
+                }
+            }
+        }
+        return Object.assign(new YAMLOMap(), pairs$1);
+    },
+    createNode: (schema, iterable, ctx) => YAMLOMap.from(schema, iterable, ctx)
+};
+
+exports.YAMLOMap = YAMLOMap;
+exports.omap = omap;
+
+
+/***/ }),
+
+/***/ 8385:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var Pair = __nccwpck_require__(7165);
+var Scalar = __nccwpck_require__(3301);
+var YAMLSeq = __nccwpck_require__(2223);
+
+function resolvePairs(seq, onError) {
+    if (identity.isSeq(seq)) {
+        for (let i = 0; i < seq.items.length; ++i) {
+            let item = seq.items[i];
+            if (identity.isPair(item))
+                continue;
+            else if (identity.isMap(item)) {
+                if (item.items.length > 1)
+                    onError('Each pair must have its own sequence indicator');
+                const pair = item.items[0] || new Pair.Pair(new Scalar.Scalar(null));
+                if (item.commentBefore)
+                    pair.key.commentBefore = pair.key.commentBefore
+                        ? `${item.commentBefore}\n${pair.key.commentBefore}`
+                        : item.commentBefore;
+                if (item.comment) {
+                    const cn = pair.value ?? pair.key;
+                    cn.comment = cn.comment
+                        ? `${item.comment}\n${cn.comment}`
+                        : item.comment;
+                }
+                item = pair;
+            }
+            seq.items[i] = identity.isPair(item) ? item : new Pair.Pair(item);
+        }
+    }
+    else
+        onError('Expected a sequence for this tag');
+    return seq;
+}
+function createPairs(schema, iterable, ctx) {
+    const { replacer } = ctx;
+    const pairs = new YAMLSeq.YAMLSeq(schema);
+    pairs.tag = 'tag:yaml.org,2002:pairs';
+    let i = 0;
+    if (iterable && Symbol.iterator in Object(iterable))
+        for (let it of iterable) {
+            if (typeof replacer === 'function')
+                it = replacer.call(iterable, String(i++), it);
+            let key, value;
+            if (Array.isArray(it)) {
+                if (it.length === 2) {
+                    key = it[0];
+                    value = it[1];
+                }
+                else
+                    throw new TypeError(`Expected [key, value] tuple: ${it}`);
+            }
+            else if (it && it instanceof Object) {
+                const keys = Object.keys(it);
+                if (keys.length === 1) {
+                    key = keys[0];
+                    value = it[key];
+                }
+                else {
+                    throw new TypeError(`Expected tuple with one key, not ${keys.length} keys`);
+                }
+            }
+            else {
+                key = it;
+            }
+            pairs.items.push(Pair.createPair(key, value, ctx));
+        }
+    return pairs;
+}
+const pairs = {
+    collection: 'seq',
+    default: false,
+    tag: 'tag:yaml.org,2002:pairs',
+    resolve: resolvePairs,
+    createNode: createPairs
+};
+
+exports.createPairs = createPairs;
+exports.pairs = pairs;
+exports.resolvePairs = resolvePairs;
+
+
+/***/ }),
+
+/***/ 8294:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var map = __nccwpck_require__(7451);
+var _null = __nccwpck_require__(3632);
+var seq = __nccwpck_require__(1706);
+var string = __nccwpck_require__(6464);
+var binary = __nccwpck_require__(6083);
+var bool = __nccwpck_require__(8398);
+var float = __nccwpck_require__(5782);
+var int = __nccwpck_require__(873);
+var merge = __nccwpck_require__(452);
+var omap = __nccwpck_require__(303);
+var pairs = __nccwpck_require__(8385);
+var set = __nccwpck_require__(1528);
+var timestamp = __nccwpck_require__(4371);
+
+const schema = [
+    map.map,
+    seq.seq,
+    string.string,
+    _null.nullTag,
+    bool.trueTag,
+    bool.falseTag,
+    int.intBin,
+    int.intOct,
+    int.int,
+    int.intHex,
+    float.floatNaN,
+    float.floatExp,
+    float.float,
+    binary.binary,
+    merge.merge,
+    omap.omap,
+    pairs.pairs,
+    set.set,
+    timestamp.intTime,
+    timestamp.floatTime,
+    timestamp.timestamp
+];
+
+exports.schema = schema;
+
+
+/***/ }),
+
+/***/ 1528:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var Pair = __nccwpck_require__(7165);
+var YAMLMap = __nccwpck_require__(4454);
+
+class YAMLSet extends YAMLMap.YAMLMap {
+    constructor(schema) {
+        super(schema);
+        this.tag = YAMLSet.tag;
+    }
+    add(key) {
+        let pair;
+        if (identity.isPair(key))
+            pair = key;
+        else if (key &&
+            typeof key === 'object' &&
+            'key' in key &&
+            'value' in key &&
+            key.value === null)
+            pair = new Pair.Pair(key.key, null);
+        else
+            pair = new Pair.Pair(key, null);
+        const prev = YAMLMap.findPair(this.items, pair.key);
+        if (!prev)
+            this.items.push(pair);
+    }
+    /**
+     * If `keepPair` is `true`, returns the Pair matching `key`.
+     * Otherwise, returns the value of that Pair's key.
+     */
+    get(key, keepPair) {
+        const pair = YAMLMap.findPair(this.items, key);
+        return !keepPair && identity.isPair(pair)
+            ? identity.isScalar(pair.key)
+                ? pair.key.value
+                : pair.key
+            : pair;
+    }
+    set(key, value) {
+        if (typeof value !== 'boolean')
+            throw new Error(`Expected boolean value for set(key, value) in a YAML set, not ${typeof value}`);
+        const prev = YAMLMap.findPair(this.items, key);
+        if (prev && !value) {
+            this.items.splice(this.items.indexOf(prev), 1);
+        }
+        else if (!prev && value) {
+            this.items.push(new Pair.Pair(key));
+        }
+    }
+    toJSON(_, ctx) {
+        return super.toJSON(_, ctx, Set);
+    }
+    toString(ctx, onComment, onChompKeep) {
+        if (!ctx)
+            return JSON.stringify(this);
+        if (this.hasAllNullValues(true))
+            return super.toString(Object.assign({}, ctx, { allNullValues: true }), onComment, onChompKeep);
+        else
+            throw new Error('Set items must all have null values');
+    }
+    static from(schema, iterable, ctx) {
+        const { replacer } = ctx;
+        const set = new this(schema);
+        if (iterable && Symbol.iterator in Object(iterable))
+            for (let value of iterable) {
+                if (typeof replacer === 'function')
+                    value = replacer.call(iterable, value, value);
+                set.items.push(Pair.createPair(value, null, ctx));
+            }
+        return set;
+    }
+}
+YAMLSet.tag = 'tag:yaml.org,2002:set';
+const set = {
+    collection: 'map',
+    identify: value => value instanceof Set,
+    nodeClass: YAMLSet,
+    default: false,
+    tag: 'tag:yaml.org,2002:set',
+    createNode: (schema, iterable, ctx) => YAMLSet.from(schema, iterable, ctx),
+    resolve(map, onError) {
+        if (identity.isMap(map)) {
+            if (map.hasAllNullValues(true))
+                return Object.assign(new YAMLSet(), map);
+            else
+                onError('Set items must all have null values');
+        }
+        else
+            onError('Expected a mapping for this tag');
+        return map;
+    }
+};
+
+exports.YAMLSet = YAMLSet;
+exports.set = set;
+
+
+/***/ }),
+
+/***/ 4371:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var stringifyNumber = __nccwpck_require__(8689);
+
+/** Internal types handle bigint as number, because TS can't figure it out. */
+function parseSexagesimal(str, asBigInt) {
+    const sign = str[0];
+    const parts = sign === '-' || sign === '+' ? str.substring(1) : str;
+    const num = (n) => asBigInt ? BigInt(n) : Number(n);
+    const res = parts
+        .replace(/_/g, '')
+        .split(':')
+        .reduce((res, p) => res * num(60) + num(p), num(0));
+    return (sign === '-' ? num(-1) * res : res);
+}
+/**
+ * hhhh:mm:ss.sss
+ *
+ * Internal types handle bigint as number, because TS can't figure it out.
+ */
+function stringifySexagesimal(node) {
+    let { value } = node;
+    let num = (n) => n;
+    if (typeof value === 'bigint')
+        num = n => BigInt(n);
+    else if (isNaN(value) || !isFinite(value))
+        return stringifyNumber.stringifyNumber(node);
+    let sign = '';
+    if (value < 0) {
+        sign = '-';
+        value *= num(-1);
+    }
+    const _60 = num(60);
+    const parts = [value % _60]; // seconds, including ms
+    if (value < 60) {
+        parts.unshift(0); // at least one : is required
+    }
+    else {
+        value = (value - parts[0]) / _60;
+        parts.unshift(value % _60); // minutes
+        if (value >= 60) {
+            value = (value - parts[0]) / _60;
+            parts.unshift(value); // hours
+        }
+    }
+    return (sign +
+        parts
+            .map(n => String(n).padStart(2, '0'))
+            .join(':')
+            .replace(/000000\d*$/, '') // % 60 may introduce error
+    );
+}
+const intTime = {
+    identify: value => typeof value === 'bigint' || Number.isInteger(value),
+    default: true,
+    tag: 'tag:yaml.org,2002:int',
+    format: 'TIME',
+    test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+$/,
+    resolve: (str, _onError, { intAsBigInt }) => parseSexagesimal(str, intAsBigInt),
+    stringify: stringifySexagesimal
+};
+const floatTime = {
+    identify: value => typeof value === 'number',
+    default: true,
+    tag: 'tag:yaml.org,2002:float',
+    format: 'TIME',
+    test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*$/,
+    resolve: str => parseSexagesimal(str, false),
+    stringify: stringifySexagesimal
+};
+const timestamp = {
+    identify: value => value instanceof Date,
+    default: true,
+    tag: 'tag:yaml.org,2002:timestamp',
+    // If the time zone is omitted, the timestamp is assumed to be specified in UTC. The time part
+    // may be omitted altogether, resulting in a date format. In such a case, the time part is
+    // assumed to be 00:00:00Z (start of day, UTC).
+    test: RegExp('^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})' + // YYYY-Mm-Dd
+        '(?:' + // time is optional
+        '(?:t|T|[ \\t]+)' + // t | T | whitespace
+        '([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}(\\.[0-9]+)?)' + // Hh:Mm:Ss(.ss)?
+        '(?:[ \\t]*(Z|[-+][012]?[0-9](?::[0-9]{2})?))?' + // Z | +5 | -03:30
+        ')?$'),
+    resolve(str) {
+        const match = str.match(timestamp.test);
+        if (!match)
+            throw new Error('!!timestamp expects a date, starting with yyyy-mm-dd');
+        const [, year, month, day, hour, minute, second] = match.map(Number);
+        const millisec = match[7] ? Number((match[7] + '00').substr(1, 3)) : 0;
+        let date = Date.UTC(year, month - 1, day, hour || 0, minute || 0, second || 0, millisec);
+        const tz = match[8];
+        if (tz && tz !== 'Z') {
+            let d = parseSexagesimal(tz, false);
+            if (Math.abs(d) < 30)
+                d *= 60;
+            date -= 60000 * d;
+        }
+        return new Date(date);
+    },
+    stringify: ({ value }) => value.toISOString().replace(/((T00:00)?:00)?\.000Z$/, '')
+};
+
+exports.floatTime = floatTime;
+exports.intTime = intTime;
+exports.timestamp = timestamp;
+
+
+/***/ }),
+
+/***/ 4475:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+const FOLD_FLOW = 'flow';
+const FOLD_BLOCK = 'block';
+const FOLD_QUOTED = 'quoted';
+/**
+ * Tries to keep input at up to `lineWidth` characters, splitting only on spaces
+ * not followed by newlines or spaces unless `mode` is `'quoted'`. Lines are
+ * terminated with `\n` and started with `indent`.
+ */
+function foldFlowLines(text, indent, mode = 'flow', { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
+    if (!lineWidth || lineWidth < 0)
+        return text;
+    if (lineWidth < minContentWidth)
+        minContentWidth = 0;
+    const endStep = Math.max(1 + minContentWidth, 1 + lineWidth - indent.length);
+    if (text.length <= endStep)
+        return text;
+    const folds = [];
+    const escapedFolds = {};
+    let end = lineWidth - indent.length;
+    if (typeof indentAtStart === 'number') {
+        if (indentAtStart > lineWidth - Math.max(2, minContentWidth))
+            folds.push(0);
+        else
+            end = lineWidth - indentAtStart;
+    }
+    let split = undefined;
+    let prev = undefined;
+    let overflow = false;
+    let i = -1;
+    let escStart = -1;
+    let escEnd = -1;
+    if (mode === FOLD_BLOCK) {
+        i = consumeMoreIndentedLines(text, i, indent.length);
+        if (i !== -1)
+            end = i + endStep;
+    }
+    for (let ch; (ch = text[(i += 1)]);) {
+        if (mode === FOLD_QUOTED && ch === '\\') {
+            escStart = i;
+            switch (text[i + 1]) {
+                case 'x':
+                    i += 3;
+                    break;
+                case 'u':
+                    i += 5;
+                    break;
+                case 'U':
+                    i += 9;
+                    break;
+                default:
+                    i += 1;
+            }
+            escEnd = i;
+        }
+        if (ch === '\n') {
+            if (mode === FOLD_BLOCK)
+                i = consumeMoreIndentedLines(text, i, indent.length);
+            end = i + indent.length + endStep;
+            split = undefined;
+        }
+        else {
+            if (ch === ' ' &&
+                prev &&
+                prev !== ' ' &&
+                prev !== '\n' &&
+                prev !== '\t') {
+                // space surrounded by non-space can be replaced with newline + indent
+                const next = text[i + 1];
+                if (next && next !== ' ' && next !== '\n' && next !== '\t')
+                    split = i;
+            }
+            if (i >= end) {
+                if (split) {
+                    folds.push(split);
+                    end = split + endStep;
+                    split = undefined;
+                }
+                else if (mode === FOLD_QUOTED) {
+                    // white-space collected at end may stretch past lineWidth
+                    while (prev === ' ' || prev === '\t') {
+                        prev = ch;
+                        ch = text[(i += 1)];
+                        overflow = true;
+                    }
+                    // Account for newline escape, but don't break preceding escape
+                    const j = i > escEnd + 1 ? i - 2 : escStart - 1;
+                    // Bail out if lineWidth & minContentWidth are shorter than an escape string
+                    if (escapedFolds[j])
+                        return text;
+                    folds.push(j);
+                    escapedFolds[j] = true;
+                    end = j + endStep;
+                    split = undefined;
+                }
+                else {
+                    overflow = true;
+                }
+            }
+        }
+        prev = ch;
+    }
+    if (overflow && onOverflow)
+        onOverflow();
+    if (folds.length === 0)
+        return text;
+    if (onFold)
+        onFold();
+    let res = text.slice(0, folds[0]);
+    for (let i = 0; i < folds.length; ++i) {
+        const fold = folds[i];
+        const end = folds[i + 1] || text.length;
+        if (fold === 0)
+            res = `\n${indent}${text.slice(0, end)}`;
+        else {
+            if (mode === FOLD_QUOTED && escapedFolds[fold])
+                res += `${text[fold]}\\`;
+            res += `\n${indent}${text.slice(fold + 1, end)}`;
+        }
+    }
+    return res;
+}
+/**
+ * Presumes `i + 1` is at the start of a line
+ * @returns index of last newline in more-indented block
+ */
+function consumeMoreIndentedLines(text, i, indent) {
+    let end = i;
+    let start = i + 1;
+    let ch = text[start];
+    while (ch === ' ' || ch === '\t') {
+        if (i < start + indent) {
+            ch = text[++i];
+        }
+        else {
+            do {
+                ch = text[++i];
+            } while (ch && ch !== '\n');
+            end = i;
+            start = i + 1;
+            ch = text[start];
+        }
+    }
+    return end;
+}
+
+exports.FOLD_BLOCK = FOLD_BLOCK;
+exports.FOLD_FLOW = FOLD_FLOW;
+exports.FOLD_QUOTED = FOLD_QUOTED;
+exports.foldFlowLines = foldFlowLines;
+
+
+/***/ }),
+
+/***/ 2148:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var anchors = __nccwpck_require__(1596);
+var identity = __nccwpck_require__(1127);
+var stringifyComment = __nccwpck_require__(9799);
+var stringifyString = __nccwpck_require__(3069);
+
+function createStringifyContext(doc, options) {
+    const opt = Object.assign({
+        blockQuote: true,
+        commentString: stringifyComment.stringifyComment,
+        defaultKeyType: null,
+        defaultStringType: 'PLAIN',
+        directives: null,
+        doubleQuotedAsJSON: false,
+        doubleQuotedMinMultiLineLength: 40,
+        falseStr: 'false',
+        flowCollectionPadding: true,
+        indentSeq: true,
+        lineWidth: 80,
+        minContentWidth: 20,
+        nullStr: 'null',
+        simpleKeys: false,
+        singleQuote: null,
+        trueStr: 'true',
+        verifyAliasOrder: true
+    }, doc.schema.toStringOptions, options);
+    let inFlow;
+    switch (opt.collectionStyle) {
+        case 'block':
+            inFlow = false;
+            break;
+        case 'flow':
+            inFlow = true;
+            break;
+        default:
+            inFlow = null;
+    }
+    return {
+        anchors: new Set(),
+        doc,
+        flowCollectionPadding: opt.flowCollectionPadding ? ' ' : '',
+        indent: '',
+        indentStep: typeof opt.indent === 'number' ? ' '.repeat(opt.indent) : '  ',
+        inFlow,
+        options: opt
+    };
+}
+function getTagObject(tags, item) {
+    if (item.tag) {
+        const match = tags.filter(t => t.tag === item.tag);
+        if (match.length > 0)
+            return match.find(t => t.format === item.format) ?? match[0];
+    }
+    let tagObj = undefined;
+    let obj;
+    if (identity.isScalar(item)) {
+        obj = item.value;
+        let match = tags.filter(t => t.identify?.(obj));
+        if (match.length > 1) {
+            const testMatch = match.filter(t => t.test);
+            if (testMatch.length > 0)
+                match = testMatch;
+        }
+        tagObj =
+            match.find(t => t.format === item.format) ?? match.find(t => !t.format);
+    }
+    else {
+        obj = item;
+        tagObj = tags.find(t => t.nodeClass && obj instanceof t.nodeClass);
+    }
+    if (!tagObj) {
+        const name = obj?.constructor?.name ?? typeof obj;
+        throw new Error(`Tag not resolved for ${name} value`);
+    }
+    return tagObj;
+}
+// needs to be called before value stringifier to allow for circular anchor refs
+function stringifyProps(node, tagObj, { anchors: anchors$1, doc }) {
+    if (!doc.directives)
+        return '';
+    const props = [];
+    const anchor = (identity.isScalar(node) || identity.isCollection(node)) && node.anchor;
+    if (anchor && anchors.anchorIsValid(anchor)) {
+        anchors$1.add(anchor);
+        props.push(`&${anchor}`);
+    }
+    const tag = node.tag ? node.tag : tagObj.default ? null : tagObj.tag;
+    if (tag)
+        props.push(doc.directives.tagString(tag));
+    return props.join(' ');
+}
+function stringify(item, ctx, onComment, onChompKeep) {
+    if (identity.isPair(item))
+        return item.toString(ctx, onComment, onChompKeep);
+    if (identity.isAlias(item)) {
+        if (ctx.doc.directives)
+            return item.toString(ctx);
+        if (ctx.resolvedAliases?.has(item)) {
+            throw new TypeError(`Cannot stringify circular structure without alias nodes`);
+        }
+        else {
+            if (ctx.resolvedAliases)
+                ctx.resolvedAliases.add(item);
+            else
+                ctx.resolvedAliases = new Set([item]);
+            item = item.resolve(ctx.doc);
+        }
+    }
+    let tagObj = undefined;
+    const node = identity.isNode(item)
+        ? item
+        : ctx.doc.createNode(item, { onTagObj: o => (tagObj = o) });
+    if (!tagObj)
+        tagObj = getTagObject(ctx.doc.schema.tags, node);
+    const props = stringifyProps(node, tagObj, ctx);
+    if (props.length > 0)
+        ctx.indentAtStart = (ctx.indentAtStart ?? 0) + props.length + 1;
+    const str = typeof tagObj.stringify === 'function'
+        ? tagObj.stringify(node, ctx, onComment, onChompKeep)
+        : identity.isScalar(node)
+            ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep)
+            : node.toString(ctx, onComment, onChompKeep);
+    if (!props)
+        return str;
+    return identity.isScalar(node) || str[0] === '{' || str[0] === '['
+        ? `${props} ${str}`
+        : `${props}\n${ctx.indent}${str}`;
+}
+
+exports.createStringifyContext = createStringifyContext;
+exports.stringify = stringify;
+
+
+/***/ }),
+
+/***/ 1212:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var stringify = __nccwpck_require__(2148);
+var stringifyComment = __nccwpck_require__(9799);
+
+function stringifyCollection(collection, ctx, options) {
+    const flow = ctx.inFlow ?? collection.flow;
+    const stringify = flow ? stringifyFlowCollection : stringifyBlockCollection;
+    return stringify(collection, ctx, options);
+}
+function stringifyBlockCollection({ comment, items }, ctx, { blockItemPrefix, flowChars, itemIndent, onChompKeep, onComment }) {
+    const { indent, options: { commentString } } = ctx;
+    const itemCtx = Object.assign({}, ctx, { indent: itemIndent, type: null });
+    let chompKeep = false; // flag for the preceding node's status
+    const lines = [];
+    for (let i = 0; i < items.length; ++i) {
+        const item = items[i];
+        let comment = null;
+        if (identity.isNode(item)) {
+            if (!chompKeep && item.spaceBefore)
+                lines.push('');
+            addCommentBefore(ctx, lines, item.commentBefore, chompKeep);
+            if (item.comment)
+                comment = item.comment;
+        }
+        else if (identity.isPair(item)) {
+            const ik = identity.isNode(item.key) ? item.key : null;
+            if (ik) {
+                if (!chompKeep && ik.spaceBefore)
+                    lines.push('');
+                addCommentBefore(ctx, lines, ik.commentBefore, chompKeep);
+            }
+        }
+        chompKeep = false;
+        let str = stringify.stringify(item, itemCtx, () => (comment = null), () => (chompKeep = true));
+        if (comment)
+            str += stringifyComment.lineComment(str, itemIndent, commentString(comment));
+        if (chompKeep && comment)
+            chompKeep = false;
+        lines.push(blockItemPrefix + str);
+    }
+    let str;
+    if (lines.length === 0) {
+        str = flowChars.start + flowChars.end;
+    }
+    else {
+        str = lines[0];
+        for (let i = 1; i < lines.length; ++i) {
+            const line = lines[i];
+            str += line ? `\n${indent}${line}` : '\n';
+        }
+    }
+    if (comment) {
+        str += '\n' + stringifyComment.indentComment(commentString(comment), indent);
+        if (onComment)
+            onComment();
+    }
+    else if (chompKeep && onChompKeep)
+        onChompKeep();
+    return str;
+}
+function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
+    const { indent, indentStep, flowCollectionPadding: fcPadding, options: { commentString } } = ctx;
+    itemIndent += indentStep;
+    const itemCtx = Object.assign({}, ctx, {
+        indent: itemIndent,
+        inFlow: true,
+        type: null
+    });
+    let reqNewline = false;
+    let linesAtValue = 0;
+    const lines = [];
+    for (let i = 0; i < items.length; ++i) {
+        const item = items[i];
+        let comment = null;
+        if (identity.isNode(item)) {
+            if (item.spaceBefore)
+                lines.push('');
+            addCommentBefore(ctx, lines, item.commentBefore, false);
+            if (item.comment)
+                comment = item.comment;
+        }
+        else if (identity.isPair(item)) {
+            const ik = identity.isNode(item.key) ? item.key : null;
+            if (ik) {
+                if (ik.spaceBefore)
+                    lines.push('');
+                addCommentBefore(ctx, lines, ik.commentBefore, false);
+                if (ik.comment)
+                    reqNewline = true;
+            }
+            const iv = identity.isNode(item.value) ? item.value : null;
+            if (iv) {
+                if (iv.comment)
+                    comment = iv.comment;
+                if (iv.commentBefore)
+                    reqNewline = true;
+            }
+            else if (item.value == null && ik?.comment) {
+                comment = ik.comment;
+            }
+        }
+        if (comment)
+            reqNewline = true;
+        let str = stringify.stringify(item, itemCtx, () => (comment = null));
+        if (i < items.length - 1)
+            str += ',';
+        if (comment)
+            str += stringifyComment.lineComment(str, itemIndent, commentString(comment));
+        if (!reqNewline && (lines.length > linesAtValue || str.includes('\n')))
+            reqNewline = true;
+        lines.push(str);
+        linesAtValue = lines.length;
+    }
+    const { start, end } = flowChars;
+    if (lines.length === 0) {
+        return start + end;
+    }
+    else {
+        if (!reqNewline) {
+            const len = lines.reduce((sum, line) => sum + line.length + 2, 2);
+            reqNewline = ctx.options.lineWidth > 0 && len > ctx.options.lineWidth;
+        }
+        if (reqNewline) {
+            let str = start;
+            for (const line of lines)
+                str += line ? `\n${indentStep}${indent}${line}` : '\n';
+            return `${str}\n${indent}${end}`;
+        }
+        else {
+            return `${start}${fcPadding}${lines.join(' ')}${fcPadding}${end}`;
+        }
+    }
+}
+function addCommentBefore({ indent, options: { commentString } }, lines, comment, chompKeep) {
+    if (comment && chompKeep)
+        comment = comment.replace(/^\n+/, '');
+    if (comment) {
+        const ic = stringifyComment.indentComment(commentString(comment), indent);
+        lines.push(ic.trimStart()); // Avoid double indent on first line
+    }
+}
+
+exports.stringifyCollection = stringifyCollection;
+
+
+/***/ }),
+
+/***/ 9799:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+/**
+ * Stringifies a comment.
+ *
+ * Empty comment lines are left empty,
+ * lines consisting of a single space are replaced by `#`,
+ * and all other lines are prefixed with a `#`.
+ */
+const stringifyComment = (str) => str.replace(/^(?!$)(?: $)?/gm, '#');
+function indentComment(comment, indent) {
+    if (/^\n+$/.test(comment))
+        return comment.substring(1);
+    return indent ? comment.replace(/^(?! *$)/gm, indent) : comment;
+}
+const lineComment = (str, indent, comment) => str.endsWith('\n')
+    ? indentComment(comment, indent)
+    : comment.includes('\n')
+        ? '\n' + indentComment(comment, indent)
+        : (str.endsWith(' ') ? '' : ' ') + comment;
+
+exports.indentComment = indentComment;
+exports.lineComment = lineComment;
+exports.stringifyComment = stringifyComment;
+
+
+/***/ }),
+
+/***/ 6829:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var stringify = __nccwpck_require__(2148);
+var stringifyComment = __nccwpck_require__(9799);
+
+function stringifyDocument(doc, options) {
+    const lines = [];
+    let hasDirectives = options.directives === true;
+    if (options.directives !== false && doc.directives) {
+        const dir = doc.directives.toString(doc);
+        if (dir) {
+            lines.push(dir);
+            hasDirectives = true;
+        }
+        else if (doc.directives.docStart)
+            hasDirectives = true;
+    }
+    if (hasDirectives)
+        lines.push('---');
+    const ctx = stringify.createStringifyContext(doc, options);
+    const { commentString } = ctx.options;
+    if (doc.commentBefore) {
+        if (lines.length !== 1)
+            lines.unshift('');
+        const cs = commentString(doc.commentBefore);
+        lines.unshift(stringifyComment.indentComment(cs, ''));
+    }
+    let chompKeep = false;
+    let contentComment = null;
+    if (doc.contents) {
+        if (identity.isNode(doc.contents)) {
+            if (doc.contents.spaceBefore && hasDirectives)
+                lines.push('');
+            if (doc.contents.commentBefore) {
+                const cs = commentString(doc.contents.commentBefore);
+                lines.push(stringifyComment.indentComment(cs, ''));
+            }
+            // top-level block scalars need to be indented if followed by a comment
+            ctx.forceBlockIndent = !!doc.comment;
+            contentComment = doc.contents.comment;
+        }
+        const onChompKeep = contentComment ? undefined : () => (chompKeep = true);
+        let body = stringify.stringify(doc.contents, ctx, () => (contentComment = null), onChompKeep);
+        if (contentComment)
+            body += stringifyComment.lineComment(body, '', commentString(contentComment));
+        if ((body[0] === '|' || body[0] === '>') &&
+            lines[lines.length - 1] === '---') {
+            // Top-level block scalars with a preceding doc marker ought to use the
+            // same line for their header.
+            lines[lines.length - 1] = `--- ${body}`;
+        }
+        else
+            lines.push(body);
+    }
+    else {
+        lines.push(stringify.stringify(doc.contents, ctx));
+    }
+    if (doc.directives?.docEnd) {
+        if (doc.comment) {
+            const cs = commentString(doc.comment);
+            if (cs.includes('\n')) {
+                lines.push('...');
+                lines.push(stringifyComment.indentComment(cs, ''));
+            }
+            else {
+                lines.push(`... ${cs}`);
+            }
+        }
+        else {
+            lines.push('...');
+        }
+    }
+    else {
+        let dc = doc.comment;
+        if (dc && chompKeep)
+            dc = dc.replace(/^\n+/, '');
+        if (dc) {
+            if ((!chompKeep || contentComment) && lines[lines.length - 1] !== '')
+                lines.push('');
+            lines.push(stringifyComment.indentComment(commentString(dc), ''));
+        }
+    }
+    return lines.join('\n') + '\n';
+}
+
+exports.stringifyDocument = stringifyDocument;
+
+
+/***/ }),
+
+/***/ 8689:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+function stringifyNumber({ format, minFractionDigits, tag, value }) {
+    if (typeof value === 'bigint')
+        return String(value);
+    const num = typeof value === 'number' ? value : Number(value);
+    if (!isFinite(num))
+        return isNaN(num) ? '.nan' : num < 0 ? '-.inf' : '.inf';
+    let n = JSON.stringify(value);
+    if (!format &&
+        minFractionDigits &&
+        (!tag || tag === 'tag:yaml.org,2002:float') &&
+        /^\d/.test(n)) {
+        let i = n.indexOf('.');
+        if (i < 0) {
+            i = n.length;
+            n += '.';
+        }
+        let d = minFractionDigits - (n.length - i - 1);
+        while (d-- > 0)
+            n += '0';
+    }
+    return n;
+}
+
+exports.stringifyNumber = stringifyNumber;
+
+
+/***/ }),
+
+/***/ 9748:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+var Scalar = __nccwpck_require__(3301);
+var stringify = __nccwpck_require__(2148);
+var stringifyComment = __nccwpck_require__(9799);
+
+function stringifyPair({ key, value }, ctx, onComment, onChompKeep) {
+    const { allNullValues, doc, indent, indentStep, options: { commentString, indentSeq, simpleKeys } } = ctx;
+    let keyComment = (identity.isNode(key) && key.comment) || null;
+    if (simpleKeys) {
+        if (keyComment) {
+            throw new Error('With simple keys, key nodes cannot have comments');
+        }
+        if (identity.isCollection(key) || (!identity.isNode(key) && typeof key === 'object')) {
+            const msg = 'With simple keys, collection cannot be used as a key value';
+            throw new Error(msg);
+        }
+    }
+    let explicitKey = !simpleKeys &&
+        (!key ||
+            (keyComment && value == null && !ctx.inFlow) ||
+            identity.isCollection(key) ||
+            (identity.isScalar(key)
+                ? key.type === Scalar.Scalar.BLOCK_FOLDED || key.type === Scalar.Scalar.BLOCK_LITERAL
+                : typeof key === 'object'));
+    ctx = Object.assign({}, ctx, {
+        allNullValues: false,
+        implicitKey: !explicitKey && (simpleKeys || !allNullValues),
+        indent: indent + indentStep
+    });
+    let keyCommentDone = false;
+    let chompKeep = false;
+    let str = stringify.stringify(key, ctx, () => (keyCommentDone = true), () => (chompKeep = true));
+    if (!explicitKey && !ctx.inFlow && str.length > 1024) {
+        if (simpleKeys)
+            throw new Error('With simple keys, single line scalar must not span more than 1024 characters');
+        explicitKey = true;
+    }
+    if (ctx.inFlow) {
+        if (allNullValues || value == null) {
+            if (keyCommentDone && onComment)
+                onComment();
+            return str === '' ? '?' : explicitKey ? `? ${str}` : str;
+        }
+    }
+    else if ((allNullValues && !simpleKeys) || (value == null && explicitKey)) {
+        str = `? ${str}`;
+        if (keyComment && !keyCommentDone) {
+            str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
+        }
+        else if (chompKeep && onChompKeep)
+            onChompKeep();
+        return str;
+    }
+    if (keyCommentDone)
+        keyComment = null;
+    if (explicitKey) {
+        if (keyComment)
+            str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
+        str = `? ${str}\n${indent}:`;
+    }
+    else {
+        str = `${str}:`;
+        if (keyComment)
+            str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
+    }
+    let vsb, vcb, valueComment;
+    if (identity.isNode(value)) {
+        vsb = !!value.spaceBefore;
+        vcb = value.commentBefore;
+        valueComment = value.comment;
+    }
+    else {
+        vsb = false;
+        vcb = null;
+        valueComment = null;
+        if (value && typeof value === 'object')
+            value = doc.createNode(value);
+    }
+    ctx.implicitKey = false;
+    if (!explicitKey && !keyComment && identity.isScalar(value))
+        ctx.indentAtStart = str.length + 1;
+    chompKeep = false;
+    if (!indentSeq &&
+        indentStep.length >= 2 &&
+        !ctx.inFlow &&
+        !explicitKey &&
+        identity.isSeq(value) &&
+        !value.flow &&
+        !value.tag &&
+        !value.anchor) {
+        // If indentSeq === false, consider '- ' as part of indentation where possible
+        ctx.indent = ctx.indent.substring(2);
+    }
+    let valueCommentDone = false;
+    const valueStr = stringify.stringify(value, ctx, () => (valueCommentDone = true), () => (chompKeep = true));
+    let ws = ' ';
+    if (keyComment || vsb || vcb) {
+        ws = vsb ? '\n' : '';
+        if (vcb) {
+            const cs = commentString(vcb);
+            ws += `\n${stringifyComment.indentComment(cs, ctx.indent)}`;
+        }
+        if (valueStr === '' && !ctx.inFlow) {
+            if (ws === '\n')
+                ws = '\n\n';
+        }
+        else {
+            ws += `\n${ctx.indent}`;
+        }
+    }
+    else if (!explicitKey && identity.isCollection(value)) {
+        const vs0 = valueStr[0];
+        const nl0 = valueStr.indexOf('\n');
+        const hasNewline = nl0 !== -1;
+        const flow = ctx.inFlow ?? value.flow ?? value.items.length === 0;
+        if (hasNewline || !flow) {
+            let hasPropsLine = false;
+            if (hasNewline && (vs0 === '&' || vs0 === '!')) {
+                let sp0 = valueStr.indexOf(' ');
+                if (vs0 === '&' &&
+                    sp0 !== -1 &&
+                    sp0 < nl0 &&
+                    valueStr[sp0 + 1] === '!') {
+                    sp0 = valueStr.indexOf(' ', sp0 + 1);
+                }
+                if (sp0 === -1 || nl0 < sp0)
+                    hasPropsLine = true;
+            }
+            if (!hasPropsLine)
+                ws = `\n${ctx.indent}`;
+        }
+    }
+    else if (valueStr === '' || valueStr[0] === '\n') {
+        ws = '';
+    }
+    str += ws + valueStr;
+    if (ctx.inFlow) {
+        if (valueCommentDone && onComment)
+            onComment();
+    }
+    else if (valueComment && !valueCommentDone) {
+        str += stringifyComment.lineComment(str, ctx.indent, commentString(valueComment));
+    }
+    else if (chompKeep && onChompKeep) {
+        onChompKeep();
+    }
+    return str;
+}
+
+exports.stringifyPair = stringifyPair;
+
+
+/***/ }),
+
+/***/ 3069:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var Scalar = __nccwpck_require__(3301);
+var foldFlowLines = __nccwpck_require__(4475);
+
+const getFoldOptions = (ctx, isBlock) => ({
+    indentAtStart: isBlock ? ctx.indent.length : ctx.indentAtStart,
+    lineWidth: ctx.options.lineWidth,
+    minContentWidth: ctx.options.minContentWidth
+});
+// Also checks for lines starting with %, as parsing the output as YAML 1.1 will
+// presume that's starting a new document.
+const containsDocumentMarker = (str) => /^(%|---|\.\.\.)/m.test(str);
+function lineLengthOverLimit(str, lineWidth, indentLength) {
+    if (!lineWidth || lineWidth < 0)
+        return false;
+    const limit = lineWidth - indentLength;
+    const strLen = str.length;
+    if (strLen <= limit)
+        return false;
+    for (let i = 0, start = 0; i < strLen; ++i) {
+        if (str[i] === '\n') {
+            if (i - start > limit)
+                return true;
+            start = i + 1;
+            if (strLen - start <= limit)
+                return false;
+        }
+    }
+    return true;
+}
+function doubleQuotedString(value, ctx) {
+    const json = JSON.stringify(value);
+    if (ctx.options.doubleQuotedAsJSON)
+        return json;
+    const { implicitKey } = ctx;
+    const minMultiLineLength = ctx.options.doubleQuotedMinMultiLineLength;
+    const indent = ctx.indent || (containsDocumentMarker(value) ? '  ' : '');
+    let str = '';
+    let start = 0;
+    for (let i = 0, ch = json[i]; ch; ch = json[++i]) {
+        if (ch === ' ' && json[i + 1] === '\\' && json[i + 2] === 'n') {
+            // space before newline needs to be escaped to not be folded
+            str += json.slice(start, i) + '\\ ';
+            i += 1;
+            start = i;
+            ch = '\\';
+        }
+        if (ch === '\\')
+            switch (json[i + 1]) {
+                case 'u':
+                    {
+                        str += json.slice(start, i);
+                        const code = json.substr(i + 2, 4);
+                        switch (code) {
+                            case '0000':
+                                str += '\\0';
+                                break;
+                            case '0007':
+                                str += '\\a';
+                                break;
+                            case '000b':
+                                str += '\\v';
+                                break;
+                            case '001b':
+                                str += '\\e';
+                                break;
+                            case '0085':
+                                str += '\\N';
+                                break;
+                            case '00a0':
+                                str += '\\_';
+                                break;
+                            case '2028':
+                                str += '\\L';
+                                break;
+                            case '2029':
+                                str += '\\P';
+                                break;
+                            default:
+                                if (code.substr(0, 2) === '00')
+                                    str += '\\x' + code.substr(2);
+                                else
+                                    str += json.substr(i, 6);
+                        }
+                        i += 5;
+                        start = i + 1;
+                    }
+                    break;
+                case 'n':
+                    if (implicitKey ||
+                        json[i + 2] === '"' ||
+                        json.length < minMultiLineLength) {
+                        i += 1;
+                    }
+                    else {
+                        // folding will eat first newline
+                        str += json.slice(start, i) + '\n\n';
+                        while (json[i + 2] === '\\' &&
+                            json[i + 3] === 'n' &&
+                            json[i + 4] !== '"') {
+                            str += '\n';
+                            i += 2;
+                        }
+                        str += indent;
+                        // space after newline needs to be escaped to not be folded
+                        if (json[i + 2] === ' ')
+                            str += '\\';
+                        i += 1;
+                        start = i + 1;
+                    }
+                    break;
+                default:
+                    i += 1;
+            }
+    }
+    str = start ? str + json.slice(start) : json;
+    return implicitKey
+        ? str
+        : foldFlowLines.foldFlowLines(str, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
+}
+function singleQuotedString(value, ctx) {
+    if (ctx.options.singleQuote === false ||
+        (ctx.implicitKey && value.includes('\n')) ||
+        /[ \t]\n|\n[ \t]/.test(value) // single quoted string can't have leading or trailing whitespace around newline
+    )
+        return doubleQuotedString(value, ctx);
+    const indent = ctx.indent || (containsDocumentMarker(value) ? '  ' : '');
+    const res = "'" + value.replace(/'/g, "''").replace(/\n+/g, `$&\n${indent}`) + "'";
+    return ctx.implicitKey
+        ? res
+        : foldFlowLines.foldFlowLines(res, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
+}
+function quotedString(value, ctx) {
+    const { singleQuote } = ctx.options;
+    let qs;
+    if (singleQuote === false)
+        qs = doubleQuotedString;
+    else {
+        const hasDouble = value.includes('"');
+        const hasSingle = value.includes("'");
+        if (hasDouble && !hasSingle)
+            qs = singleQuotedString;
+        else if (hasSingle && !hasDouble)
+            qs = doubleQuotedString;
+        else
+            qs = singleQuote ? singleQuotedString : doubleQuotedString;
+    }
+    return qs(value, ctx);
+}
+// The negative lookbehind avoids a polynomial search,
+// but isn't supported yet on Safari: https://caniuse.com/js-regexp-lookbehind
+let blockEndNewlines;
+try {
+    blockEndNewlines = new RegExp('(^|(?<!\n))\n+(?!\n|$)', 'g');
+}
+catch {
+    blockEndNewlines = /\n+(?!\n|$)/g;
+}
+function blockString({ comment, type, value }, ctx, onComment, onChompKeep) {
+    const { blockQuote, commentString, lineWidth } = ctx.options;
+    // 1. Block can't end in whitespace unless the last line is non-empty.
+    // 2. Strings consisting of only whitespace are best rendered explicitly.
+    if (!blockQuote || /\n[\t ]+$/.test(value) || /^\s*$/.test(value)) {
+        return quotedString(value, ctx);
+    }
+    const indent = ctx.indent ||
+        (ctx.forceBlockIndent || containsDocumentMarker(value) ? '  ' : '');
+    const literal = blockQuote === 'literal'
+        ? true
+        : blockQuote === 'folded' || type === Scalar.Scalar.BLOCK_FOLDED
+            ? false
+            : type === Scalar.Scalar.BLOCK_LITERAL
+                ? true
+                : !lineLengthOverLimit(value, lineWidth, indent.length);
+    if (!value)
+        return literal ? '|\n' : '>\n';
+    // determine chomping from whitespace at value end
+    let chomp;
+    let endStart;
+    for (endStart = value.length; endStart > 0; --endStart) {
+        const ch = value[endStart - 1];
+        if (ch !== '\n' && ch !== '\t' && ch !== ' ')
+            break;
+    }
+    let end = value.substring(endStart);
+    const endNlPos = end.indexOf('\n');
+    if (endNlPos === -1) {
+        chomp = '-'; // strip
+    }
+    else if (value === end || endNlPos !== end.length - 1) {
+        chomp = '+'; // keep
+        if (onChompKeep)
+            onChompKeep();
+    }
+    else {
+        chomp = ''; // clip
+    }
+    if (end) {
+        value = value.slice(0, -end.length);
+        if (end[end.length - 1] === '\n')
+            end = end.slice(0, -1);
+        end = end.replace(blockEndNewlines, `$&${indent}`);
+    }
+    // determine indent indicator from whitespace at value start
+    let startWithSpace = false;
+    let startEnd;
+    let startNlPos = -1;
+    for (startEnd = 0; startEnd < value.length; ++startEnd) {
+        const ch = value[startEnd];
+        if (ch === ' ')
+            startWithSpace = true;
+        else if (ch === '\n')
+            startNlPos = startEnd;
+        else
+            break;
+    }
+    let start = value.substring(0, startNlPos < startEnd ? startNlPos + 1 : startEnd);
+    if (start) {
+        value = value.substring(start.length);
+        start = start.replace(/\n+/g, `$&${indent}`);
+    }
+    const indentSize = indent ? '2' : '1'; // root is at -1
+    let header = (literal ? '|' : '>') + (startWithSpace ? indentSize : '') + chomp;
+    if (comment) {
+        header += ' ' + commentString(comment.replace(/ ?[\r\n]+/g, ' '));
+        if (onComment)
+            onComment();
+    }
+    if (literal) {
+        value = value.replace(/\n+/g, `$&${indent}`);
+        return `${header}\n${indent}${start}${value}${end}`;
+    }
+    value = value
+        .replace(/\n+/g, '\n$&')
+        .replace(/(?:^|\n)([\t ].*)(?:([\n\t ]*)\n(?![\n\t ]))?/g, '$1$2') // more-indented lines aren't folded
+        //                ^ more-ind. ^ empty     ^ capture next empty lines only at end of indent
+        .replace(/\n+/g, `$&${indent}`);
+    const body = foldFlowLines.foldFlowLines(`${start}${value}${end}`, indent, foldFlowLines.FOLD_BLOCK, getFoldOptions(ctx, true));
+    return `${header}\n${indent}${body}`;
+}
+function plainString(item, ctx, onComment, onChompKeep) {
+    const { type, value } = item;
+    const { actualString, implicitKey, indent, indentStep, inFlow } = ctx;
+    if ((implicitKey && value.includes('\n')) ||
+        (inFlow && /[[\]{},]/.test(value))) {
+        return quotedString(value, ctx);
+    }
+    if (!value ||
+        /^[\n\t ,[\]{}#&*!|>'"%@`]|^[?-]$|^[?-][ \t]|[\n:][ \t]|[ \t]\n|[\n\t ]#|[\n\t :]$/.test(value)) {
+        // not allowed:
+        // - empty string, '-' or '?'
+        // - start with an indicator character (except [?:-]) or /[?-] /
+        // - '\n ', ': ' or ' \n' anywhere
+        // - '#' not preceded by a non-space char
+        // - end with ' ' or ':'
+        return implicitKey || inFlow || !value.includes('\n')
+            ? quotedString(value, ctx)
+            : blockString(item, ctx, onComment, onChompKeep);
+    }
+    if (!implicitKey &&
+        !inFlow &&
+        type !== Scalar.Scalar.PLAIN &&
+        value.includes('\n')) {
+        // Where allowed & type not set explicitly, prefer block style for multiline strings
+        return blockString(item, ctx, onComment, onChompKeep);
+    }
+    if (containsDocumentMarker(value)) {
+        if (indent === '') {
+            ctx.forceBlockIndent = true;
+            return blockString(item, ctx, onComment, onChompKeep);
+        }
+        else if (implicitKey && indent === indentStep) {
+            return quotedString(value, ctx);
+        }
+    }
+    const str = value.replace(/\n+/g, `$&\n${indent}`);
+    // Verify that output will be parsed as a string, as e.g. plain numbers and
+    // booleans get parsed with those types in v1.2 (e.g. '42', 'true' & '0.9e-3'),
+    // and others in v1.1.
+    if (actualString) {
+        const test = (tag) => tag.default && tag.tag !== 'tag:yaml.org,2002:str' && tag.test?.test(str);
+        const { compat, tags } = ctx.doc.schema;
+        if (tags.some(test) || compat?.some(test))
+            return quotedString(value, ctx);
+    }
+    return implicitKey
+        ? str
+        : foldFlowLines.foldFlowLines(str, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
+}
+function stringifyString(item, ctx, onComment, onChompKeep) {
+    const { implicitKey, inFlow } = ctx;
+    const ss = typeof item.value === 'string'
+        ? item
+        : Object.assign({}, item, { value: String(item.value) });
+    let { type } = item;
+    if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
+        // force double quotes on control characters & unpaired surrogates
+        if (/[\x00-\x08\x0b-\x1f\x7f-\x9f\u{D800}-\u{DFFF}]/u.test(ss.value))
+            type = Scalar.Scalar.QUOTE_DOUBLE;
+    }
+    const _stringify = (_type) => {
+        switch (_type) {
+            case Scalar.Scalar.BLOCK_FOLDED:
+            case Scalar.Scalar.BLOCK_LITERAL:
+                return implicitKey || inFlow
+                    ? quotedString(ss.value, ctx) // blocks are not valid inside flow containers
+                    : blockString(ss, ctx, onComment, onChompKeep);
+            case Scalar.Scalar.QUOTE_DOUBLE:
+                return doubleQuotedString(ss.value, ctx);
+            case Scalar.Scalar.QUOTE_SINGLE:
+                return singleQuotedString(ss.value, ctx);
+            case Scalar.Scalar.PLAIN:
+                return plainString(ss, ctx, onComment, onChompKeep);
+            default:
+                return null;
+        }
+    };
+    let res = _stringify(type);
+    if (res === null) {
+        const { defaultKeyType, defaultStringType } = ctx.options;
+        const t = (implicitKey && defaultKeyType) || defaultStringType;
+        res = _stringify(t);
+        if (res === null)
+            throw new Error(`Unsupported default string type ${t}`);
+    }
+    return res;
+}
+
+exports.stringifyString = stringifyString;
+
+
+/***/ }),
+
+/***/ 204:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var identity = __nccwpck_require__(1127);
+
+const BREAK = Symbol('break visit');
+const SKIP = Symbol('skip children');
+const REMOVE = Symbol('remove node');
+/**
+ * Apply a visitor to an AST node or document.
+ *
+ * Walks through the tree (depth-first) starting from `node`, calling a
+ * `visitor` function with three arguments:
+ *   - `key`: For sequence values and map `Pair`, the node's index in the
+ *     collection. Within a `Pair`, `'key'` or `'value'`, correspondingly.
+ *     `null` for the root node.
+ *   - `node`: The current node.
+ *   - `path`: The ancestry of the current node.
+ *
+ * The return value of the visitor may be used to control the traversal:
+ *   - `undefined` (default): Do nothing and continue
+ *   - `visit.SKIP`: Do not visit the children of this node, continue with next
+ *     sibling
+ *   - `visit.BREAK`: Terminate traversal completely
+ *   - `visit.REMOVE`: Remove the current node, then continue with the next one
+ *   - `Node`: Replace the current node, then continue by visiting it
+ *   - `number`: While iterating the items of a sequence or map, set the index
+ *     of the next step. This is useful especially if the index of the current
+ *     node has changed.
+ *
+ * If `visitor` is a single function, it will be called with all values
+ * encountered in the tree, including e.g. `null` values. Alternatively,
+ * separate visitor functions may be defined for each `Map`, `Pair`, `Seq`,
+ * `Alias` and `Scalar` node. To define the same visitor function for more than
+ * one node type, use the `Collection` (map and seq), `Value` (map, seq & scalar)
+ * and `Node` (alias, map, seq & scalar) targets. Of all these, only the most
+ * specific defined one will be used for each node.
+ */
+function visit(node, visitor) {
+    const visitor_ = initVisitor(visitor);
+    if (identity.isDocument(node)) {
+        const cd = visit_(null, node.contents, visitor_, Object.freeze([node]));
+        if (cd === REMOVE)
+            node.contents = null;
+    }
+    else
+        visit_(null, node, visitor_, Object.freeze([]));
+}
+// Without the `as symbol` casts, TS declares these in the `visit`
+// namespace using `var`, but then complains about that because
+// `unique symbol` must be `const`.
+/** Terminate visit traversal completely */
+visit.BREAK = BREAK;
+/** Do not visit the children of the current node */
+visit.SKIP = SKIP;
+/** Remove the current node */
+visit.REMOVE = REMOVE;
+function visit_(key, node, visitor, path) {
+    const ctrl = callVisitor(key, node, visitor, path);
+    if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
+        replaceNode(key, path, ctrl);
+        return visit_(key, ctrl, visitor, path);
+    }
+    if (typeof ctrl !== 'symbol') {
+        if (identity.isCollection(node)) {
+            path = Object.freeze(path.concat(node));
+            for (let i = 0; i < node.items.length; ++i) {
+                const ci = visit_(i, node.items[i], visitor, path);
+                if (typeof ci === 'number')
+                    i = ci - 1;
+                else if (ci === BREAK)
+                    return BREAK;
+                else if (ci === REMOVE) {
+                    node.items.splice(i, 1);
+                    i -= 1;
+                }
+            }
+        }
+        else if (identity.isPair(node)) {
+            path = Object.freeze(path.concat(node));
+            const ck = visit_('key', node.key, visitor, path);
+            if (ck === BREAK)
+                return BREAK;
+            else if (ck === REMOVE)
+                node.key = null;
+            const cv = visit_('value', node.value, visitor, path);
+            if (cv === BREAK)
+                return BREAK;
+            else if (cv === REMOVE)
+                node.value = null;
+        }
+    }
+    return ctrl;
+}
+/**
+ * Apply an async visitor to an AST node or document.
+ *
+ * Walks through the tree (depth-first) starting from `node`, calling a
+ * `visitor` function with three arguments:
+ *   - `key`: For sequence values and map `Pair`, the node's index in the
+ *     collection. Within a `Pair`, `'key'` or `'value'`, correspondingly.
+ *     `null` for the root node.
+ *   - `node`: The current node.
+ *   - `path`: The ancestry of the current node.
+ *
+ * The return value of the visitor may be used to control the traversal:
+ *   - `Promise`: Must resolve to one of the following values
+ *   - `undefined` (default): Do nothing and continue
+ *   - `visit.SKIP`: Do not visit the children of this node, continue with next
+ *     sibling
+ *   - `visit.BREAK`: Terminate traversal completely
+ *   - `visit.REMOVE`: Remove the current node, then continue with the next one
+ *   - `Node`: Replace the current node, then continue by visiting it
+ *   - `number`: While iterating the items of a sequence or map, set the index
+ *     of the next step. This is useful especially if the index of the current
+ *     node has changed.
+ *
+ * If `visitor` is a single function, it will be called with all values
+ * encountered in the tree, including e.g. `null` values. Alternatively,
+ * separate visitor functions may be defined for each `Map`, `Pair`, `Seq`,
+ * `Alias` and `Scalar` node. To define the same visitor function for more than
+ * one node type, use the `Collection` (map and seq), `Value` (map, seq & scalar)
+ * and `Node` (alias, map, seq & scalar) targets. Of all these, only the most
+ * specific defined one will be used for each node.
+ */
+async function visitAsync(node, visitor) {
+    const visitor_ = initVisitor(visitor);
+    if (identity.isDocument(node)) {
+        const cd = await visitAsync_(null, node.contents, visitor_, Object.freeze([node]));
+        if (cd === REMOVE)
+            node.contents = null;
+    }
+    else
+        await visitAsync_(null, node, visitor_, Object.freeze([]));
+}
+// Without the `as symbol` casts, TS declares these in the `visit`
+// namespace using `var`, but then complains about that because
+// `unique symbol` must be `const`.
+/** Terminate visit traversal completely */
+visitAsync.BREAK = BREAK;
+/** Do not visit the children of the current node */
+visitAsync.SKIP = SKIP;
+/** Remove the current node */
+visitAsync.REMOVE = REMOVE;
+async function visitAsync_(key, node, visitor, path) {
+    const ctrl = await callVisitor(key, node, visitor, path);
+    if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
+        replaceNode(key, path, ctrl);
+        return visitAsync_(key, ctrl, visitor, path);
+    }
+    if (typeof ctrl !== 'symbol') {
+        if (identity.isCollection(node)) {
+            path = Object.freeze(path.concat(node));
+            for (let i = 0; i < node.items.length; ++i) {
+                const ci = await visitAsync_(i, node.items[i], visitor, path);
+                if (typeof ci === 'number')
+                    i = ci - 1;
+                else if (ci === BREAK)
+                    return BREAK;
+                else if (ci === REMOVE) {
+                    node.items.splice(i, 1);
+                    i -= 1;
+                }
+            }
+        }
+        else if (identity.isPair(node)) {
+            path = Object.freeze(path.concat(node));
+            const ck = await visitAsync_('key', node.key, visitor, path);
+            if (ck === BREAK)
+                return BREAK;
+            else if (ck === REMOVE)
+                node.key = null;
+            const cv = await visitAsync_('value', node.value, visitor, path);
+            if (cv === BREAK)
+                return BREAK;
+            else if (cv === REMOVE)
+                node.value = null;
+        }
+    }
+    return ctrl;
+}
+function initVisitor(visitor) {
+    if (typeof visitor === 'object' &&
+        (visitor.Collection || visitor.Node || visitor.Value)) {
+        return Object.assign({
+            Alias: visitor.Node,
+            Map: visitor.Node,
+            Scalar: visitor.Node,
+            Seq: visitor.Node
+        }, visitor.Value && {
+            Map: visitor.Value,
+            Scalar: visitor.Value,
+            Seq: visitor.Value
+        }, visitor.Collection && {
+            Map: visitor.Collection,
+            Seq: visitor.Collection
+        }, visitor);
+    }
+    return visitor;
+}
+function callVisitor(key, node, visitor, path) {
+    if (typeof visitor === 'function')
+        return visitor(key, node, path);
+    if (identity.isMap(node))
+        return visitor.Map?.(key, node, path);
+    if (identity.isSeq(node))
+        return visitor.Seq?.(key, node, path);
+    if (identity.isPair(node))
+        return visitor.Pair?.(key, node, path);
+    if (identity.isScalar(node))
+        return visitor.Scalar?.(key, node, path);
+    if (identity.isAlias(node))
+        return visitor.Alias?.(key, node, path);
+    return undefined;
+}
+function replaceNode(key, path, node) {
+    const parent = path[path.length - 1];
+    if (identity.isCollection(parent)) {
+        parent.items[key] = node;
+    }
+    else if (identity.isPair(parent)) {
+        if (key === 'key')
+            parent.key = node;
+        else
+            parent.value = node;
+    }
+    else if (identity.isDocument(parent)) {
+        parent.contents = node;
+    }
+    else {
+        const pt = identity.isAlias(parent) ? 'alias' : 'scalar';
+        throw new Error(`Cannot replace node with ${pt} parent`);
+    }
+}
+
+exports.visit = visit;
+exports.visitAsync = visitAsync;
 
 
 /***/ })
