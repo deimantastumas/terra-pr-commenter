@@ -4,7 +4,8 @@ import { findTFPlans } from './utils'
 import * as diff from 'diff'
 import * as yaml from 'yaml'
 import * as github from '@actions/github'
-import { MAX_GITHUB_COMMENT_BODY_SIZE } from './constants'
+import { COMMENT_FOOTER, MAX_GITHUB_COMMENT_BODY_SIZE } from './constants'
+import { CreatePRComment, RemoveCommentsByLookupText } from './pull-request'
 
 interface PlanChanges {
   CreateResourcesCount: number
@@ -35,20 +36,13 @@ export async function run(): Promise<void> {
       'heading-plan-variable-name'
     )
     const commentHeader: string = core.getInput('comment-header')
-    const quiet: boolean = core.getBooleanInput('quiet')
-    const hidePreviousComments: boolean = core.getBooleanInput(
-      'hide-previous-comments'
-    )
     const removePreviousComments: boolean = core.getBooleanInput(
       'remove-previous-comments'
-    )
-    const createMultipleComments: boolean = core.getBooleanInput(
-      'create-multiple-comments'
     )
     const octokit = github.getOctokit(githubtoken)
     const context = github.context
 
-    // todo(): input validation
+    // todo(): add input validation
 
     // Find TF plan JSON files
     const tfPlanFiles = findTFPlans(tfPlanLookupDir, tfPlanLookupName)
@@ -287,9 +281,11 @@ ${planChanges.DestroyResourcesCount > planChanges.ReplaceResourcesCount ? resour
 ${planChanges.UpdateResourcesCount > 0 ? resourcesToUpdateContent : ''}
 ${planChanges.ReplaceResourcesCount > 0 ? resourcesToReplaceContent : ''}
 </details>
+
+${COMMENT_FOOTER}
 `
-      // todo(): handle cases when comments are too large instead of failing the action
-      // in theory - it shouldn't happen as the output is already compressed quite a lot
+      // todo(): handle cases when comments are too large instead of failing the action.
+      // In theory - it shouldn't happen as the output is already compressed quite a lot
       // and reaching the '65536' characters limit shouldn't really happen
       if (commentBody.length > MAX_GITHUB_COMMENT_BODY_SIZE) {
         core.setFailed(
@@ -298,18 +294,13 @@ ${planChanges.ReplaceResourcesCount > 0 ? resourcesToReplaceContent : ''}
         return
       }
 
-      octokit.rest.issues.createComment({
-        issue_number: context.issue.number,
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        body: commentBody
-      })
-    }
+      // Remove previous comments that were created by this action
+      await RemoveCommentsByLookupText(octokit, context, COMMENT_FOOTER)
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+      // Create a comment
+      await CreatePRComment(octokit, context, commentBody)
+    }
   } catch (error) {
-    // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
   }
 }

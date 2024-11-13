@@ -33531,7 +33531,7 @@ function wrappy (fn, cb) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MAX_GITHUB_COMMENT_BODY_SIZE = exports.GET_COMMENTS_QUERY = exports.REMOVE_COMMENT_QUERY = exports.MINIMIZE_COMMENT_QUERY = void 0;
+exports.COMMENT_FOOTER = exports.MAX_GITHUB_COMMENT_BODY_SIZE = exports.GET_COMMENTS_QUERY = exports.REMOVE_COMMENT_QUERY = exports.MINIMIZE_COMMENT_QUERY = void 0;
 exports.MINIMIZE_COMMENT_QUERY = `
   mutation minimizeComment($id: ID!) {
     minimizeComment(input: { classifier: OUTDATED, subjectId: $id }) {
@@ -33562,6 +33562,7 @@ exports.GET_COMMENTS_QUERY = `
   }
 `;
 exports.MAX_GITHUB_COMMENT_BODY_SIZE = 65536;
+exports.COMMENT_FOOTER = '###### Generated via `terra-pr-commenter` GHA';
 
 
 /***/ }),
@@ -33603,6 +33604,7 @@ const diff = __importStar(__nccwpck_require__(2823));
 const yaml = __importStar(__nccwpck_require__(8815));
 const github = __importStar(__nccwpck_require__(3228));
 const constants_1 = __nccwpck_require__(7242);
+const pull_request_1 = __nccwpck_require__(5964);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -33616,13 +33618,10 @@ async function run() {
         const expandComment = core.getBooleanInput('expand-comment');
         const headingPlanVariableName = core.getInput('heading-plan-variable-name');
         const commentHeader = core.getInput('comment-header');
-        const quiet = core.getBooleanInput('quiet');
-        const hidePreviousComments = core.getBooleanInput('hide-previous-comments');
         const removePreviousComments = core.getBooleanInput('remove-previous-comments');
-        const createMultipleComments = core.getBooleanInput('create-multiple-comments');
         const octokit = github.getOctokit(githubtoken);
         const context = github.context;
-        // todo(): input validation
+        // todo(): add input validation
         // Find TF plan JSON files
         const tfPlanFiles = (0, utils_1.findTFPlans)(tfPlanLookupDir, tfPlanLookupName);
         // Go through TF plans and create comment bodies
@@ -33824,30 +33823,105 @@ ${planChanges.DestroyResourcesCount > planChanges.ReplaceResourcesCount ? resour
 ${planChanges.UpdateResourcesCount > 0 ? resourcesToUpdateContent : ''}
 ${planChanges.ReplaceResourcesCount > 0 ? resourcesToReplaceContent : ''}
 </details>
+
+${constants_1.COMMENT_FOOTER}
 `;
-            // todo(): handle cases when comments are too large instead of failing the action
-            // in theory - it shouldn't happen as the output is already compressed quite a lot
+            // todo(): handle cases when comments are too large instead of failing the action.
+            // In theory - it shouldn't happen as the output is already compressed quite a lot
             // and reaching the '65536' characters limit shouldn't really happen
             if (commentBody.length > constants_1.MAX_GITHUB_COMMENT_BODY_SIZE) {
                 core.setFailed(`Comment body size is too large for GitHub comment: ${commentBody.length} > ${constants_1.MAX_GITHUB_COMMENT_BODY_SIZE}`);
                 return;
             }
-            octokit.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: commentBody
-            });
+            // Remove previous comments that were created by this action
+            await (0, pull_request_1.RemoveCommentsByLookupText)(octokit, context, constants_1.COMMENT_FOOTER);
+            // Create a comment
+            await (0, pull_request_1.CreatePRComment)(octokit, context, commentBody);
         }
-        // Set outputs for other workflow steps to use
-        core.setOutput('time', new Date().toTimeString());
     }
     catch (error) {
-        // Fail the workflow run if an error occurs
         if (error instanceof Error)
             core.setFailed(error.message);
     }
 }
+
+
+/***/ }),
+
+/***/ 5964:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.QueryCommentsByLookupText = exports.RemoveCommentsByLookupText = exports.CreatePRComment = void 0;
+const constants_1 = __nccwpck_require__(7242);
+const core = __importStar(__nccwpck_require__(7484));
+const CreatePRComment = async (octokit, context, commentBody) => {
+    await octokit.rest.issues.createComment({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        body: commentBody
+    });
+};
+exports.CreatePRComment = CreatePRComment;
+const RemoveCommentsByLookupText = async (octokit, context, lookupText) => {
+    const targetComments = await (0, exports.QueryCommentsByLookupText)(octokit, context, lookupText);
+    targetComments.forEach(async (comment) => {
+        try {
+            await octokit.graphql(constants_1.REMOVE_COMMENT_QUERY, {
+                id: comment.id
+            });
+        }
+        catch (error) {
+            core.warning(`Failed to remove the comment ${comment.id} for PR #${context.issue.number}`);
+        }
+    });
+};
+exports.RemoveCommentsByLookupText = RemoveCommentsByLookupText;
+const QueryCommentsByLookupText = async (octokit, context, lookupText) => {
+    const issueCommentsResponse = await octokit.graphql(constants_1.GET_COMMENTS_QUERY, {
+        owner: context.repo.owner,
+        name: context.repo.repo,
+        number: context.issue.number
+    });
+    core.info(`Successfully retrieved comments for PR #${context.issue.number}.`);
+    const issueComments = issueCommentsResponse.repository.pullRequest.comments.nodes;
+    const filteredComments = issueComments.filter(comment => comment.body.includes(lookupText));
+    if (filteredComments.length === 0) {
+        core.info(`No comments created by action were found. Skipping the cleanup`);
+        return [];
+    }
+    else {
+        core.info(`${filteredComments.length} will be removed from PR #${context.issue}`);
+    }
+    return filteredComments;
+};
+exports.QueryCommentsByLookupText = QueryCommentsByLookupText;
 
 
 /***/ }),

@@ -39,23 +39,10 @@ inputs:
       passed
     required: false
     default: 'Terraform Plan Changes'
-  quiet:
-    description: Skips the comment if there are no changes in plan
-    required: false
-    default: 'false'
-  hide-previous-comments:
-    description: Hides privious comments on the PR
-    required: false
-    default: 'false'
   remove-previous-comments:
     description: Removes privious comments on the PR
     required: false
     default: 'false'
-  create-multiple-comments:
-    description: Creates separate comments for each specified plan
-    required: false
-    default: 'false'
-
 runs:
   using: node20
   main: dist/index.js
