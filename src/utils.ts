@@ -7,13 +7,19 @@ import * as path from 'path'
  * @param fileName The name of the file to look for.
  * @returns An array of paths to the found files, or an empty array if no files were found.
  */
-export const findTFPlans = (lookupDir: string, planName: string): string[] => {
-  const dirsToCheck: string[] = [lookupDir]
+export const findTFPlans = (
+  lookupDir: string,
+  planName: string,
+  maxDepth: number
+): string[] => {
+  const dirsToCheck: { dir: string; depth: number }[] = [
+    { dir: lookupDir, depth: 0 }
+  ]
   const foundPaths: string[] = []
 
   while (dirsToCheck.length > 0) {
-    const currentDir = dirsToCheck.shift()
-    if (!currentDir) continue
+    const { dir: currentDir, depth } = dirsToCheck.shift()!
+    if (depth > maxDepth) continue
 
     const entries = fs.readdirSync(currentDir)
 
@@ -22,8 +28,8 @@ export const findTFPlans = (lookupDir: string, planName: string): string[] => {
       const stat = fs.statSync(fullPath)
 
       if (stat.isDirectory()) {
-        // Add subdirectory to the queue to check later
-        dirsToCheck.push(fullPath)
+        // Add subdirectory to the queue with an incremented depth
+        dirsToCheck.push({ dir: fullPath, depth: depth + 1 })
       } else if (entry === planName) {
         // Add the path to the found paths array
         foundPaths.push(fullPath)

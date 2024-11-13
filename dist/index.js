@@ -33623,7 +33623,8 @@ async function run() {
         const context = github.context;
         // todo(): add input validation
         // Find TF plan JSON files
-        const tfPlanFiles = (0, utils_1.findTFPlans)(tfPlanLookupDir, tfPlanLookupName);
+        // todo(): simplify this function and allow customizing max-depth
+        const tfPlanFiles = (0, utils_1.findTFPlans)(tfPlanLookupDir, tfPlanLookupName, 2);
         // Go through TF plans and create comment bodies
         for (const tfPlan of tfPlanFiles) {
             core.info(`Parsing TF plan: ${tfPlan}`);
@@ -33635,6 +33636,7 @@ async function run() {
                 UpdateResourcesCount: 0,
                 DestroyResourcesCount: 0,
                 ReplaceResourcesCount: 0,
+                ImportResourcesCount: 0,
                 ResouceChangeBody: []
             };
             // If 'heading-plan-variable-name' is passed - use this variable for resolving heading value
@@ -33656,11 +33658,7 @@ async function run() {
                 for (const resourceChange of resourceChanges) {
                     const resourceAddress = resourceChange['address'];
                     const resourceChangeDetails = resourceChange['change'];
-                    // Skip change if it's 'no-op'
                     const resourceChangeActions = resourceChangeDetails['actions'];
-                    if (resourceChangeActions.includes('no-op')) {
-                        continue;
-                    }
                     const beforeChanges = resourceChangeDetails['before']
                         ? resourceChangeDetails['before']
                         : {};
@@ -33709,6 +33707,15 @@ async function run() {
                     // Resolve resource change action
                     let overallAction = '';
                     switch (resourceChangeActions[0]) {
+                        case 'no-op':
+                            if ('importing' in resourceChangeDetails) {
+                                planChanges.ImportResourcesCount += 1;
+                                overallAction = 'Import';
+                            }
+                            else {
+                                continue;
+                            }
+                            break;
                         case 'create':
                             overallAction = 'Create';
                             planChanges.CreateResourcesCount += 1;
@@ -33729,12 +33736,15 @@ async function run() {
                         case 'update':
                             planChanges.UpdateResourcesCount += 1;
                             overallAction = 'Update';
+                            break;
                     }
                     // Create a diff from before and after changes
                     const beforeYaml = yaml.stringify(beforeChanges);
                     const afterYaml = yaml.stringify(afterChanges);
                     let changeDiff = '';
-                    if (overallAction === 'Create' || overallAction === 'Update') {
+                    if (overallAction === 'Create' ||
+                        overallAction === 'Update' ||
+                        overallAction === 'Import') {
                         changeDiff = diff.createPatch(resourceAddress, beforeYaml, afterYaml, undefined, overallAction);
                     }
                     else {
@@ -33781,8 +33791,17 @@ ${changeDiff}
 #### Resources to replace:
 
 `;
+            let resourcesToImportContent = `
+#### Resources to import:
+
+`;
             for (const resourceChangeBody of planChanges.ResouceChangeBody) {
                 switch (resourceChangeBody.Action) {
+                    case 'Import':
+                        resourcesToImportContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
                     case 'Create':
                         resourcesToCreateContent += `
 \`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
@@ -33812,7 +33831,7 @@ ${changeDiff}
             const commentBody = `
 <b>${resolvedCommentHeader}<b>
 
-![Create](https://img.shields.io/badge/Create-${planChanges.CreateResourcesCount}-brightgreen) ![Update](https://img.shields.io/badge/Update-${planChanges.UpdateResourcesCount}-yellow) ![Replace](https://img.shields.io/badge/Replace-${planChanges.ReplaceResourcesCount}-orange) ![Destroy](https://img.shields.io/badge/Destroy-${planChanges.DestroyResourcesCount}-red)
+![Create](https://img.shields.io/badge/Create-${planChanges.CreateResourcesCount}-brightgreen) ![Update](https://img.shields.io/badge/Update-${planChanges.UpdateResourcesCount}-yellow) ![Replace](https://img.shields.io/badge/Replace-${planChanges.ReplaceResourcesCount}-orange) ![Destroy](https://img.shields.io/badge/Destroy-${planChanges.DestroyResourcesCount}-red ![Import](https://img.shields.io/badge/Import-${planChanges.ImportResourcesCount}-blue)
 <details${expandComment ? ' open' : ''}>
 <summary>
 <b>Resource changes:</b>
@@ -33822,6 +33841,7 @@ ${planChanges.CreateResourcesCount > planChanges.ReplaceResourcesCount ? resourc
 ${planChanges.DestroyResourcesCount > planChanges.ReplaceResourcesCount ? resourcesToDestroyContent : ''}
 ${planChanges.UpdateResourcesCount > 0 ? resourcesToUpdateContent : ''}
 ${planChanges.ReplaceResourcesCount > 0 ? resourcesToReplaceContent : ''}
+${planChanges.ImportResourcesCount > 0 ? resourcesToImportContent : ''}
 </details>
 
 ${constants_1.COMMENT_FOOTER}
@@ -33833,6 +33853,7 @@ ${constants_1.COMMENT_FOOTER}
                 core.setFailed(`Comment body size is too large for GitHub comment: ${commentBody.length} > ${constants_1.MAX_GITHUB_COMMENT_BODY_SIZE}`);
                 return;
             }
+            console.log(commentBody);
             // Remove previous comments that were created by this action
             await (0, pull_request_1.RemoveCommentsByLookupText)(octokit, context, constants_1.COMMENT_FOOTER);
             // Create a comment
@@ -33964,20 +33985,22 @@ const path = __importStar(__nccwpck_require__(6928));
  * @param fileName The name of the file to look for.
  * @returns An array of paths to the found files, or an empty array if no files were found.
  */
-const findTFPlans = (lookupDir, planName) => {
-    const dirsToCheck = [lookupDir];
+const findTFPlans = (lookupDir, planName, maxDepth) => {
+    const dirsToCheck = [
+        { dir: lookupDir, depth: 0 }
+    ];
     const foundPaths = [];
     while (dirsToCheck.length > 0) {
-        const currentDir = dirsToCheck.shift();
-        if (!currentDir)
+        const { dir: currentDir, depth } = dirsToCheck.shift();
+        if (depth > maxDepth)
             continue;
         const entries = fs.readdirSync(currentDir);
         for (const entry of entries) {
             const fullPath = path.join(currentDir, entry);
             const stat = fs.statSync(fullPath);
             if (stat.isDirectory()) {
-                // Add subdirectory to the queue to check later
-                dirsToCheck.push(fullPath);
+                // Add subdirectory to the queue with an incremented depth
+                dirsToCheck.push({ dir: fullPath, depth: depth + 1 });
             }
             else if (entry === planName) {
                 // Add the path to the found paths array
