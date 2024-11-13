@@ -277,6 +277,7 @@ ${changeDiff}
 \`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
 
 `
+            break
           case 'Create':
             resourcesToCreateContent += `
 \`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
@@ -300,6 +301,7 @@ ${changeDiff}
 \`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
 
 `
+            break
         }
       }
 
