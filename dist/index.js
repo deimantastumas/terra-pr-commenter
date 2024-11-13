@@ -33525,6 +33525,47 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 7242:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MAX_GITHUB_COMMENT_BODY_SIZE = exports.GET_COMMENTS_QUERY = exports.REMOVE_COMMENT_QUERY = exports.MINIMIZE_COMMENT_QUERY = void 0;
+exports.MINIMIZE_COMMENT_QUERY = `
+  mutation minimizeComment($id: ID!) {
+    minimizeComment(input: { classifier: OUTDATED, subjectId: $id }) {
+      clientMutationId
+    }
+  }
+`;
+exports.REMOVE_COMMENT_QUERY = `
+  mutation ($id: ID!) {
+    deleteIssueComment(input: { id: $id }) {
+      clientMutationId
+    }
+  }
+`;
+exports.GET_COMMENTS_QUERY = `
+  query comments($owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+      pullRequest(number: $number) {
+        comments(last: 100, orderBy: { field: UPDATED_AT, direction: DESC }) {
+          nodes {
+            id
+            body
+            isMinimized
+          }
+        }
+      }
+    }
+  }
+`;
+exports.MAX_GITHUB_COMMENT_BODY_SIZE = 65536;
+
+
+/***/ }),
+
 /***/ 1730:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -33561,6 +33602,7 @@ const utils_1 = __nccwpck_require__(1798);
 const diff = __importStar(__nccwpck_require__(2823));
 const yaml = __importStar(__nccwpck_require__(8815));
 const github = __importStar(__nccwpck_require__(3228));
+const constants_1 = __nccwpck_require__(7242);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -33626,13 +33668,16 @@ async function run() {
                     const afterChanges = resourceChangeDetails['after']
                         ? resourceChangeDetails['after']
                         : {};
-                    const sensitiveParams = resourceChangeDetails['after_sensitive']
+                    const beforeSensitiveParams = resourceChangeDetails['before_sensitive']
+                        ? resourceChangeDetails['before_sensitive']
+                        : {};
+                    const afterSensitiveParams = resourceChangeDetails['after_sensitive']
                         ? resourceChangeDetails['after_sensitive']
                         : {};
                     // To prevent exposing sensitive data:
                     // 1. Remove sensitive field if there was no change for it
                     // 2. Mask sensitive field if there was a change
-                    for (const sensitiveParamKey in sensitiveParams) {
+                    for (const sensitiveParamKey in beforeSensitiveParams) {
                         if (beforeChanges[sensitiveParamKey] ===
                             afterChanges[sensitiveParamKey]) {
                             delete beforeChanges[sensitiveParamKey];
@@ -33640,17 +33685,28 @@ async function run() {
                         }
                         else {
                             if (sensitiveParamKey in beforeChanges) {
-                                beforeChanges[sensitiveParamKey] = 'OLD_SENSITIVE_VALUE';
+                                beforeChanges[sensitiveParamKey] = '(OLD_SENSITIVE_VALUE)';
                             }
                             if (sensitiveParamKey in afterChanges) {
-                                afterChanges[sensitiveParamKey] = 'NEW_SENSITIVE_VALUE';
+                                afterChanges[sensitiveParamKey] = '(NEW_SENSITIVE_VALUE)';
                             }
                         }
                     }
-                    // Create a diff from before and after changes
-                    const beforeYaml = yaml.stringify(beforeChanges);
-                    const afterYaml = yaml.stringify(afterChanges);
-                    const changeDiff = diff.createPatch(resourceAddress, beforeYaml, afterYaml);
+                    for (const sensitiveParamKey in afterSensitiveParams) {
+                        if (beforeChanges[sensitiveParamKey] ===
+                            afterChanges[sensitiveParamKey]) {
+                            delete beforeChanges[sensitiveParamKey];
+                            delete afterChanges[sensitiveParamKey];
+                        }
+                        else {
+                            if (sensitiveParamKey in beforeChanges) {
+                                beforeChanges[sensitiveParamKey] = '(OLD_SENSITIVE_VALUE)';
+                            }
+                            if (sensitiveParamKey in afterChanges) {
+                                afterChanges[sensitiveParamKey] = '(NEW_SENSITIVE_VALUE)';
+                            }
+                        }
+                    }
                     // Resolve resource change action
                     let overallAction = '';
                     switch (resourceChangeActions[0]) {
@@ -33663,6 +33719,7 @@ async function run() {
                                 resourceChangeActions.includes('create')) {
                                 planChanges.CreateResourcesCount += 1;
                                 planChanges.DestroyResourcesCount += 1;
+                                planChanges.ReplaceResourcesCount += 1;
                                 overallAction = 'Replace';
                             }
                             else {
@@ -33674,38 +33731,32 @@ async function run() {
                             planChanges.UpdateResourcesCount += 1;
                             overallAction = 'Update';
                     }
+                    // Create a diff from before and after changes
+                    const beforeYaml = yaml.stringify(beforeChanges);
+                    const afterYaml = yaml.stringify(afterChanges);
+                    let changeDiff = '';
+                    if (overallAction === 'Create' || overallAction === 'Update') {
+                        changeDiff = diff.createPatch(resourceAddress, beforeYaml, afterYaml, undefined, overallAction);
+                    }
+                    else {
+                        changeDiff = diff.createPatch(resourceAddress, beforeYaml, afterYaml, overallAction, undefined);
+                    }
+                    // Sanitize diff to be more readable
+                    // 1. Remove lines without changes (that don't start with '+' or '-')
+                    changeDiff = changeDiff.replace(/^(?![+-]).*\n?/gm, '');
+                    // 2. Remove lines that only has '-{}' or '+{}'
+                    changeDiff = changeDiff.replace(/^-{}\n?/gm, '');
+                    changeDiff = changeDiff.replace(/^\+{}\n?/gm, '');
+                    // 3. Add diff heading
+                    changeDiff = `
+Resource: ${resourceAddress}
+===================================================================
+${changeDiff}
+`;
                     planChanges.ResouceChangeBody.push({
                         Address: resourceAddress,
                         ChangeDif: changeDiff,
                         Action: overallAction
-                    });
-                    // Create change content for comment body
-                    let changeContent = '';
-                    for (const resourceChangeBody of planChanges.ResouceChangeBody) {
-                        changeContent += `
-\`\`\`diff
-${resourceChangeBody.ChangeDif}
-\`\`\`
-
-`;
-                    }
-                    // Create comment
-                    const commentBody = `
-<b>${resolvedCommentHeader}<b>
-![add](https://img.shields.io/badge/add-${planChanges.CreateResourcesCount}-brightgreen) ![change](https://img.shields.io/badge/change-${planChanges.UpdateResourcesCount}-yellow) ![replace](https://img.shields.io/badge/replace-${planChanges.ReplaceResourcesCount}-orange) ![destroy](https://img.shields.io/badge/destroy-${planChanges.DestroyResourcesCount}-red)
-<details${expandComment ? ' open' : ''}>
-<summary>
-<b>Terraform Diff:</b>
-</summary>
-
-${changeContent}
-</details>
-`;
-                    octokit.rest.issues.createComment({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        body: commentBody
                     });
                 }
             }
@@ -33714,6 +33765,79 @@ ${changeContent}
                     core.setFailed(`TF plan ${tfPlan} is invalid: ${error}`);
                 return;
             }
+            // Create change content for comment body
+            let resourcesToCreateContent = `
+#### Resources to create:
+
+`;
+            let resourcesToDestroyContent = `
+#### Resources to destroy:
+
+`;
+            let resourcesToUpdateContent = `
+#### Resources to update:
+
+`;
+            let resourcesToReplaceContent = `
+#### Resources to replace:
+
+`;
+            for (const resourceChangeBody of planChanges.ResouceChangeBody) {
+                switch (resourceChangeBody.Action) {
+                    case 'Create':
+                        resourcesToCreateContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                        break;
+                    case 'Update':
+                        resourcesToUpdateContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                        break;
+                    case 'Destroy':
+                        resourcesToDestroyContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                        break;
+                    case 'Replace':
+                        resourcesToReplaceContent += `
+\`\`\`diff${resourceChangeBody.ChangeDif}\`\`\`
+
+`;
+                }
+            }
+            // Create comment
+            const commentBody = `
+<b>${resolvedCommentHeader}<b>
+
+![Create](https://img.shields.io/badge/Create-${planChanges.CreateResourcesCount}-brightgreen) ![Update](https://img.shields.io/badge/Update-${planChanges.UpdateResourcesCount}-yellow) ![Replace](https://img.shields.io/badge/Replace-${planChanges.ReplaceResourcesCount}-orange) ![Destroy](https://img.shields.io/badge/Destroy-${planChanges.DestroyResourcesCount}-red)
+<details${expandComment ? ' open' : ''}>
+<summary>
+<b>Resource changes:</b>
+</summary>
+
+${planChanges.CreateResourcesCount > planChanges.ReplaceResourcesCount ? resourcesToCreateContent : ''}
+${planChanges.DestroyResourcesCount > planChanges.ReplaceResourcesCount ? resourcesToDestroyContent : ''}
+${planChanges.UpdateResourcesCount > 0 ? resourcesToUpdateContent : ''}
+${planChanges.ReplaceResourcesCount > 0 ? resourcesToReplaceContent : ''}
+</details>
+`;
+            // todo(): handle cases when comments are too large instead of failing the action
+            // in theory - it shouldn't happen as the output is already compressed quite a lot
+            // and reaching the '65536' characters limit shouldn't really happen
+            if (commentBody.length > constants_1.MAX_GITHUB_COMMENT_BODY_SIZE) {
+                core.setFailed(`Comment body size is too large for GitHub comment: ${commentBody.length} > ${constants_1.MAX_GITHUB_COMMENT_BODY_SIZE}`);
+                return;
+            }
+            octokit.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+            });
         }
         // Set outputs for other workflow steps to use
         core.setOutput('time', new Date().toTimeString());

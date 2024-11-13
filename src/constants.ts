@@ -29,3 +29,5 @@ export const GET_COMMENTS_QUERY = /* GraphQL */ `
     }
   }
 `
+
+export const MAX_GITHUB_COMMENT_BODY_SIZE = 65536
