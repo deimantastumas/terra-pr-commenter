@@ -69,7 +69,9 @@ export const QueryCommentsByLookupText = async (
       number: context.issue.number
     }
   )
-  core.info(`Successfully retrieved comments for PR #${context.issue.number}.`)
+  core.info(
+    `Successfully retrieved all comments in PR #${context.issue.number}.`
+  )
 
   const issueComments =
     issueCommentsResponse.repository.pullRequest.comments.nodes
@@ -78,11 +80,13 @@ export const QueryCommentsByLookupText = async (
   )
 
   if (filteredComments.length === 0) {
-    core.info(`No comments created by action were found. Skipping the cleanup`)
+    core.info(
+      `No comments containing lookup text '${lookupText}' were found. Skipping the deletion`
+    )
     return []
   } else {
     core.info(
-      `${filteredComments.length} will be removed from PR #${context.issue}`
+      `${filteredComments.length} comments will be removed from PR #${context.issue.number}`
     )
   }
   return filteredComments

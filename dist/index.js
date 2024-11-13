@@ -33909,15 +33909,15 @@ const QueryCommentsByLookupText = async (octokit, context, lookupText) => {
         name: context.repo.repo,
         number: context.issue.number
     });
-    core.info(`Successfully retrieved comments for PR #${context.issue.number}.`);
+    core.info(`Successfully retrieved all comments in PR #${context.issue.number}.`);
     const issueComments = issueCommentsResponse.repository.pullRequest.comments.nodes;
     const filteredComments = issueComments.filter(comment => comment.body.includes(lookupText));
     if (filteredComments.length === 0) {
-        core.info(`No comments created by action were found. Skipping the cleanup`);
+        core.info(`No comments containing lookup text '${lookupText}' were found. Skipping the deletion`);
         return [];
     }
     else {
-        core.info(`${filteredComments.length} will be removed from PR #${context.issue}`);
+        core.info(`${filteredComments.length} comments will be removed from PR #${context.issue.number}`);
     }
     return filteredComments;
 };
